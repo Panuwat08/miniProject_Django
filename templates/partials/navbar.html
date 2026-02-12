@@ -1,0 +1,38 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="/">
+      <img
+        src="{% static 'img/logo.png' %}"
+        alt="Logo"
+        width="50"
+        height="50"
+        class="rounded"
+      />
+      <span>Hotel Shop</span>
+    </a>
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#nav"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav ms-auto gap-2">
+        <li class="nav-item"><a class="nav-link" href="/">สินค้า</a></li>
+        <li class="nav-item"><a class="nav-link" href="/cart/">ตะกร้า</a></li>
+        <li class="nav-item">
+          <a class="nav-link" href="/checkout/">ชำระเงิน</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/admin-panel/orders/">ตรวจสลิป</a>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="/admin/">Admin</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,38 @@
+{% extends "base.html" %} {% block title %}อัปโหลดสลิป{% endblock %} {% block
+content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <div>
+    <h3 class="mb-0">อัปโหลดสลิป</h3>
+    <div class="text-muted">คำสั่งซื้อ #{{ order.id }}</div>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'order_detail' order.id %}"
+    >กลับไปหน้าออเดอร์</a
+  >
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data" class="row g-3">
+      {% csrf_token %}
+
+      <div class="col-12">
+        <label class="form-label">เลือกไฟล์รูปสลิป</label>
+        <input
+          class="form-control"
+          type="file"
+          name="slip"
+          accept="image/*"
+          required
+        />
+        <div class="form-text">
+          แนะนำเป็นไฟล์ .jpg/.png และเห็นยอดเงิน/วันเวลา/เลขอ้างอิงชัดเจน
+        </div>
+      </div>
+
+      <div class="col-12">
+        <button class="btn btn-primary w-100" type="submit">อัปโหลด</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

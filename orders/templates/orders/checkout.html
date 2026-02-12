@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}ชำระเงิน{% endblock %}
+
+{% block content %}
+<h3 class="mb-3">สั่งซื้อ / ชำระเงิน</h3>
+
+<div class="card shadow-sm border-0">
+  <div class="card-body">
+    <form method="post" class="row g-3">
+      {% csrf_token %}
+
+      <div class="col-12">
+        <h5 class="mb-2">ที่อยู่จัดส่ง</h5>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">ชื่อผู้รับ</label>
+        <input class="form-control" name="full_name" placeholder="ชื่อ-นามสกุล">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">เบอร์โทร</label>
+        <input class="form-control" name="phone" placeholder="08x-xxx-xxxx">
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">ที่อยู่</label>
+        <textarea class="form-control" name="address_line" rows="3"
+          placeholder="บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์"></textarea>
+      </div>
+
+      <div class="col-12">
+        <h5 class="mb-2">วิธีชำระเงิน</h5>
+        <select class="form-select" name="payment_method">
+          {% for value,label in methods %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12">
+        <button class="btn btn-primary w-100" type="submit">ยืนยันคำสั่งซื้อ</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}รายละเอียดออเดอร์{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <div>
+    <h3 class="mb-0">คำสั่งซื้อ #{{ order.id }}</h3>
+    <div class="text-muted">สร้างเมื่อ {{ order.created_at }}</div>
+  </div>
+  <a class="btn btn-outline-primary" href="/">ซื้อเพิ่ม</a>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h5 class="mb-3">รายการสินค้า</h5>
+
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>สินค้า</th>
+                <th class="text-end">ราคา</th>
+                <th class="text-end">จำนวน</th>
+                <th class="text-end">รวมย่อย</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for it in order.items.all %}
+              <tr>
+                <td class="fw-semibold">{{ it.product.name }}</td>
+                <td class="text-end">{{ it.price }}</td>
+                <td class="text-end">{{ it.qty }}</td>
+                <td class="text-end fw-bold">{{ it.subtotal }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <hr class="my-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="fs-5">ยอดรวมทั้งหมด</div>
+          <div class="fs-4 fw-bold">{{ order.total }} ฿</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card shadow-sm border-0 mb-3">
+      <div class="card-body">
+        <h5 class="mb-3">ข้อมูลคำสั่งซื้อ</h5>
+
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">สถานะ</span>
+          <span class="fw-semibold">{{ order.get_status_display }}</span>
+        </div>
+
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">วิธีชำระเงิน</span>
+          <span class="fw-semibold">{{ order.get_payment_method_display }}</span>
+        </div>
+
+        <hr class="my-3">
+
+        <h6 class="mb-2">ที่อยู่จัดส่ง</h6>
+        <div class="small">
+          <div class="fw-semibold">{{ order.shipping.full_name }}</div>
+          <div>{{ order.shipping.phone }}</div>
+          <div class="text-muted">{{ order.shipping.address_line }}</div>
+        </div>
+      </div>
+    </div>
+
+    {% if order.payment_method == "TRANSFER" %}
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h5 class="mb-2">สลิปโอนเงิน</h5>
+
+          {% if order.slip and order.slip.image %}
+            <div class="mb-2">
+              <img src="{{ order.slip.image.url }}" class="img-fluid rounded border" style="max-height: 260px; object-fit: cover;">
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-muted">สถานะสลิป</span>
+              <span class="badge
+                {% if order.slip.approved == None %} text-bg-warning
+                {% elif order.slip.approved %} text-bg-success
+                {% else %} text-bg-danger
+                {% endif %}
+              ">
+                {% if order.slip.approved == None %} รอตรวจสอบ
+                {% elif order.slip.approved %} ผ่าน
+                {% else %} ไม่ผ่าน
+                {% endif %}
+              </span>
+            </div>
+
+            {% if order.slip.note %}
+              <div class="alert alert-secondary small mb-2">
+                <b>หมายเหตุ:</b> {{ order.slip.note }}
+              </div>
+            {% endif %}
+
+            <a class="btn btn-outline-primary w-100" href="{% url 'upload_slip' order.id %}">
+              อัปโหลดสลิปใหม่
+            </a>
+          {% else %}
+            <div class="alert alert-warning small">
+              ยังไม่มีสลิป กรุณาอัปโหลดเพื่อให้แอดมินตรวจสอบ
+            </div>
+            <a class="btn btn-primary w-100" href="{% url 'upload_slip' order.id %}">
+              อัปโหลดสลิป
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

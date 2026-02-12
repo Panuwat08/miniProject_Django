@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}ตรวจสลิป{% endblock %}
+{% block content %}
+<h2>ตรวจสลิปคำสั่งซื้อ #{{ order.id }}</h2>
+
+<p><b>User:</b> {{ order.user.username }}</p>
+<p><b>Status:</b> {{ order.status }}</p>
+
+{% if slip and slip.image %}
+  <p><img src="{{ slip.image.url }}" style="max-width:320px;"></p>
+{% else %}
+  <p>ยังไม่มีสลิป</p>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+  <div style="margin:10px 0;">
+    <textarea name="note" placeholder="หมายเหตุ (ถ้ามี)" style="width:100%;padding:8px;"></textarea>
+  </div>
+  <button name="action" value="approve" type="submit">อนุมัติ (ผ่าน)</button>
+  <button name="action" value="reject" type="submit">ปฏิเสธ (ไม่ผ่าน)</button>
+</form>
+
+{% endblock %}

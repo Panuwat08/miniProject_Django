@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Admin: Orders{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <div>
+    <h3 class="mb-0">Admin Panel: รายการคำสั่งซื้อ</h3>
+    <div class="text-muted">ตรวจสอบสถานะและสลิปการโอนเงิน</div>
+  </div>
+  <a class="btn btn-outline-primary" href="/admin/">ไป Django Admin</a>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>User</th>
+          <th>Status</th>
+          <th class="text-end">Total</th>
+          <th>Slip</th>
+          <th class="text-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in orders %}
+        <tr>
+          <td class="fw-semibold">#{{ o.id }}</td>
+          <td>{{ o.user.username }}</td>
+          <td>
+            <span class="badge text-bg-light border">{{ o.status }}</span>
+          </td>
+          <td class="text-end fw-bold">{{ o.total }}</td>
+          <td>
+            {% if o.slip %}
+              <span class="badge
+                {% if o.slip.approved == None %} text-bg-warning
+                {% elif o.slip.approved %} text-bg-success
+                {% else %} text-bg-danger
+                {% endif %}
+              ">
+                {% if o.slip.approved == None %} รอตรวจ
+                {% elif o.slip.approved %} ผ่าน
+                {% else %} ไม่ผ่าน
+                {% endif %}
+              </span>
+            {% else %}
+              <span class="text-muted">-</span>
+            {% endif %}
+          </td>
+          <td class="text-end">
+            <a class="btn btn-outline-primary btn-sm" href="{% url 'admin_check_slip' o.id %}">
+              ตรวจสลิป/อัปเดต
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted py-4">ยังไม่มีคำสั่งซื้อ</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

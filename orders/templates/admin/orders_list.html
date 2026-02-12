@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Admin Orders{% endblock %}
+
+{% block content %}
+<style>
+  /* กันล้นจอแบบชัวร์ */
+  .page-wrap { max-width: 100%; }
+  .table-responsive { overflow-x: auto; }
+  #ordersTable { min-width: 900px; } /* ถ้าจอแคบให้เลื่อนแทนล้น */
+  td, th { white-space: nowrap; }     /* กันคำยาวดันตาราง */
+</style>
+
+<div class="page-wrap">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <div>
+      <h3 class="mb-0">Admin Panel: รายการคำสั่งซื้อ</h3>
+      <div class="text-muted">ตรวจสอบสถานะและสลิปการโอนเงิน</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="/admin/">Django Admin</a>
+      <a class="btn btn-outline-primary" href="/">กลับหน้าเว็บ</a>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body pb-0">
+      <div class="row g-2 align-items-center">
+        <div class="col-lg-6">
+          <div class="fw-semibold">สรุป</div>
+          <div class="small text-muted">ทั้งหมด {{ orders|length }} รายการ</div>
+        </div>
+        <div class="col-lg-6">
+          <div class="input-group">
+            <span class="input-group-text">ค้นหา</span>
+            <input id="orderSearch" type="text" class="form-control" placeholder="ค้นหา ID หรือ Username...">
+          </div>
+        </div>
+      </div>
+      <hr class="my-3">
+    </div>
+
+    <div class="table-responsive">
+      <table class="table align-middle mb-0" id="ordersTable">
+        <thead class="table-light">
+          <tr>
+            <th style="width:90px;">ID</th>
+            <th>User</th>
+            <th>Status</th>
+            <th class="text-end">Total</th>
+            <th>Slip</th>
+            <th class="text-end" style="width:180px;">Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for o in orders %}
+          <tr>
+            <td class="fw-semibold">#{{ o.id }}</td>
+
+            <td>
+              <div class="fw-semibold text-truncate" style="max-width: 220px;">{{ o.user.username }}</div>
+              <div class="small text-muted">user id: {{ o.user.id }}</div>
+            </td>
+
+            <td>
+              <span class="badge text-bg-light border">{{ o.status }}</span>
+            </td>
+
+            <td class="text-end fw-bold">{{ o.total }} ฿</td>
+
+            <td>
+              {% if o.slip %}
+                <span class="badge
+                  {% if o.slip.approved == None %} text-bg-warning
+                  {% elif o.slip.approved %} text-bg-success
+                  {% else %} text-bg-danger
+                  {% endif %}
+                ">
+                  {% if o.slip.approved == None %} รอตรวจ
+                  {% elif o.slip.approved %} ผ่าน
+                  {% else %} ไม่ผ่าน
+                  {% endif %}
+                </span>
+              {% else %}
+                <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+
+            <td class="text-end">
+              <a class="btn btn-outline-primary btn-sm" href="{% url 'admin_check_slip' o.id %}">
+                ตรวจสลิป / อัปเดต
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              ยังไม่มีคำสั่งซื้อในระบบ
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer bg-white border-0">
+      <div class="small text-muted">
+        * แนะนำ: ตรวจสลิปที่สถานะ “รอตรวจ” ก่อน
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const input = document.getElementById("orderSearch");
+    const table = document.getElementById("ordersTable");
+    if (!input || !table) return;
+
+    input.addEventListener("input", function () {
+      const q = this.value.toLowerCase();
+      const rows = table.querySelectorAll("tbody tr");
+      rows.forEach((tr) => {
+        const text = tr.innerText.toLowerCase();
+        tr.style.display = text.includes(q) ? "" : "none";
+      });
+    });
+  })();
+</script>
+{% endblock %}
