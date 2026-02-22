@@ -50,7 +50,8 @@
             {% endif %}
           </td>
           <td class="text-end">
-            <a class="btn btn-outline-primary btn-sm" href="{% url 'admin_check_slip' o.id %}">
+            <!-- ✅ แก้ตรงนี้: ใส่ namespace -->
+            <a class="btn btn-outline-primary btn-sm" href="{% url 'orders:admin_check_slip' o.id %}">
               ตรวจสลิป/อัปเดต
             </a>
           </td>

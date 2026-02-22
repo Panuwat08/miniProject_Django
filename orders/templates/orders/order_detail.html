@@ -81,7 +81,11 @@
 
           {% if order.slip and order.slip.image %}
             <div class="mb-2">
-              <img src="{{ order.slip.image.url }}" class="img-fluid rounded border" style="max-height: 260px; object-fit: cover;">
+              <img
+                src="{{ order.slip.image.url }}"
+                class="img-fluid rounded border"
+                style="max-height: 260px; object-fit: cover;"
+              >
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -105,14 +109,17 @@
               </div>
             {% endif %}
 
-            <a class="btn btn-outline-primary w-100" href="{% url 'upload_slip' order.id %}">
+            <!-- ✅ แก้ namespace -->
+            <a class="btn btn-outline-primary w-100" href="{% url 'orders:upload_slip' order.id %}">
               อัปโหลดสลิปใหม่
             </a>
           {% else %}
             <div class="alert alert-warning small">
               ยังไม่มีสลิป กรุณาอัปโหลดเพื่อให้แอดมินตรวจสอบ
             </div>
-            <a class="btn btn-primary w-100" href="{% url 'upload_slip' order.id %}">
+
+            <!-- ✅ แก้ namespace -->
+            <a class="btn btn-primary w-100" href="{% url 'orders:upload_slip' order.id %}">
               อัปโหลดสลิป
             </a>
           {% endif %}

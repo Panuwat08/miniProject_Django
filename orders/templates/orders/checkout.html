@@ -1,47 +1,171 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}ชำระเงิน{% endblock %}
 
 {% block content %}
 <h3 class="mb-3">สั่งซื้อ / ชำระเงิน</h3>
 
-<div class="card shadow-sm border-0">
-  <div class="card-body">
-    <form method="post" class="row g-3">
-      {% csrf_token %}
+<div class="row g-3">
 
-      <div class="col-12">
-        <h5 class="mb-2">ที่อยู่จัดส่ง</h5>
-      </div>
+  <!-- LEFT -->
+  <div class="col-12 col-lg-7">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <form method="post" class="row g-3" enctype="multipart/form-data">
+          {% csrf_token %}
 
-      <div class="col-md-6">
-        <label class="form-label">ชื่อผู้รับ</label>
-        <input class="form-control" name="full_name" placeholder="ชื่อ-นามสกุล">
-      </div>
+          <div class="col-12">
+            <h5 class="mb-2">ที่อยู่จัดส่ง</h5>
+          </div>
 
-      <div class="col-md-6">
-        <label class="form-label">เบอร์โทร</label>
-        <input class="form-control" name="phone" placeholder="08x-xxx-xxxx">
-      </div>
+          <div class="col-md-6">
+            <label class="form-label">ชื่อผู้รับ</label>
+            <input class="form-control" name="full_name" required>
+          </div>
 
-      <div class="col-12">
-        <label class="form-label">ที่อยู่</label>
-        <textarea class="form-control" name="address_line" rows="3"
-          placeholder="บ้านเลขที่ ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์"></textarea>
-      </div>
+          <div class="col-md-6">
+            <label class="form-label">เบอร์โทร</label>
+            <input class="form-control" name="phone" required>
+          </div>
 
-      <div class="col-12">
-        <h5 class="mb-2">วิธีชำระเงิน</h5>
-        <select class="form-select" name="payment_method">
-          {% for value,label in methods %}
-            <option value="{{ value }}">{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
+          <div class="col-12">
+            <label class="form-label">ที่อยู่</label>
+            <textarea class="form-control" name="address_line" rows="3" required></textarea>
+          </div>
 
-      <div class="col-12">
-        <button class="btn btn-primary w-100" type="submit">ยืนยันคำสั่งซื้อ</button>
+          <!-- PAYMENT DROPDOWN -->
+          <div class="col-12 mt-2">
+            <h5 class="mb-2">วิธีชำระเงิน</h5>
+
+            <select class="form-select" name="payment_method" id="payment_method" required>
+              <option value="{{ PaymentMethod.COD }}" selected>เก็บเงินปลายทาง</option>
+              <option value="{{ PaymentMethod.TRANSFER }}">โอนเงิน/พร้อมเพย์ QR (แนบสลิป)</option>
+            </select>
+
+            <div class="form-text">ถ้าเลือกโอนเงิน/พร้อมเพย์ จะมี QR และต้องแนบสลิป</div>
+          </div>
+
+          <!-- TRANSFER SECTION (QR + SLIP) -->
+          <div class="col-12 d-none" id="transfer_section">
+            <div class="border rounded-3 p-3">
+              <div class="fw-semibold mb-1">โอนเงิน / พร้อมเพย์ QR</div>
+              <div class="text-muted small mb-3">สแกนจ่ายผ่านแอปธนาคาร แล้วแนบสลิป</div>
+
+              <div class="text-center">
+                <img
+                  src="{% url 'orders:promptpay_qr' %}?amount={{ total }}"
+                  class="img-fluid"
+                  style="max-width:260px;"
+                  alt="PromptPay QR"
+                >
+                <div class="small text-muted mt-2">
+                  ยอดชำระ {{ total }} บาท
+                </div>
+              </div>
+
+              <hr class="my-3">
+
+              <label class="form-label fw-semibold">แนบหลักฐานการชำระเงิน (สลิป) <span class="text-danger">*</span></label>
+              <input
+                type="file"
+                class="form-control"
+                name="slip"
+                id="slip_input"
+                accept="image/*"
+              >
+              <div class="form-text">รองรับไฟล์รูปภาพเท่านั้น (jpg/png/webp)</div>
+
+              <div class="mt-2 d-none" id="slip_preview_wrap">
+                <div class="small text-muted mb-1">ตัวอย่างสลิป</div>
+                <img id="slip_preview" class="img-fluid rounded-3 border" style="max-height: 260px;">
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 mt-3">
+            <button class="btn btn-primary w-100" type="submit">
+              ยืนยันคำสั่งซื้อ
+            </button>
+          </div>
+
+        </form>
       </div>
-    </form>
+    </div>
   </div>
+
+  <!-- RIGHT -->
+  <div class="col-12 col-lg-5">
+    <div class="card shadow-sm border-0">
+      <div class="card-body">
+        <h5 class="mb-3">สรุปรายการสินค้า</h5>
+
+        {% for item in cart.items.all %}
+          <div class="d-flex justify-content-between mb-2">
+            <div>
+              {{ item.product.name }}
+              <div class="small text-muted">x {{ item.qty }}</div>
+            </div>
+            <div class="fw-semibold">{{ item.subtotal }} ฿</div>
+          </div>
+        {% endfor %}
+
+        <hr>
+        <div class="d-flex justify-content-between">
+          <div class="fw-semibold">รวมทั้งหมด</div>
+          <div class="fs-5 fw-bold">{{ total }} ฿</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const select = document.getElementById("payment_method");
+  const section = document.getElementById("transfer_section");
+  const slipInput = document.getElementById("slip_input");
+  const previewWrap = document.getElementById("slip_preview_wrap");
+  const previewImg = document.getElementById("slip_preview");
+
+  const TRANSFER_VALUE = "{{ PaymentMethod.TRANSFER }}";
+
+  function refresh() {
+    const method = select.value;
+
+    if (method === TRANSFER_VALUE) {
+      section.classList.remove("d-none");
+      slipInput.required = true; 
+    } else {
+      section.classList.add("d-none");
+      slipInput.required = false;
+      slipInput.value = "";
+      previewWrap.classList.add("d-none");
+      previewImg.src = "";
+    }
+  }
+
+  select.addEventListener("change", refresh);
+  refresh();
+
+  slipInput.addEventListener("change", function () {
+    const file = this.files && this.files[0];
+    if (!file) {
+      previewWrap.classList.add("d-none");
+      previewImg.src = "";
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      alert("ไฟล์ต้องเป็นรูปภาพเท่านั้น");
+      this.value = "";
+      previewWrap.classList.add("d-none");
+      previewImg.src = "";
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    previewImg.src = url;
+    previewWrap.classList.remove("d-none");
+  });
+});
+</script>
 {% endblock %}
