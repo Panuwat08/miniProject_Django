@@ -11,6 +11,7 @@ urlpatterns = [
 
     # orders: /checkout /order/...
     path("", include("orders.urls")),
+        path('', include('accounts.urls')),  # 👈 เพิ่มบรรทัดนี้
 ]
 
 if settings.DEBUG:
