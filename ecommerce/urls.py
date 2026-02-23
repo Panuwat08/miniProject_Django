@@ -5,13 +5,12 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+
+    # shop: / (home) + /cart...
     path("", include("shop.urls")),
 
-    # orders หลัก
-    path("orders/", include(("orders.urls", "orders"), namespace="orders")),
-
-    # ✅ เพิ่ม alias ให้เข้าได้แบบเดิม
-    path("", include("orders.urls")),  # ทำให้ /admin-panel/orders/ กลับมาใช้ได้
+    # orders: /checkout /order/...
+    path("", include("orders.urls")),
 ]
 
 if settings.DEBUG:

@@ -5,7 +5,7 @@ from shop.models import Product
 class PaymentMethod(models.TextChoices):
     COD = "COD", "เก็บเงินปลายทาง"
     TRANSFER = "TRANSFER", "โอนเงิน"
-    ONLINE = "ONLINE", "ออนไลน์"
+    ONLINE = "ONLINE", "ชำระเงินผ่าน QR Code"
 
 class OrderStatus(models.TextChoices):
     PENDING = "PENDING", "รอชำระเงิน/รอตรวจสอบ"

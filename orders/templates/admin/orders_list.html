@@ -3,110 +3,67 @@
 
 {% block content %}
 <style>
-  /* Layout */
-  .page-wrap { max-width: 100%; }
-
-  /* Table */
-  .table-responsive { overflow-x: auto; }
-  #ordersTable { min-width: 980px; }
-  #ordersTable th, #ordersTable td { vertical-align: middle; }
-  #ordersTable td, #ordersTable th { white-space: nowrap; }
-
-  /* Sticky header */
-  #ordersTable thead th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    background: var(--bs-table-bg, #f8f9fa);
+  /* กันล้นจอแบบชัวร์ */
+  .page-wrap {
+    max-width: 100%;
   }
 
-  /* Row hover */
-  #ordersTable tbody tr { transition: background .15s ease; }
-  #ordersTable tbody tr:hover { background: rgba(13,110,253,.06); }
-
-  /* Card polish */
-  .shadow-soft { box-shadow: 0 .5rem 1.25rem rgba(0,0,0,.06); }
-  .rounded-4 { border-radius: 1rem; }
-
-  /* KPI chips */
-  .kpi {
-    border: 1px solid rgba(0,0,0,.08);
-    border-radius: 999px;
-    padding: .35rem .75rem;
-    background: #fff;
+  .table-responsive {
+    overflow-x: auto;
   }
 
-  /* Action button */
-  .btn-action { border-radius: .75rem; }
+  #ordersTable {
+    min-width: 900px;
+  }
 
-  /* Search */
-  .search-wrap .form-control { border-left: 0; }
-  .search-wrap .input-group-text { background: #fff; }
+  /* ถ้าจอแคบให้เลื่อนแทนล้น */
+  td,
+  th {
+    white-space: nowrap;
+  }
+
+  /* กันคำยาวดันตาราง */
 </style>
 
 <div class="page-wrap">
   <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
     <div>
-      <div class="d-flex align-items-center gap-2">
-        <span class="badge text-bg-primary">Admin</span>
-        <h3 class="mb-0">รายการคำสั่งซื้อ</h3>
-      </div>
-      <div class="text-muted">ตรวจสอบสถานะ และสลิปการโอนเงิน</div>
+      <h3 class="mb-0">Admin Panel: รายการคำสั่งซื้อ</h3>
+      <div class="text-muted">ตรวจสอบสถานะและสลิปการโอนเงิน</div>
     </div>
-
     <div class="d-flex gap-2">
-      <a class="btn btn-outline-secondary btn-action" href="/admin/">Django Admin</a>
-      <a class="btn btn-outline-primary btn-action" href="/">กลับหน้าเว็บ</a>
+      <a class="btn btn-outline-secondary" href="/admin/">Django Admin</a>
+      <a class="btn btn-outline-primary" href="/">กลับหน้าเว็บ</a>
     </div>
   </div>
 
-  {# ====== KPI SUMMARY ====== #}
-  <div class="d-flex flex-wrap gap-2 mb-3">
-    <div class="kpi">
-      <span class="text-muted small">ทั้งหมด</span>
-      <span class="fw-semibold ms-1">{{ orders|length }}</span>
-    </div>
-    <div class="kpi">
-      <span class="badge text-bg-warning">รอตรวจสลิป</span>
-      <span class="text-muted small ms-2">ดูจากคอลัมน์ Slip</span>
-    </div>
-
-    <div class="kpi">
-      <span class="badge text-bg-success">สลิปผ่าน</span>
-      <span class="badge text-bg-danger ms-1">ไม่ผ่าน</span>
-    </div>
-  </div>
-
-  <div class="card border-0 shadow-soft rounded-4">
+  <div class="card shadow-sm border-0">
     <div class="card-body pb-0">
       <div class="row g-2 align-items-center">
         <div class="col-lg-6">
           <div class="fw-semibold">สรุป</div>
-          <div class="small text-muted">พิมพ์ค้นหาได้ทั้ง ID / Username / Status</div>
+          <div class="small text-muted">ทั้งหมด {{ orders|length }} รายการ</div>
         </div>
-
         <div class="col-lg-6">
-          <div class="input-group search-wrap">
-            <span class="input-group-text">🔎</span>
-            <input id="orderSearch" type="text" class="form-control" placeholder="ค้นหาเช่น 12, panuwat, PENDING...">
-            <button class="btn btn-outline-secondary" type="button" id="clearSearch">ล้าง</button>
+          <div class="input-group">
+            <span class="input-group-text">ค้นหา</span>
+            <input id="orderSearch" type="text" class="form-control" placeholder="ค้นหา ID หรือ Username...">
           </div>
         </div>
       </div>
-
       <hr class="my-3">
     </div>
 
     <div class="table-responsive">
-      <table class="table align-middle mb-0 table-striped" id="ordersTable">
+      <table class="table align-middle mb-0" id="ordersTable">
         <thead class="table-light">
           <tr>
             <th style="width:90px;">ID</th>
-            <th>ผู้ใช้งาน</th>
-            <th>สถานะ</th>
-            <th class="text-end">ราคา</th>
-            <th>สลิป</th>
-            <th class="text-end" style="width:200px;">จัดการข้อมูล</th>
+            <th>User</th>
+            <th>Status</th>
+            <th class="text-end">Total</th>
+            <th>Slip</th>
+            <th class="text-end" style="width:180px;">Action</th>
           </tr>
         </thead>
 
@@ -121,46 +78,42 @@
             </td>
 
             <td>
-              {# สีสถานะออเดอร์ #}
-              <span class="badge
-                {% if o.status == 'PENDING' %} text-bg-warning
-                {% elif o.status == 'PAID' %} text-bg-success
-                {% elif o.status == 'REJECTED' %} text-bg-danger
-                {% elif o.status == 'SHIPPED' %} text-bg-primary
-                {% elif o.status == 'COMPLETED' %} text-bg-dark
-                {% elif o.status == 'CANCELLED' %} text-bg-secondary
-                {% else %} text-bg-light border text-dark
-                {% endif %}
-              ">
-                {{ o.status }}
-              </span>
+              <span class="badge text-bg-light border">{{ o.status }}</span>
             </td>
 
             <td class="text-end fw-bold">{{ o.total }} ฿</td>
 
             <td>
               {% if o.slip %}
-                <span class="badge
+              <span class="badge
                   {% if o.slip.approved == None %} text-bg-warning
                   {% elif o.slip.approved %} text-bg-success
                   {% else %} text-bg-danger
                   {% endif %}
                 ">
-                  {% if o.slip.approved == None %} ⏳ รอตรวจ
-                  {% elif o.slip.approved %} ✅ ผ่าน
-                  {% else %} ❌ ไม่ผ่าน
-                  {% endif %}
-                </span>
+                {% if o.slip.approved == None %} รอตรวจ
+                {% elif o.slip.approved %} ผ่าน
+                {% else %} ไม่ผ่าน
+                {% endif %}
+              </span>
               {% else %}
-                <span class="text-muted">-</span>
+              <span class="text-muted">-</span>
               {% endif %}
             </td>
 
             <td class="text-end">
-              <a class="btn btn-outline-primary btn-sm btn-action"
-                 href="{% url 'orders:admin_check_slip' o.id %}">
-                ตรวจสลิป / อัปเดต
-              </a>
+              <div class="d-flex gap-1 justify-content-end">
+                <a class="btn btn-outline-primary btn-sm" href="{% url 'admin_check_slip' o.id %}">
+                  ตรวจสลิป / อัปเดต
+                </a>
+                <form method="post" action="{% url 'admin_delete_order' o.id %}" class="d-inline"
+                  onsubmit="return confirm('ยืนยันลบคำสั่งซื้อ #{{ o.id }}? (สต็อกจะถูกคืนกลับ)');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-trash"></i> ลบ
+                  </button>
+                </form>
+              </div>
             </td>
           </tr>
           {% empty %}
@@ -174,9 +127,9 @@
       </table>
     </div>
 
-    <div class="card-footer bg-white border-0 rounded-4">
+    <div class="card-footer bg-white border-0">
       <div class="small text-muted">
-        * แนะนำ: ตรวจสลิปที่สถานะ “⏳ รอตรวจ” ก่อน แล้วอัปเดตเป็น “ชำระแล้ว (PAID)” เมื่อผ่าน
+        * แนะนำ: ตรวจสลิปที่สถานะ “รอตรวจ” ก่อน
       </div>
     </div>
   </div>
@@ -185,28 +138,17 @@
 <script>
   (function () {
     const input = document.getElementById("orderSearch");
-    const btnClear = document.getElementById("clearSearch");
     const table = document.getElementById("ordersTable");
     if (!input || !table) return;
 
-    function applyFilter() {
-      const q = input.value.toLowerCase().trim();
+    input.addEventListener("input", function () {
+      const q = this.value.toLowerCase();
       const rows = table.querySelectorAll("tbody tr");
       rows.forEach((tr) => {
         const text = tr.innerText.toLowerCase();
         tr.style.display = text.includes(q) ? "" : "none";
       });
-    }
-
-    input.addEventListener("input", applyFilter);
-
-    if (btnClear) {
-      btnClear.addEventListener("click", function () {
-        input.value = "";
-        input.focus();
-        applyFilter();
-      });
-    }
+    });
   })();
 </script>
 {% endblock %}
