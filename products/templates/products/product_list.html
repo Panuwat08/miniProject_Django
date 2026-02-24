@@ -1,0 +1,517 @@
+{% extends 'products/base.html' %}
+
+{% block content %}
+
+<style>
+    /* === PAGE HEADER === */
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .header-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--accent-emerald), #059669);
+        color: #fff;
+        font-size: 1.3rem;
+        box-shadow: 0 0 24px var(--accent-emerald-glow);
+    }
+
+    .header-text h1 {
+        font-size: 1.6rem;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+    }
+
+    .header-text p {
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        margin-top: 2px;
+    }
+
+    /* === SEARCH BAR === */
+    .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 28px;
+    }
+
+    .search-box {
+        position: relative;
+        flex: 1;
+        max-width: 360px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 10px 16px 10px 42px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-glass);
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.9rem;
+        outline: none;
+        transition: all var(--duration-fast) var(--ease-out);
+    }
+
+    .search-box input::placeholder {
+        color: var(--text-muted);
+    }
+
+    .search-box input:focus {
+        border-color: var(--accent-emerald);
+        box-shadow: 0 0 0 3px var(--accent-emerald-glow);
+        background: var(--bg-glass-hover);
+    }
+
+    .search-box .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        pointer-events: none;
+    }
+
+    /* === STATS ROW === */
+    .stats-row {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 28px;
+        flex-wrap: wrap;
+    }
+
+    .stat-card {
+        flex: 1;
+        min-width: 160px;
+        padding: 18px 22px;
+        border-radius: var(--radius-md);
+        background: var(--bg-glass);
+        border: 1px solid var(--border-subtle);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        transition: all var(--duration-normal) var(--ease-out);
+    }
+
+    .stat-card:hover {
+        background: var(--bg-glass-hover);
+        transform: translateY(-2px);
+    }
+
+    .stat-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .stat-icon.emerald {
+        background: rgba(52, 211, 153, 0.12);
+        color: var(--accent-emerald);
+    }
+
+    .stat-icon.gold {
+        background: rgba(251, 191, 36, 0.12);
+        color: var(--accent-gold);
+    }
+
+    .stat-icon.rose {
+        background: rgba(251, 113, 133, 0.12);
+        color: var(--accent-rose);
+    }
+
+    .stat-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        line-height: 1.1;
+    }
+
+    .stat-label {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    /* === PRODUCT GRID === */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 22px;
+    }
+
+    .product-card {
+        position: relative;
+        border-radius: var(--radius-lg);
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        overflow: hidden;
+        transition: all var(--duration-normal) var(--ease-out);
+        cursor: default;
+    }
+
+    .product-card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--shadow-glow), var(--shadow-lg);
+        border-color: var(--border-accent);
+    }
+
+    /* Image */
+    .product-image {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+        background: linear-gradient(135deg, var(--bg-secondary), #252840);
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform var(--duration-slow) var(--ease-out);
+    }
+
+    .product-card:hover .product-image img {
+        transform: scale(1.08);
+    }
+
+    .product-image .no-image {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        gap: 8px;
+    }
+
+    .product-image .no-image i {
+        font-size: 2.2rem;
+        opacity: 0.4;
+    }
+
+    .product-image::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 80px;
+        background: linear-gradient(to top, var(--bg-card), transparent);
+        pointer-events: none;
+    }
+
+    /* Stock Badge on image */
+    .stock-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 2;
+    }
+
+    /* Body */
+    .product-body {
+        padding: 18px 20px 20px;
+    }
+
+    .product-name {
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .product-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .product-price {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--accent-emerald);
+    }
+
+    .product-price small {
+        font-size: 0.78rem;
+        font-weight: 400;
+        color: var(--text-muted);
+    }
+
+    /* Actions */
+    .product-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .product-actions .btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 9px 0;
+        border-radius: var(--radius-sm);
+        font-family: inherit;
+        font-weight: 600;
+        font-size: 0.82rem;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all var(--duration-fast) var(--ease-out);
+    }
+
+    .btn-edit {
+        background: rgba(251, 191, 36, 0.1);
+        color: var(--accent-gold);
+        border: 1px solid rgba(251, 191, 36, 0.15) !important;
+    }
+
+    .btn-edit:hover {
+        background: rgba(251, 191, 36, 0.2);
+        transform: translateY(-1px);
+        color: var(--accent-gold);
+    }
+
+    .btn-del {
+        background: rgba(251, 113, 133, 0.1);
+        color: var(--accent-rose);
+        border: 1px solid rgba(251, 113, 133, 0.15) !important;
+    }
+
+    .btn-del:hover {
+        background: rgba(251, 113, 133, 0.2);
+        transform: translateY(-1px);
+        color: var(--accent-rose);
+    }
+
+    /* === EMPTY STATE === */
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+    }
+
+    .empty-state .empty-icon {
+        font-size: 4rem;
+        color: var(--text-muted);
+        opacity: 0.3;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+
+    .empty-state p {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 24px;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 640px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .product-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-row {
+            flex-direction: column;
+        }
+
+        .toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-box {
+            max-width: 100%;
+        }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header animate-in">
+    <div class="header-left">
+        <div class="header-icon">
+            <i class="bi bi-box-seam"></i>
+        </div>
+        <div class="header-text">
+            <h1>สินค้าทั้งหมด</h1>
+            <p>จัดการรายการสินค้าของโรงแรม</p>
+        </div>
+    </div>
+    <a href="{% url 'product_create' %}" class="btn-primary-glow">
+        <i class="bi bi-plus-lg"></i>
+        เพิ่มสินค้าใหม่
+    </a>
+</div>
+
+<!-- Stats Row -->
+<div class="stats-row animate-in animate-delay-1">
+    <div class="stat-card">
+        <div class="stat-icon emerald">
+            <i class="bi bi-box-seam"></i>
+        </div>
+        <div>
+            <div class="stat-value" id="totalProducts">{{ products|length }}</div>
+            <div class="stat-label">สินค้าทั้งหมด</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon gold">
+            <i class="bi bi-cash-coin"></i>
+        </div>
+        <div>
+            <div class="stat-value" id="totalValue">
+                {% widthratio products|length 1 1 as count %}
+                {{ products|length }}
+            </div>
+            <div class="stat-label">รายการในระบบ</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon rose">
+            <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div>
+            <div class="stat-value" id="lowStock">-</div>
+            <div class="stat-label">สต็อกต่ำ</div>
+        </div>
+    </div>
+</div>
+
+<!-- Toolbar: Search -->
+<div class="toolbar animate-in animate-delay-2">
+    <div class="search-box">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" id="searchInput" placeholder="ค้นหาสินค้า..." oninput="filterProducts()">
+    </div>
+</div>
+
+<!-- Product Grid -->
+<div class="product-grid" id="productGrid">
+    {% for product in products %}
+    <div class="product-card animate-in animate-delay-{{ forloop.counter }}" data-name="{{ product.name|lower }}">
+
+        <!-- Image -->
+        <div class="product-image">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+            {% else %}
+            <div class="no-image">
+                <i class="bi bi-image"></i>
+                <span>ไม่มีรูปภาพ</span>
+            </div>
+            {% endif %}
+
+            <!-- Stock Badge -->
+            <div class="stock-badge">
+                <span
+                    class="badge-status {% if product.stock_qty < 5 %}badge-danger{% elif product.stock_qty < 20 %}badge-gold{% else %}badge-success{% endif %}">
+                    <i
+                        class="bi {% if product.stock_qty < 5 %}bi-exclamation-circle{% else %}bi-check-circle{% endif %}"></i>
+                    {{ product.stock_qty }} ชิ้น
+                </span>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="product-body">
+            <div class="product-name" title="{{ product.name }}">{{ product.name }}</div>
+            <div class="product-meta">
+                <span class="product-price">
+                    ฿{{ product.price }}
+                    <small>บาท</small>
+                </span>
+            </div>
+
+            <!-- Actions -->
+            <div class="product-actions">
+                <a href="{% url 'product_update' product.pk %}" class="btn btn-edit">
+                    <i class="bi bi-pencil-square"></i> แก้ไข
+                </a>
+                <a href="{% url 'product_delete' product.pk %}" class="btn btn-del">
+                    <i class="bi bi-trash3"></i> ลบ
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <!-- Empty State -->
+    <div class="empty-state animate-in" style="grid-column: 1 / -1;">
+        <div class="empty-icon">
+            <i class="bi bi-inbox"></i>
+        </div>
+        <h3>ยังไม่มีสินค้าในระบบ</h3>
+        <p>เริ่มเพิ่มสินค้าตัวแรกของคุณได้เลย</p>
+        <a href="{% url 'product_create' %}" class="btn-primary-glow">
+            <i class="bi bi-plus-lg"></i> เพิ่มสินค้าใหม่
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    // Low-stock counter
+    document.addEventListener('DOMContentLoaded', () => {
+        const cards = document.querySelectorAll('.product-card');
+        let lowCount = 0;
+        cards.forEach(card => {
+            const badge = card.querySelector('.stock-badge .badge-status');
+            if (badge && badge.classList.contains('badge-danger')) lowCount++;
+        });
+        const el = document.getElementById('lowStock');
+        if (el) el.textContent = lowCount;
+    });
+
+    // Search filter
+    function filterProducts() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.querySelectorAll('.product-card');
+        let visible = 0;
+        cards.forEach(card => {
+            const name = card.getAttribute('data-name') || '';
+            const show = name.includes(q);
+            card.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        document.getElementById('totalProducts').textContent = visible;
+    }
+</script>
+
+{% endblock %}
