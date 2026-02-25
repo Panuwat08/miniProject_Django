@@ -70,18 +70,48 @@ def checkout(request):
             messages.error(request, f"ไม่สามารถสร้างคำสั่งซื้อได้: {e}")
             return redirect("checkout")
 
-    return render(request, "orders/checkout.html", {"methods": PaymentMethod.choices})
+    return render(request, "orders/checkout.html", {"methods": PaymentMethod.choices, "cart": cart})
 
 @login_required
 def order_detail(request, order_id):
     order = get_object_or_404(Order.objects.select_related("shipping"), id=order_id, user=request.user)
-    return render(request, "orders/order_detail.html", {"order": order})
+
+    qr_code_img = None
+    account_name = None
+
+    if order.status == OrderStatus.PENDING and order.payment_method == PaymentMethod.ONLINE:
+        try:
+            from promptpay import qrcode as pp_qrcode
+            import qrcode
+            import base64
+            from io import BytesIO
+            from django.conf import settings
+
+            # Generate PromptPay Payload
+            # ID: Phone or Citizen ID
+            payload = pp_qrcode.generate_payload(settings.PROMPTPAY_ID, float(order.total))
+            
+            # Generate QR Image
+            img = qrcode.make(payload)
+            buffer = BytesIO()
+            img.save(buffer, format="PNG")
+            qr_code_img = base64.b64encode(buffer.getvalue()).decode()
+            
+            account_name = getattr(settings, "PROMPTPAY_NAME", "")
+        except Exception as e:
+            print(f"Error generating QR: {e}")
+
+    return render(request, "orders/order_detail.html", {
+        "order": order,
+        "qr_code_img": qr_code_img,
+        "account_name": account_name
+    })
 
 @login_required
 def upload_slip(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
-    if order.payment_method != PaymentMethod.TRANSFER:
+    if order.payment_method not in [PaymentMethod.TRANSFER, PaymentMethod.ONLINE]:
         messages.error(request, "ออเดอร์นี้ไม่ต้องอัปโหลดสลิป")
         return redirect("order_detail", order_id=order.id)
 
@@ -108,3 +138,22 @@ def upload_slip(request, order_id):
         return redirect("order_detail", order_id=order.id)
 
     return render(request, "orders/upload_slip.html", {"order": order})
+
+@login_required
+def remove_slip(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    if request.method == "POST":
+        if hasattr(order, 'slip'):
+            order.slip.delete()
+            # Refund status to pending if it was rejected or paid? 
+            # Usually if removing slip, we might want to ensure status is PENDING.
+            if order.status == OrderStatus.REJECTED: # If it was rejected, resetting gives a chance to upload a new one cleanly
+                order.status = OrderStatus.PENDING
+                order.save()
+            
+            messages.success(request, "ลบสลิปเรียบร้อยแล้ว")
+        else:
+            messages.error(request, "ไม่พบสลิป")
+            
+    return redirect("order_detail", order_id=order.id)

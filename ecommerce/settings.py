@@ -18,8 +18,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    "accounts",
     "shop",
+    'accounts',
     "orders",
     "products",
 ]
@@ -95,3 +95,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "/admin/login/"
+# PromptPay Configuration
+PROMPTPAY_ID = "0630392680"
+PROMPTPAY_NAME = "อภิสิทธิ์ วิเศษศรี"

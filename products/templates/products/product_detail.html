@@ -72,8 +72,8 @@
           <div class="spec-box">
             <span class="spec-label">สถานะคลังสินค้า</span>
             <span class="spec-value">
-              {% if product.stock > 0 %}
-                <span class="text-success">พร้อมส่ง ({{ product.stock }} ชิ้น)</span>
+              {% if product.stock_qty > 0 %}
+                <span class="text-success">พร้อมส่ง ({{ product.stock_qty }} ชิ้น)</span>
               {% else %}
                 <span class="text-danger">สินค้าหมดชั่วคราว</span>
               {% endif %}

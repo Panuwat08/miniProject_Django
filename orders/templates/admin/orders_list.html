@@ -4,10 +4,25 @@
 {% block content %}
 <style>
   /* กันล้นจอแบบชัวร์ */
-  .page-wrap { max-width: 100%; }
-  .table-responsive { overflow-x: auto; }
-  #ordersTable { min-width: 900px; } /* ถ้าจอแคบให้เลื่อนแทนล้น */
-  td, th { white-space: nowrap; }     /* กันคำยาวดันตาราง */
+  .page-wrap {
+    max-width: 100%;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  #ordersTable {
+    min-width: 900px;
+  }
+
+  /* ถ้าจอแคบให้เลื่อนแทนล้น */
+  td,
+  th {
+    white-space: nowrap;
+  }
+
+  /* กันคำยาวดันตาราง */
 </style>
 
 <div class="page-wrap">
@@ -70,26 +85,35 @@
 
             <td>
               {% if o.slip %}
-                <span class="badge
+              <span class="badge
                   {% if o.slip.approved == None %} text-bg-warning
                   {% elif o.slip.approved %} text-bg-success
                   {% else %} text-bg-danger
                   {% endif %}
                 ">
-                  {% if o.slip.approved == None %} รอตรวจ
-                  {% elif o.slip.approved %} ผ่าน
-                  {% else %} ไม่ผ่าน
-                  {% endif %}
-                </span>
+                {% if o.slip.approved == None %} รอตรวจ
+                {% elif o.slip.approved %} ผ่าน
+                {% else %} ไม่ผ่าน
+                {% endif %}
+              </span>
               {% else %}
-                <span class="text-muted">-</span>
+              <span class="text-muted">-</span>
               {% endif %}
             </td>
 
             <td class="text-end">
-              <a class="btn btn-outline-primary btn-sm" href="{% url 'admin_check_slip' o.id %}">
-                ตรวจสลิป / อัปเดต
-              </a>
+              <div class="d-flex gap-1 justify-content-end">
+                <a class="btn btn-outline-primary btn-sm" href="{% url 'admin_check_slip' o.id %}">
+                  ตรวจสลิป / อัปเดต
+                </a>
+                <form method="post" action="{% url 'admin_delete_order' o.id %}" class="d-inline"
+                  onsubmit="return confirm('ยืนยันลบคำสั่งซื้อ #{{ o.id }}? (สต็อกจะถูกคืนกลับ)');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-trash"></i> ลบ
+                  </button>
+                </form>
+              </div>
             </td>
           </tr>
           {% empty %}

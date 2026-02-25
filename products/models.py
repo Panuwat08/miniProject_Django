@@ -31,7 +31,7 @@ class Category(models.Model):
 
 class Product(models.Model):
     """
-    [FR-05, FR-07] สินค้าอุปกรณ์โรงแรม: เก็บข้อมูลเชิงลึกสำหรับผู้ซื้อเชิงพาณิชย์
+    [FR-05, FR-07, FR-20, FR-21, FR-22] สินค้าอุปกรณ์โรงแรม: เก็บข้อมูลเชิงลึกสำหรับผู้ซื้อเชิงพาณิชย์และการจัดการสต็อก
     """
     # เชื่อมโยงกับหมวดหมู่ (FR-06)
     category = models.ForeignKey(
@@ -46,9 +46,16 @@ class Product(models.Model):
     slug = models.SlugField(max_length=255, unique=True, blank=True)
     description = models.TextField("รายละเอียด", blank=True, default="")
     price = models.DecimalField("ราคา", max_digits=10, decimal_places=2)
-    stock = models.PositiveIntegerField("จำนวนสต็อก", default=0) # แสดงจำนวนที่พร้อมส่ง (FR-07)
+    
+    # ส่วนจัดการสต็อก (FR-21, FR-22) - ใช้ชื่อ stock_qty ตามกลุ่มจัดการสต็อก
+    stock_qty = models.PositiveIntegerField("จำนวนสต็อก", default=0) 
+    
+    # รูปภาพ
     image = models.ImageField("รูปสินค้า", upload_to="products/", null=True, blank=True)
+    
+    # สถานะ (FR-20: Soft Delete)
     is_active = models.BooleanField("เปิดใช้งาน", default=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -65,3 +72,7 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    # ฟังก์ชันเช็คสต็อกก่อนขาย (FR-22)
+    def can_sell(self, amount):
+        return self.stock_qty >= amount and self.is_active

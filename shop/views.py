@@ -12,6 +12,10 @@ def home(request):
     products = Product.objects.filter(is_active=True).order_by("-id")
     return render(request, "shop/product_list.html", {"products": products})
 
+def product_detail(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    return render(request, "shop/product_detail.html", {"product": product})
+
 @login_required
 def cart_detail(request):
     cart = _get_cart(request.user)
@@ -40,7 +44,7 @@ def cart_update_qty(request, item_id):
 
     try:
         qty = int(qty_str)
-    except:
+    except ValueError:
         qty = 1
 
     if qty < 1:
