@@ -5,15 +5,18 @@ from django.contrib import messages
 from .models import Category, Product
 from .forms import ProductForm
 
-# [กลุ่มที่ 2] ระบบควบคุมการแสดงผลและจัดการสินค้าอุปกรณ์โรงแรม
-# พัฒนาขึ้นโดยรวมส่วน User Display และ Admin Management (CRUD) เข้าด้วยกัน
+# [กลุ่มที่ 2] ระบบควบคุมการแสดงผลและจัดการสินค้า (หมวดอุปกรณ์โรงแรม)
+# รายละเอียดความต้องการ (Requirements):
+# FR-05: ระบบต้องแสดงรายการสินค้า (Product List)
+# FR-06: ระบบต้องแสดงสินค้าแยกตามหมวด (Category Filter)
+# FR-07: ระบบต้องแสดงรายละเอียดสินค้า (Product Detail)
+# FR-08: ระบบต้องรองรับการค้นหาสินค้า (Search System)
 
 # --- ส่วนแสดงผลสำหรับลูกค้า (User Facing) ---
 
 def product_list(request):
     """
     [FR-05] แสดงรายการสินค้าทั้งหมด (Product Listing)
-    ดึงข้อมูลสินค้าที่ 'เปิดใช้งาน' และรวมข้อมูลหมวดหมู่เพื่อลดการเรียก Database
     """
     categories = Category.objects.filter(is_active=True)
     products = Product.objects.filter(is_active=True).select_related("category")

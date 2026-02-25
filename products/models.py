@@ -1,8 +1,12 @@
 from django.db import models
 from django.utils.text import slugify
 
-# [กลุ่มที่ 2] ระบบจัดการสินค้าและหมวดหมู่ (Hotel Equipment & Supplies)
-# ออกแบบมาเพื่อรองรับ B2B และความต้องการของเจ้าของโรงแรม
+# [กลุ่มที่ 2] ระบบจัดการสินค้าและหมวดหมู่ (แสดงสินค้า - หมวดอุปกรณ์โรงแรม)
+# รายละเอียดความต้องการ (Requirements):
+# FR-05: ระบบต้องแสดงรายการสินค้า (Product List)
+# FR-06: ระบบต้องแสดงสินค้าแยกตามหมวด (Category Filter)
+# FR-07: ระบบต้องแสดงรายละเอียดสินค้า (Product Detail)
+# FR-08: ระบบต้องรองรับการค้นหาสินค้า (Search System)
 
 class Category(models.Model):
     """
