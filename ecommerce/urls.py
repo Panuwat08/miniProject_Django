@@ -15,8 +15,6 @@ urlpatterns = [
     # orders: /checkout /order/...
     path("", include("orders.urls")),
 
-    # products: /products/... (แสดงสินค้าอุปกรณ์โรงแรม)
-    path("products/", include("products.urls")),
 ]
 
 if settings.DEBUG:

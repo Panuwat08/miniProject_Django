@@ -2,198 +2,436 @@
 {% block title %}ตะกร้าสินค้า{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <h2 class="fw-bold mb-0 text-dark">ตะกร้าสินค้าของฉัน</h2>
-        <a href="/" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold shadow-sm hover-scale">
-            <i class="bi bi-arrow-left me-2"></i>เลือกซื้อสินค้าต่อ
-        </a>
+<div class="container py-4">
+
+  <!-- ==================== Step Progress Bar (Animated) ==================== -->
+  <div class="d-flex align-items-center justify-content-center mb-5 flex-wrap gap-2 fade-in" style="animation-delay:0.1s;">
+    <div class="d-flex align-items-center">
+      <div class="step-circle active pulse-glow">1</div>
+      <span class="ms-2 fw-bold text-primary small">ตะกร้าสินค้า</span>
+    </div>
+    <div class="step-line active-line"></div>
+    <div class="d-flex align-items-center">
+      <div class="step-circle">2</div>
+      <span class="ms-2 text-muted small">ชำระเงิน</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="d-flex align-items-center">
+      <div class="step-circle">3</div>
+      <span class="ms-2 text-muted small">สำเร็จ</span>
+    </div>
+  </div>
+
+  <!-- ==================== Page Header ==================== -->
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3 fade-in" style="animation-delay:0.2s;">
+    <div class="d-flex align-items-center gap-3">
+      <div class="header-icon">
+        <i class="bi bi-cart3 fs-4"></i>
+      </div>
+      <div>
+        <h2 class="fw-bold mb-0 text-dark h4">ตะกร้าสินค้าของฉัน</h2>
+        <small class="text-muted">รายการสินค้าที่คุณเลือกไว้</small>
+      </div>
+    </div>
+    <a href="/" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold btn-ripple">
+      <i class="bi bi-arrow-left me-1"></i>เลือกซื้อสินค้าต่อ
+    </a>
+  </div>
+
+  {% if cart.items.all %}
+  <div class="row g-4">
+
+    <!-- ==================== รายการสินค้า ==================== -->
+    <div class="col-lg-8">
+      {% for item in cart.items.all %}
+      <div class="card border-0 shadow-sm rounded-4 mb-3 cart-item-card fade-in" style="animation-delay:{{ forloop.counter0 }}00ms;">
+        <div class="card-body p-3 p-md-4">
+          <div class="row align-items-center g-3">
+
+            <!-- รูปภาพสินค้า พร้อม Zoom Effect -->
+            <div class="col-auto">
+              <div class="product-img-wrap">
+                {% if item.product.image %}
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="product-img">
+                {% else %}
+                <div class="product-img-placeholder">
+                  <i class="bi bi-image fs-4 text-muted"></i>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- ข้อมูลสินค้า -->
+            <div class="col">
+              <h6 class="fw-bold text-dark mb-1">{{ item.product.name }}</h6>
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <span class="badge-custom badge-id"><i class="bi bi-tag-fill me-1"></i>รหัส: {{ item.product.id }}</span>
+                {% if item.qty >= item.product.stock %}
+                <span class="badge-custom badge-warn"><i class="bi bi-exclamation-triangle me-1"></i>สั่งเต็มสต็อก</span>
+                {% else %}
+                <span class="badge-custom badge-ok"><i class="bi bi-check-circle-fill me-1"></i>มีสินค้า</span>
+                {% endif %}
+              </div>
+              <div class="text-muted small"><i class="bi bi-box-seam me-1"></i>คลัง: {{ item.product.stock }} ชิ้น</div>
+            </div>
+
+            <!-- ราคาต่อชิ้น -->
+            <div class="col-auto text-center d-none d-md-block">
+              <div class="text-muted small mb-1">ราคา/ชิ้น</div>
+              <div class="fw-bold text-dark">฿{{ item.product.price|floatformat:2 }}</div>
+            </div>
+
+            <!-- ปุ่มปรับจำนวน -->
+            <div class="col-auto">
+              <form method="post" action="{% url 'cart_update_qty' item.id %}" class="d-inline">
+                {% csrf_token %}
+                <div class="qty-control">
+                  <button class="qty-btn" type="button" onclick="var el=this.parentNode.querySelector('input');el.stepDown();el.dispatchEvent(new Event('change'));">
+                    <i class="bi bi-dash"></i>
+                  </button>
+                  <input type="number" class="qty-input" name="qty" value="{{ item.qty }}" min="1" max="{{ item.product.stock }}" onchange="this.form.submit()">
+                  <button class="qty-btn" type="button" onclick="var el=this.parentNode.querySelector('input');el.stepUp();el.dispatchEvent(new Event('change'));">
+                    <i class="bi bi-plus"></i>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- ราคารวม -->
+            <div class="col-auto text-center">
+              <div class="text-muted small mb-1 d-none d-md-block">รวม</div>
+              <div class="fw-bold fs-5 gradient-text">฿{{ item.subtotal|floatformat:2 }}</div>
+            </div>
+
+            <!-- ปุ่มลบ -->
+            <div class="col-auto">
+              <a href="{% url 'cart_remove' item.id %}" class="btn-delete btn-ripple"
+                onclick="return confirm('ยืนยันที่จะลบสินค้านี้?');" title="ลบสินค้า">
+                <i class="bi bi-trash3"></i>
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      {% endfor %}
     </div>
 
-    {% if cart.items.all %}
-    <div class="row g-5">
-        <!-- Cart Items List -->
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
-                <div class="card-header bg-white border-bottom pt-4 px-5 pb-3">
-                    <h4 class="fw-bold mb-0 text-dark"><i
-                            class="bi bi-bag-check-fill me-3 text-primary"></i>รายการสินค้า</h4>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="ps-5 py-4 border-0 text-secondary fw-semibold" style="width: 50%;">สินค้า
-                                    </th>
-                                    <th class="py-4 border-0 text-center text-secondary fw-semibold">ราคา</th>
-                                    <th class="py-4 border-0 text-center text-secondary fw-semibold"
-                                        style="width: 160px;">จำนวน</th>
-                                    <th class="py-4 border-0 text-center text-secondary fw-semibold">รวม</th>
-                                    <th class="pe-5 py-4 border-0 text-end text-secondary fw-semibold">ลบ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in cart.items.all %}
-                                {% with pid=item.product.id prc=item.product.price %}
-                                <tr class="hover-bg-light transition-all">
-                                    <td class="ps-5 py-4">
-                                        <div class="d-flex align-items-center">
-                                            <div class="flex-shrink-0">
-                                                <div class="p-2 bg-white rounded-4 shadow-sm border">
-                                                    {% if item.product.image %}
-                                                    <img src="{{ item.product.image.url }}"
-                                                        alt="{{ item.product.name }}"
-                                                        class="rounded-3 object-fit-cover d-block"
-                                                        style="width: 100px; height: 100px;">
-                                                    {% else %}
-                                                    <div class="bg-secondary-subtle rounded-3 d-flex align-items-center justify-content-center text-muted small"
-                                                        style="width: 100px; height: 100px;">No Img</div>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                            <div class="flex-grow-1 ms-4">
-                                                <h5 class="mb-2 fw-bold text-dark">{{ item.product.name }}</h5>
-                                                <div class="d-flex align-items-center flex-wrap gap-2">
-                                                    <span
-                                                        class="badge bg-white text-secondary border rounded-pill px-3 py-1"><i
-                                                            class="bi bi-tag-fill me-1"></i>รหัส: {{ pid }}</span>
-                                                    {% if item.qty >= item.product.stock %}
-                                                    <span class="badge text-bg-warning rounded-pill">สินค้าหมด</span>
-                                                    {% else %}
-                                                    <span
-                                                        class="badge bg-success-subtle text-success rounded-pill border border-success-subtle"><i
-                                                            class="bi bi-check-circle-fill me-1"></i>มีสินค้า</span>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-center py-4 fw-semibold text-secondary fs-5">{{ prc }} ฿</td>
-                                    <td class="text-center py-4">
-                                        <form method="post" action="{% url 'cart_update_qty' item.id %}"
-                                            class="d-flex flex-column align-items-center justify-content-center">
-                                            {% csrf_token %}
-                                            <div class="input-group shadow-sm rounded-pill overflow-hidden border"
-                                                style="width: 140px;">
-                                                <button class="btn btn-white border-0 bg-white" type="button"
-                                                    onclick="this.parentNode.querySelector('input[type=number]').stepDown(); this.parentNode.querySelector('input[type=number]').dispatchEvent(new Event('change'));">
-                                                    <i class="bi bi-dash-lg text-secondary"></i>
-                                                </button>
-                                                <input type="number"
-                                                    class="form-control text-center bg-white border-0 fw-bold fs-5 py-2 text-dark"
-                                                    name="qty" value="{{ item.qty }}" min="1"
-                                                    max="{{ item.product.stock }}" onchange="this.form.submit()"
-                                                    style="appearance: textfield;">
-                                                <button class="btn btn-white border-0 bg-white" type="button"
-                                                    onclick="this.parentNode.querySelector('input[type=number]').stepUp(); this.parentNode.querySelector('input[type=number]').dispatchEvent(new Event('change'));">
-                                                    <i class="bi bi-plus-lg text-secondary"></i>
-                                                </button>
-                                            </div>
-                                        </form>
-                                        <div class="mt-2 text-muted fw-light" style="font-size: 0.85rem;">
-                                            <i class="bi bi-box-seam me-1"></i>เหลือ {{ item.product.stock }} ชิ้น
-                                        </div>
-                                    </td>
-                                    <td class="text-center py-4 fw-bold text-primary fs-5">{{ item.subtotal }} ฿</td>
-                                    <td class="pe-5 py-4 text-end">
-                                        <a href="{% url 'cart_remove' item.id %}"
-                                            class="btn btn-outline-danger rounded-circle shadow-sm hover-scale p-3 d-flex align-items-center justify-content-center"
-                                            title="ลบสินค้า" onclick="return confirm('ยืนยันที่จะลบสินค้านี้?');"
-                                            style="width: 50px; height: 50px;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
-                                                fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                                                <path
-                                                    d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
-                                                <path fill-rule="evenodd"
-                                                    d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
-                                            </svg>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endwith %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+    <!-- ==================== กล่องสรุปราคา (Glassmorphism) ==================== -->
+    <div class="col-lg-4">
+      <div class="sticky-top fade-in" style="top:1.5rem;animation-delay:0.3s;">
+        <div class="summary-glass rounded-4 overflow-hidden">
+          <!-- Gradient Header -->
+          <div class="summary-header">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <h6 class="mb-0 fw-bold text-white"><i class="bi bi-receipt-cutoff me-2"></i>สรุปรายการ</h6>
+                <small class="text-white-50">{{ cart.items.count }} รายการในตะกร้า</small>
+              </div>
+              <div class="summary-icon-float"><i class="bi bi-bag-check fs-4"></i></div>
             </div>
+          </div>
+          <div class="p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="text-muted"><i class="bi bi-box me-2"></i>ยอดรวมสินค้า</span>
+              <span class="fw-semibold fs-6">฿{{ cart.total_price|floatformat:2 }}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="text-muted"><i class="bi bi-truck me-2"></i>ค่าจัดส่ง</span>
+              <span class="badge-free">ฟรี</span>
+            </div>
+            <hr class="border-dashed my-3">
+            <!-- ยอดสุทธิ -->
+            <div class="total-box mb-4">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-bold fs-6 text-dark">ยอดสุทธิ</span>
+                <span class="fw-bold fs-3 gradient-text">฿{{ cart.total_price|floatformat:2 }}</span>
+              </div>
+            </div>
+            <!-- ปุ่มชำระเงิน Animated Gradient -->
+            <a href="/checkout/" class="btn-gradient-animated w-100 d-block text-center rounded-pill fw-bold py-3 mb-3 text-white text-decoration-none fs-5 btn-ripple">
+              <i class="bi bi-credit-card-2-front-fill me-2"></i>ดำเนินการชำระเงิน
+            </a>
+            <!-- Trust Badges -->
+            <div class="d-flex align-items-center justify-content-center gap-3">
+              <div class="trust-badge"><i class="bi bi-shield-check text-success"></i><span>ปลอดภัย</span></div>
+              <div class="trust-badge"><i class="bi bi-lock-fill text-primary"></i><span>SSL</span></div>
+              <div class="trust-badge"><i class="bi bi-patch-check-fill text-info"></i><span>รับประกัน</span></div>
+            </div>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Order Summary -->
-        <div class="col-lg-4">
-            <div class="card shadow border-0 rounded-4 sticky-top" style="top: 2rem;">
-                <div class="card-header bg-primary text-white pt-4 pb-3 px-4 rounded-top-4">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-receipt-cutoff me-2"></i>สรุปรายการ</h5>
-                </div>
-                <div class="card-body p-4 bg-light">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-secondary fs-6">ยอดรวมสินค้า</span>
-                        <span class="fw-semibold fs-5">{{ cart.total_price }} ฿</span>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="text-secondary fs-6">ค่าจัดส่ง</span>
-                        <span class="badge text-bg-success rounded-pill px-3 py-2">ส่งฟรี</span>
-                    </div>
-                    <hr class="text-secondary opacity-25">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <span class="fw-bold fs-4 text-dark">ยอดสุทธิ</span>
-                        <span class="fw-bold fs-2 text-primary">{{ cart.total_price }} ฿</span>
-                    </div>
-                    <a href="/checkout/"
-                        class="btn btn-primary w-100 btn-lg rounded-pill fw-bold shadow hover-scale py-3 fs-5">
-                        <i class="bi bi-credit-card-2-front-fill me-2"></i>ดำเนินการชำระเงิน
-                    </a>
-                    <div class="text-center mt-3">
-                        <small class="text-muted"><i class="bi bi-shield-check me-1"></i>ชำระเงินปลอดภัย 100%</small>
-                    </div>
-                </div>
-            </div>
-        </div>
+  </div>
+
+  {% else %}
+  <!-- ==================== ตะกร้าว่าง (Animated) ==================== -->
+  <div class="text-center py-5 fade-in">
+    <div class="empty-cart-icon mx-auto mb-4">
+      <i class="bi bi-cart-x float-anim"></i>
     </div>
-    {% else %}
-    <div class="text-center py-5">
-        <div class="mb-4 text-muted opacity-25">
-            <i class="bi bi-cart-x" style="font-size: 100px;"></i>
-        </div>
-        <h3 class="fw-bold text-secondary">ไม่มีสินค้าในตะกร้า</h3>
-        <p class="text-muted mb-4">เลือกดูสินค้าใหม่ๆ และเพิ่มลงในตะกร้าของคุณได้เลย</p>
-        <a href="/" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow hover-scale">
-            <i class="bi bi-cart-plus me-2"></i>ไปเลือกซื้อสินค้า
-        </a>
-    </div>
-    {% endif %}
+    <h4 class="fw-bold text-dark mb-2">ไม่มีสินค้าในตะกร้า</h4>
+    <p class="text-muted mb-4 col-md-6 mx-auto">ยังไม่มีสินค้าในตะกร้าของคุณ ไปเลือกดูสินค้าใหม่ๆ ได้เลย!</p>
+    <a href="/" class="btn-gradient-animated d-inline-block text-white text-decoration-none rounded-pill px-5 py-3 fw-bold fs-5 btn-ripple">
+      <i class="bi bi-cart-plus me-2"></i>ไปเลือกซื้อสินค้า
+    </a>
+  </div>
+  {% endif %}
+
 </div>
 
+<!-- ==================== ULTIMATE CSS ==================== -->
 <style>
-    .hover-scale {
-        transition: transform 0.2s;
-    }
+  /* ===== Fade-In Animation ===== */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeSlideUp 0.6s ease forwards;
+  }
+  @keyframes fadeSlideUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-    .hover-scale:hover {
-        transform: translateY(-2px);
-    }
+  /* ===== Floating Animation (empty cart icon) ===== */
+  .float-anim {
+    animation: floatUpDown 3s ease-in-out infinite;
+  }
+  @keyframes floatUpDown {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
 
-    .object-fit-cover {
-        object-fit: cover;
-    }
+  /* ===== Pulse Glow on Active Step ===== */
+  .pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(13, 110, 253, 0); }
+  }
 
-    .transition-all {
-        transition: all 0.2s ease;
-    }
+  /* ===== Step Progress Bar ===== */
+  .step-circle {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: #f0f0f0; color: #adb5bd;
+    border: 2px solid #dee2e6;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85rem; transition: all 0.3s;
+  }
+  .step-circle.active {
+    background: linear-gradient(135deg, #0d6efd, #6610f2);
+    color: #fff; border-color: transparent;
+  }
+  .step-circle.done {
+    background: #198754; color: #fff; border-color: #198754;
+  }
+  .step-line { width: 60px; height: 3px; background: #dee2e6; border-radius: 2px; margin: 0 4px; }
+  .step-line.active-line {
+    background: linear-gradient(90deg, #6610f2, #dee2e6);
+  }
+  .step-line.done-line { background: #198754; }
 
-    .hover-bg-light:hover {
-        background-color: var(--bs-light);
-    }
+  /* ===== Gradient Text ===== */
+  .gradient-text {
+    background: linear-gradient(135deg, #0d6efd, #6610f2);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
+  /* ===== Header Icon ===== */
+  .header-icon {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, #e7f1ff, #e0d4fd);
+    color: #0d6efd; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.3s;
+  }
+  .header-icon:hover { transform: rotate(-10deg) scale(1.1); }
 
-    input[type="number"] {
-        -moz-appearance: textfield;
-    }
+  /* ===== Cart Item Card ===== */
+  .cart-item-card {
+    border: 1px solid #f0f0f0 !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .cart-item-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.1) !important;
+    border-color: #d4c5f9 !important;
+  }
+
+  /* ===== Product Image + Zoom ===== */
+  .product-img-wrap {
+    width: 90px; height: 90px; border-radius: 16px;
+    overflow: hidden; border: 2px solid #f0f0f0;
+    transition: all 0.3s;
+  }
+  .cart-item-card:hover .product-img-wrap {
+    border-color: #c0b3f3;
+    box-shadow: 0 4px 15px rgba(102, 16, 242, 0.15);
+  }
+  .product-img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .product-img-wrap:hover .product-img { transform: scale(1.15); }
+  .product-img-placeholder {
+    width: 100%; height: 100%; background: #f8f9fa;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ===== Badges ===== */
+  .badge-custom {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 500;
+  }
+  .badge-id { background: #f0f0f0; color: #6c757d; }
+  .badge-ok { background: #e6f8f0; color: #198754; border: 1px solid #c3e6cb; }
+  .badge-warn { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+  .badge-free {
+    background: linear-gradient(135deg, #e6f8f0, #d1f2e0);
+    color: #198754; font-weight: 700; font-size: 0.78rem;
+    padding: 5px 14px; border-radius: 20px;
+  }
+
+  /* ===== Quantity Control ===== */
+  .qty-control {
+    display: flex; align-items: center;
+    border: 2px solid #e9ecef; border-radius: 50px;
+    overflow: hidden; background: #fff; transition: all 0.25s;
+  }
+  .qty-control:hover, .qty-control:focus-within {
+    border-color: #6610f2;
+    box-shadow: 0 0 0 3px rgba(102, 16, 242, 0.1);
+  }
+  .qty-btn {
+    width: 36px; height: 36px; border: none; background: transparent;
+    color: #6610f2; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .qty-btn:hover { background: #ede7f6; }
+  .qty-btn:active { transform: scale(0.9); }
+  .qty-input {
+    width: 40px; text-align: center; border: none; background: transparent;
+    font-weight: 700; font-size: 0.95rem; color: #212529;
+    -moz-appearance: textfield; appearance: textfield;
+  }
+  .qty-input::-webkit-inner-spin-button,
+  .qty-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+  /* ===== Delete Button ===== */
+  .btn-delete {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 2px solid #f0f0f0; background: #fff; color: #dc3545;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none; transition: all 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .btn-delete:hover {
+    background: #dc3545; color: #fff; border-color: #dc3545;
+    transform: scale(1.15) rotate(10deg);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.35);
+  }
+
+  /* ===== Glassmorphism Summary Card ===== */
+  .summary-glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  }
+  .summary-header {
+    background: linear-gradient(135deg, #0d6efd 0%, #6610f2 50%, #6f42c1 100%);
+    padding: 1.25rem 1.5rem;
+    position: relative; overflow: hidden;
+  }
+  .summary-header::after {
+    content: ''; position: absolute; top: -50%; right: -20%;
+    width: 150px; height: 150px;
+    background: rgba(255,255,255,0.08); border-radius: 50%;
+  }
+  .summary-icon-float {
+    width: 45px; height: 45px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    animation: floatUpDown 4s ease-in-out infinite;
+  }
+
+  .total-box {
+    background: linear-gradient(135deg, #e7f1ff, #ede7f6);
+    border-radius: 16px; padding: 16px 20px;
+    border: 1px solid #d4c5f9;
+  }
+  .border-dashed { border-style: dashed !important; }
+
+  /* ===== Animated Gradient Button ===== */
+  .btn-gradient-animated {
+    background: linear-gradient(270deg, #0d6efd, #6610f2, #6f42c1, #0d6efd);
+    background-size: 600% 600%;
+    animation: gradientShift 4s ease infinite;
+    border: none; transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(102, 16, 242, 0.3);
+  }
+  .btn-gradient-animated:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(102, 16, 242, 0.45);
+  }
+  .btn-gradient-animated:active { transform: translateY(0) scale(0.98); }
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* ===== Ripple Effect ===== */
+  .btn-ripple { position: relative; overflow: hidden; }
+  .btn-ripple::after {
+    content: ''; position: absolute;
+    width: 100px; height: 100px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    transform: scale(0); opacity: 1;
+    pointer-events: none;
+  }
+  .btn-ripple:active::after {
+    animation: ripple 0.6s ease-out;
+  }
+  @keyframes ripple {
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  /* ===== Trust Badges ===== */
+  .trust-badge {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2px; font-size: 0.68rem; color: #6c757d;
+    transition: transform 0.2s;
+  }
+  .trust-badge:hover { transform: translateY(-2px); }
+  .trust-badge i { font-size: 1rem; }
+
+  /* ===== Empty Cart ===== */
+  .empty-cart-icon {
+    width: 130px; height: 130px;
+    background: linear-gradient(135deg, #e7f1ff, #ede7f6);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 3px solid #d4c5f9;
+    box-shadow: 0 8px 25px rgba(102, 16, 242, 0.1);
+  }
+  .empty-cart-icon i { font-size: 55px; color: #6610f2; }
+
+  /* ===== Mobile Responsive ===== */
+  @media (max-width: 768px) {
+    .product-img-wrap { width: 70px; height: 70px; border-radius: 12px; }
+    .qty-btn { width: 32px; height: 32px; }
+    .qty-input { width: 35px; font-size: 0.85rem; }
+    .step-line { width: 30px; }
+    .summary-glass { margin-top: 1rem; }
+  }
 </style>
 {% endblock %}

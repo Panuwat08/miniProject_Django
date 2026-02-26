@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-4">
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+  <div>
+    <h1 class="h3 fw-bold mb-1"><i class="bi bi-gear text-primary me-2"></i>ระบบจัดการสินค้า (Admin)</h1>
+    <p class="text-muted mb-0">แก้ไขข้อมูล เพิ่ม ลบ สินค้าและดูแลสต็อก</p>
+  </div>
+  <div>
+    <a href="{% url 'product_create' %}" class="btn btn-primary fw-bold shadow-sm">
+      <i class="bi bi-plus-lg"></i> เพิ่มสินค้าใหม่
+    </a>
+  </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100 bg-white">
+      <div class="card-body d-flex align-items-center">
+        <div class="bg-success bg-opacity-10 text-success rounded-3 d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+          <i class="bi bi-box-seam fs-4"></i>
+        </div>
+        <div>
+          <h3 class="fw-bold mb-0" id="totalProducts">{{ products|length }}</h3>
+          <p class="text-muted mb-0 small">สินค้าทั้งหมด</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100 bg-white">
+      <div class="card-body d-flex align-items-center">
+        <div class="bg-warning bg-opacity-10 text-warning rounded-3 d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+          <i class="bi bi-cash-coin fs-4"></i>
+        </div>
+        <div>
+          <h3 class="fw-bold mb-0" id="totalValue">
+            {% widthratio products|length 1 1 as count %}
+            {{ products|length }}
+          </h3>
+          <p class="text-muted mb-0 small">รายการในระบบ</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100 bg-white">
+      <div class="card-body d-flex align-items-center">
+        <div class="bg-danger bg-opacity-10 text-danger rounded-3 d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+          <i class="bi bi-exclamation-triangle fs-4"></i>
+        </div>
+        <div>
+          <h3 class="fw-bold mb-0 text-danger" id="lowStock">-</h3>
+          <p class="text-muted mb-0 small">สต็อกต่ำ</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toolbar: Search -->
+<div class="mb-4">
+  <div class="input-group input-group-lg shadow-sm">
+    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+    <input type="text" id="searchInput" class="form-control border-start-0" placeholder="ค้นหาสินค้า..." oninput="filterProducts()">
+  </div>
+</div>
+
+<!-- Product Grid -->
+<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4" id="productGrid">
+  {% for product in products %}
+  <div class="col product-card" data-name="{{ product.name|lower }}">
+    <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden position-relative">
+      
+      <!-- Stock Badge -->
+      <div class="position-absolute top-0 end-0 p-2 z-1">
+        {% if product.stock < 5 %}
+        <span class="badge bg-danger rounded-pill px-3 py-2"><i class="bi bi-exclamation-circle me-1"></i> {{ product.stock }} ชิ้น</span>
+        {% elif product.stock < 20 %}
+        <span class="badge bg-warning text-dark rounded-pill px-3 py-2"><i class="bi bi-exclamation-triangle me-1"></i> {{ product.stock }} ชิ้น</span>
+        {% else %}
+        <span class="badge bg-success rounded-pill px-3 py-2"><i class="bi bi-check-circle me-1"></i> {{ product.stock }} ชิ้น</span>
+        {% endif %}
+      </div>
+      
+      <!-- Image -->
+      {% if product.image %}
+      <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 180px; object-fit: cover;">
+      {% else %}
+      <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+        <i class="bi bi-image text-muted fs-1"></i>
+      </div>
+      {% endif %}
+      
+      <!-- Body -->
+      <div class="card-body d-flex flex-column p-4">
+        <h5 class="card-title fw-bold text-dark mb-4 text-truncate" title="{{ product.name }}">{{ product.name }}</h5>
+        
+        <div class="mt-auto">
+          <h4 class="text-success fw-bold mb-3">
+            ฿{{ product.price|floatformat:2 }} <small class="text-muted fs-6 fw-normal">บาท</small>
+          </h4>
+          
+          <div class="d-flex gap-2 mt-3">
+            <a href="{% url 'product_update' product.pk %}" class="btn btn-outline-warning w-50 fw-bold">
+              <i class="bi bi-pencil-square"></i> แก้ไข
+            </a>
+            <a href="{% url 'product_delete' product.pk %}" class="btn btn-outline-danger w-50 fw-bold">
+              <i class="bi bi-trash3"></i> ลบ
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <!-- Empty State -->
+  <div class="col-12 text-center py-5">
+    <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+    <h3 class="text-muted">ยังไม่มีสินค้าในระบบ</h3>
+    <p class="text-muted mb-4">เริ่มเพิ่มสินค้าตัวแรกของคุณได้เลย</p>
+    <a href="{% url 'product_create' %}" class="btn btn-primary fw-bold">
+      <i class="bi bi-plus-lg"></i> เพิ่มสินค้าใหม่
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+  // Low-stock counter
+  document.addEventListener('DOMContentLoaded', () => {
+      const cards = document.querySelectorAll('.product-card');
+      let lowCount = 0;
+      cards.forEach(card => {
+          const badge = card.querySelector('.badge.bg-danger');
+          if (badge) lowCount++;
+      });
+      const el = document.getElementById('lowStock');
+      if (el) el.textContent = lowCount;
+  });
+
+  // Search filter
+  function filterProducts() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const cards = document.querySelectorAll('.product-card');
+      let visible = 0;
+      cards.forEach(card => {
+          const name = card.getAttribute('data-name') || '';
+          const show = name.includes(q);
+          card.style.display = show ? '' : 'none';
+          if (show) visible++;
+      });
+      document.getElementById('totalProducts').textContent = visible;
+  }
+</script>
+
+</div>
+
+{% endblock %}

@@ -62,3 +62,76 @@ def cart_remove(request, item_id):
     item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
     item.delete()
     return redirect("cart_detail")
+
+# ==============================
+# Admin Product Management Views
+# ==============================
+from .forms import ProductForm
+
+@login_required
+def admin_product_list(request):
+    if not request.user.is_superuser:
+        messages.error(request, 'ไม่มีสิทธิ์เข้าถึง')
+        return redirect('home')
+    products = Product.objects.all().order_by("-id")
+    return render(request, "shop/admin_product_list.html", {"products": products})
+
+@login_required
+def product_create(request):
+    if not request.user.is_superuser:
+        messages.error(request, 'ไม่มีสิทธิ์เข้าถึง')
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            product = form.save()
+            messages.success(request, f'เพิ่มสินค้า "{product.name}" เรียบร้อยแล้ว')
+            return redirect('admin_product_list')
+    else:
+        form = ProductForm()
+    return render(request, 'shop/product_form.html', {'form': form, 'title': 'เพิ่มสินค้าใหม่'})
+
+@login_required
+def product_update(request, pk):
+    if not request.user.is_superuser:
+        messages.error(request, 'ไม่มีสิทธิ์เข้าถึง')
+        return redirect('home')
+
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'อัปเดตข้อมูล "{product.name}" เรียบร้อยแล้ว')
+            return redirect('admin_product_list')
+    else:
+        form = ProductForm(instance=product)
+    return render(request, 'shop/product_form.html', {'form': form, 'title': 'แก้ไขสินค้า'})
+
+@login_required
+def product_delete(request, pk):
+    if not request.user.is_superuser:
+        messages.error(request, 'ไม่มีสิทธิ์เข้าถึง')
+        return redirect('home')
+        
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == 'POST':
+        product.is_active = False  # Soft Delete
+        product.save()
+        messages.warning(request, f'ลบสินค้า "{product.name}" ออกจากรายการขายแล้ว')
+        return redirect('admin_product_list')
+    return render(request, 'shop/product_confirm_delete.html', {'product': product})
+
+def deduct_stock(product_id, quantity):
+    try:
+        product = Product.objects.get(id=product_id)
+        if product.stock >= quantity:
+            product.stock -= quantity
+            product.save()
+            return True
+        else:
+            return False
+    except Product.DoesNotExist:
+        return False
+
