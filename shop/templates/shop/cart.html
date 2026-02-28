@@ -1,0 +1,199 @@
+﻿{% extends "base.html" %}
+{% block title %}ตะกร้าสินค้า{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h2 class="fw-bold mb-0 text-dark">ตะกร้าสินค้าของฉัน</h2>
+        <a href="/" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold shadow-sm hover-scale">
+            <i class="bi bi-arrow-left me-2"></i>เลือกซื้อสินค้าต่อ
+        </a>
+    </div>
+
+    {% if cart.items.all %}
+    <div class="row g-5">
+        <!-- Cart Items List -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-bottom pt-4 px-5 pb-3">
+                    <h4 class="fw-bold mb-0 text-dark"><i
+                            class="bi bi-bag-check-fill me-3 text-primary"></i>รายการสินค้า</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-5 py-4 border-0 text-secondary fw-semibold" style="width: 50%;">สินค้า
+                                    </th>
+                                    <th class="py-4 border-0 text-center text-secondary fw-semibold">ราคา</th>
+                                    <th class="py-4 border-0 text-center text-secondary fw-semibold"
+                                        style="width: 160px;">จำนวน</th>
+                                    <th class="py-4 border-0 text-center text-secondary fw-semibold">รวม</th>
+                                    <th class="pe-5 py-4 border-0 text-end text-secondary fw-semibold">ลบ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in cart.items.all %}
+                                {% with pid=item.product.id prc=item.product.price %}
+                                <tr class="hover-bg-light transition-all">
+                                    <td class="ps-5 py-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <div class="p-2 bg-white rounded-4 shadow-sm border">
+                                                    {% if item.product.image %}
+                                                    <img src="{{ item.product.image.url }}"
+                                                        alt="{{ item.product.name }}"
+                                                        class="rounded-3 object-fit-cover d-block"
+                                                        style="width: 100px; height: 100px;">
+                                                    {% else %}
+                                                    <div class="bg-secondary-subtle rounded-3 d-flex align-items-center justify-content-center text-muted small"
+                                                        style="width: 100px; height: 100px;">No Img</div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-4">
+                                                <h5 class="mb-2 fw-bold text-dark">{{ item.product.name }}</h5>
+                                                <div class="d-flex align-items-center flex-wrap gap-2">
+                                                    <span
+                                                        class="badge bg-white text-secondary border rounded-pill px-3 py-1"><i
+                                                            class="bi bi-tag-fill me-1"></i>รหัส: {{ pid }}</span>
+                                                    {% if item.qty >= item.product.stock %}
+                                                    <span class="badge text-bg-warning rounded-pill">สินค้าหมด</span>
+                                                    {% else %}
+                                                    <span
+                                                        class="badge bg-success-subtle text-success rounded-pill border border-success-subtle"><i
+                                                            class="bi bi-check-circle-fill me-1"></i>มีสินค้า</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center py-4 fw-semibold text-secondary fs-5">{{ prc }} ฿</td>
+                                    <td class="text-center py-4">
+                                        <form method="post" action="{% url 'cart_update_qty' item.id %}"
+                                            class="d-flex flex-column align-items-center justify-content-center">
+                                            {% csrf_token %}
+                                            <div class="input-group shadow-sm rounded-pill overflow-hidden border"
+                                                style="width: 140px;">
+                                                <button class="btn btn-white border-0 bg-white" type="button"
+                                                    onclick="this.parentNode.querySelector('input[type=number]').stepDown(); this.parentNode.querySelector('input[type=number]').dispatchEvent(new Event('change'));">
+                                                    <i class="bi bi-dash-lg text-secondary"></i>
+                                                </button>
+                                                <input type="number"
+                                                    class="form-control text-center bg-white border-0 fw-bold fs-5 py-2 text-dark"
+                                                    name="qty" value="{{ item.qty }}" min="1"
+                                                    max="{{ item.product.stock }}" onchange="this.form.submit()"
+                                                    style="appearance: textfield;">
+                                                <button class="btn btn-white border-0 bg-white" type="button"
+                                                    onclick="this.parentNode.querySelector('input[type=number]').stepUp(); this.parentNode.querySelector('input[type=number]').dispatchEvent(new Event('change'));">
+                                                    <i class="bi bi-plus-lg text-secondary"></i>
+                                                </button>
+                                            </div>
+                                        </form>
+                                        <div class="mt-2 text-muted fw-light" style="font-size: 0.85rem;">
+                                            <i class="bi bi-box-seam me-1"></i>เหลือ {{ item.product.stock }} ชิ้น
+                                        </div>
+                                    </td>
+                                    <td class="text-center py-4 fw-bold text-primary fs-5">{{ item.subtotal }} ฿</td>
+                                    <td class="pe-5 py-4 text-end">
+                                        <a href="{% url 'cart_remove' item.id %}"
+                                            class="btn btn-outline-danger rounded-circle shadow-sm hover-scale p-3 d-flex align-items-center justify-content-center"
+                                            title="ลบสินค้า" onclick="return confirm('ยืนยันที่จะลบสินค้านี้?');"
+                                            style="width: 50px; height: 50px;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                                fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                                <path
+                                                    d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
+                                                <path fill-rule="evenodd"
+                                                    d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
+                                            </svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endwith %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <div class="card shadow border-0 rounded-4 sticky-top" style="top: 2rem;">
+                <div class="card-header bg-primary text-white pt-4 pb-3 px-4 rounded-top-4">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-receipt-cutoff me-2"></i>สรุปรายการ</h5>
+                </div>
+                <div class="card-body p-4 bg-light">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-secondary fs-6">ยอดรวมสินค้า</span>
+                        <span class="fw-semibold fs-5">{{ cart.total_price }} ฿</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="text-secondary fs-6">ค่าจัดส่ง</span>
+                        <span class="badge text-bg-success rounded-pill px-3 py-2">ส่งฟรี</span>
+                    </div>
+                    <hr class="text-secondary opacity-25">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="fw-bold fs-4 text-dark">ยอดสุทธิ</span>
+                        <span class="fw-bold fs-2 text-primary">{{ cart.total_price }} ฿</span>
+                    </div>
+                    <a href="/checkout/"
+                        class="btn btn-primary w-100 btn-lg rounded-pill fw-bold shadow hover-scale py-3 fs-5">
+                        <i class="bi bi-credit-card-2-front-fill me-2"></i>ดำเนินการชำระเงิน
+                    </a>
+                    <div class="text-center mt-3">
+                        <small class="text-muted"><i class="bi bi-shield-check me-1"></i>ชำระเงินปลอดภัย 100%</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-4 text-muted opacity-25">
+            <i class="bi bi-cart-x" style="font-size: 100px;"></i>
+        </div>
+        <h3 class="fw-bold text-secondary">ไม่มีสินค้าในตะกร้า</h3>
+        <p class="text-muted mb-4">เลือกดูสินค้าใหม่ๆ และเพิ่มลงในตะกร้าของคุณได้เลย</p>
+        <a href="/" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow hover-scale">
+            <i class="bi bi-cart-plus me-2"></i>ไปเลือกซื้อสินค้า
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .hover-scale {
+        transition: transform 0.2s;
+    }
+
+    .hover-scale:hover {
+        transform: translateY(-2px);
+    }
+
+    .object-fit-cover {
+        object-fit: cover;
+    }
+
+    .transition-all {
+        transition: all 0.2s ease;
+    }
+
+    .hover-bg-light:hover {
+        background-color: var(--bs-light);
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
+</style>
+{% endblock %}

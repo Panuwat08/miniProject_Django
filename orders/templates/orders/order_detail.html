@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+{% block title %}รายละเอียดคำสั่งซื้อ #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h3 class="fw-bold mb-0">คำสั่งซื้อ #{{ order.id }}</h3>
+      <p class="text-muted small mb-0">
+        <i class="bi bi-clock me-1"></i>สั่งซื้อเมื่อ {{ order.created_at|date:"d M Y H:i" }}
+      </p>
+    </div>
+    <a href="/" class="btn btn-outline-primary rounded-pill px-4 fw-semibold">
+      <i class="bi bi-bag-plus me-2"></i>เลือกซื้อเพิ่ม
+    </a>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Order Items & Total -->
+    <div class="col-lg-7">
+      <div class="card shadow border-0 rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+          <h5 class="fw-bold mb-0"><i class="bi bi-basket me-2 text-primary"></i>รายการสินค้า</h5>
+        </div>
+        <div class="card-body px-4 pb-4">
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead class="text-secondary small bg-light rounded-3">
+                <tr>
+                  <th class="border-0 rounded-start-3 ps-3">สินค้า</th>
+                  <th class="text-end border-0">จน.</th>
+                  <th class="text-end border-0 rounded-end-3 pe-3">รวม</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for it in order.items.all %}
+                <tr>
+                  <td class="py-3 ps-3 border-bottom-0">
+                    <div class="d-flex align-items-center">
+                      {% if it.product.image %}
+                      <img src="{{ it.product.image.url }}" class="rounded-3 me-3 border"
+                        style="width: 48px; height: 48px; object-fit: cover;">
+                      {% else %}
+                      <div
+                        class="rounded-3 me-3 bg-secondary-subtle d-flex align-items-center justify-content-center text-muted small"
+                        style="width: 48px; height: 48px;">No Img</div>
+                      {% endif %}
+                      <div>
+                        <div class="fw-semibold text-dark">{{ it.product.name }}</div>
+                        <div class="small text-muted">{{ it.price }} ฿ / ชิ้น</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-end py-3 border-bottom-0 fw-semibold">{{ it.qty }}</td>
+                  <td class="text-end py-3 pe-3 border-bottom-0 fw-bold text-primary">{{ it.subtotal }} ฿</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <hr class="my-4 text-muted opacity-25">
+
+          <div class="d-flex justify-content-between align-items-center px-2">
+            <div>
+              <span class="text-muted small d-block">ยอดรวมทั้งสิ้น</span>
+              <span class="fw-bold fs-3 text-primary">{{ order.total }} ฿</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Status & Payment -->
+    <div class="col-lg-5">
+      <!-- Info Card -->
+      <div class="card shadow border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-3">สถานะคำสั่งซื้อ</h5>
+
+          <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded-3">
+            <span class="text-secondary fw-semibold">สถานะ</span>
+            <span class="badge rounded-pill px-3 py-2 fs-6
+                {% if order.status == 'PENDING' %}text-bg-warning
+                {% elif order.status == 'PAID' %}text-bg-success
+                {% elif order.status == 'REJECTED' %}text-bg-danger
+                {% else %}text-bg-secondary{% endif %}">
+              {{ order.get_status_display }}
+            </span>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-0 px-2">
+            <span class="text-secondary"><i class="bi bi-credit-card me-2"></i>วิธีชำระเงิน</span>
+            <span class="fw-bold">{{ order.get_payment_method_display }}</span>
+          </div>
+
+          <hr class="my-3 text-muted opacity-25">
+
+          <h6 class="fw-semibold text-secondary mb-2"><i class="bi bi-geo-alt me-2"></i>ที่อยู่จัดส่ง</h6>
+          <div class="p-3 border rounded-3 bg-white">
+            <div class="fw-bold text-dark">{{ order.shipping.full_name }}</div>
+            <div class="text-muted small mb-1">{{ order.shipping.phone }}</div>
+            <div class="text-secondary small">{{ order.shipping.address_line }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment / Slip Section -->
+      <div class="card shadow border-0 rounded-4">
+        <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+          <h5 class="fw-bold mb-0">
+            {% if order.payment_method == "COD" %}
+            <i class="bi bi-cash-stack me-2 text-primary"></i>ชำระเงินปลายทาง
+            {% else %}
+            <i class="bi bi-wallet2 me-2 text-primary"></i>การโอนเงิน/แจ้งสลิป
+            {% endif %}
+          </h5>
+        </div>
+        <div class="card-body p-4">
+
+          <!-- 1. CASH ON DELIVERY (COD) -->
+          {% if order.payment_method == "COD" %}
+          <div class="text-center mb-0">
+            <div
+              class="bg-primary-subtle text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+              style="width: 80px; height: 80px;">
+              <i class="bi bi-truck fs-1"></i>
+            </div>
+            <h5 class="fw-bold text-dark">รอรับสินค้าและชำระเงิน</h5>
+            <p class="text-muted">กรุณาเตรียมเงินสดจำนวน</p>
+            <div class="display-6 fw-bold text-primary mb-3">{{ order.total }} ฿</div>
+            <div class="alert alert-light border small text-secondary">
+              สินค้าจะถูกจัดส่งไปยังที่อยู่ที่ระบุ เจ้าหน้าที่จะโทรหาก่อนเข้าไปส่งสินค้า
+            </div>
+          </div>
+
+          {% else %}
+          <!-- 2. TRANSFER or ONLINE (QR) -->
+
+          <!-- QR Code Section -->
+          {% if order.payment_method == "ONLINE" and order.status == "PENDING" and qr_code_img %}
+          <div class="text-center mb-4">
+            <div class="p-3 bg-white rounded-4 shadow-sm border d-inline-block">
+              <img src="data:image/png;base64,{{ qr_code_img }}" class="img-fluid rounded-3" style="max-width: 200px;">
+            </div>
+            <div class="mt-2 text-muted small">สแกนเพื่อชำระเงิน</div>
+            <div class="mt-1 fw-bold text-dark">ชื่อบัญชี: {{ account_name }}</div>
+          </div>
+
+          <!-- Bank Transfer Info Section (If TRANSFER) -->
+          {% elif order.payment_method == "TRANSFER" and order.status == "PENDING" %}
+          <div class="text-center mb-4 p-3 bg-light rounded-4 border">
+            <h6 class="fw-bold text-secondary mb-3">โอนเงินผ่านบัญชีธนาคาร</h6>
+            <!-- GSB Bank Info -->
+            <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
+              <i class="bi bi-bank fs-2 text-primary"></i>
+              <div class="text-start">
+                <div class="fw-bold text-dark">ธนาคารออมสิน (GSB)</div>
+                <div class="text-muted small">ชื่อบัญชี: อภิสิทธิ์ วิเศษศรี</div>
+                <div class="fw-bold fs-5 text-primary">020322096585</div>
+              </div>
+            </div>
+            <div class="small text-muted mt-2">ยอดโอน: <span class="fw-bold">{{ order.total }} ฿</span></div>
+          </div>
+          {% endif %}
+
+          <!-- Slip Upload Section -->
+          {% if order.slip %}
+          <div class="text-center mb-3">
+            {% if order.slip.image %}
+            <div class="position-relative d-inline-block">
+              <img src="{{ order.slip.image.url }}" class="img-fluid rounded-3 shadow-sm border"
+                style="max-height: 200px; object-fit: cover;">
+              <div class="position-absolute top-0 end-0 m-2">
+                <span class="badge rounded-pill shadow-sm
+                                {% if order.slip.approved == None %} text-bg-warning
+                                {% elif order.slip.approved %} text-bg-success
+                                {% else %} text-bg-danger{% endif %}">
+                  {% if order.slip.approved == None %} รอตรวจ
+                  {% elif order.slip.approved %} ผ่าน
+                  {% else %} ไม่ผ่าน{% endif %}
+                </span>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          {% if order.slip.note %}
+          <div class="alert alert-secondary small mb-3 border-0 bg-light text-secondary">
+            <i class="bi bi-info-circle me-1"></i> <b>หมายเหตุ:</b> {{ order.slip.note }}
+          </div>
+          {% endif %}
+
+          <!-- Actions -->
+          <div class="d-grid gap-2">
+            <a class="btn btn-outline-primary rounded-pill fw-semibold" href="{% url 'upload_slip' order.id %}">
+              <i class="bi bi-arrow-repeat me-1"></i> เปลี่ยนสลิปใหม่
+            </a>
+
+            <form action="{% url 'remove_slip' order.id %}" method="post"
+              onsubmit="return confirm('คุณต้องการลบสลิปนี้ใช่หรือไม่?');" class="d-grid">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-light text-danger rounded-pill fw-semibold btn-sm py-2">
+                <i class="bi bi-trash me-1"></i> ลบสลิปออก
+              </button>
+            </form>
+          </div>
+
+          {% else %}
+          <!-- No slip uploaded yet -->
+          <div class="text-center py-4 bg-light rounded-3 border border-dashed mb-3">
+            <i class="bi bi-receipt text-muted fs-1 mb-2"></i>
+            <p class="text-muted small mb-0">ยังไม่มีหลักฐานการโอนเงิน</p>
+          </div>
+
+          <a class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm" href="{% url 'upload_slip' order.id %}">
+            <i class="bi bi-upload me-2"></i>อัปโหลดสลิป
+          </a>
+          {% endif %}
+
+          {% endif %} <!-- End if COD vs Online/Transfer -->
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

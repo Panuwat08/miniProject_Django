@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}อัปโหลดสลิป{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+
+      <div class="text-center mb-4">
+        <h2 class="fw-bold">อัปโหลดหลักฐานการโอนเงิน</h2>
+        <p class="text-muted">คำสั่งซื้อ #{{ order.id }}</p>
+      </div>
+
+      <div class="card shadow border-0 rounded-4">
+        <div class="card-body p-4 p-md-5">
+
+          <div class="text-center mb-4">
+            <div
+              class="bg-primary-subtle text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+              style="width: 64px; height: 64px;">
+              <i class="bi bi-cloud-upload fs-2"></i>
+            </div>
+            <h5 class="fw-bold">แนบรูปสลิป</h5>
+            <p class="small text-muted">รองรับไฟล์ .jpg, .png</p>
+          </div>
+
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold">เลือกไฟล์รูปภาพ</label>
+              <input class="form-control form-control-lg bg-light border-0" type="file" name="slip" accept="image/*"
+                required>
+            </div>
+
+            <div class="alert alert-info border-0 d-flex align-items-center role=" alert">
+              <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+              <div>
+                กรุณาตรวจสอบยอดเงินและวันเวลาในสลิปให้ชัดเจน
+              </div>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+              <button class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm" type="submit">
+                <i class="bi bi-send-fill me-2"></i>ยืนยันการอัปโหลด
+              </button>
+              <a href="{% url 'order_detail' order.id %}"
+                class="btn btn-light btn-lg rounded-pill fw-semibold text-secondary">
+                ยกเลิก / กลับไปหน้าคำสั่งซื้อ
+              </a>
+            </div>
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

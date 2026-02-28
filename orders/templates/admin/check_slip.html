@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}ตรวจสอบสลิป{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h3 class="fw-bold mb-0">ตรวจสอบสลิป #{{ order.id }}</h3>
+    <a href="{% url 'admin_orders' %}" class="btn btn-outline-secondary">กลับไปรายการ</a>
+  </div>
+
+  <div class="row g-4">
+    <!-- Order Info -->
+    <div class="col-md-5">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-header bg-white fw-bold">ข้อมูลคำสั่งซื้อ</div>
+        <div class="card-body">
+          <p class="mb-1 text-muted">ลูกค้า</p>
+          <div class="fw-semibold mb-3">{{ order.user.username }} ({{ order.shipping.full_name }})</div>
+
+          <p class="mb-1 text-muted">ยอดที่ต้องชำระ</p>
+          <div class="fs-4 fw-bold text-primary mb-3">{{ order.total }} ฿</div>
+
+          <p class="mb-1 text-muted">สถานะปัจจุบัน</p>
+          <div>{{ order.get_status_display }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slip Image & Action -->
+    <div class="col-md-7">
+      <div class="card shadow border-0 h-100">
+        <div class="card-body p-4 text-center">
+          {% if slip and slip.image %}
+          <div class="mb-4">
+            <img src="{{ slip.image.url }}" class="img-fluid rounded border shadow-sm" style="max-height: 500px;">
+          </div>
+
+          <form method="post" class="text-start bg-light p-3 rounded-3">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label fw-semibold">หมายเหตุ (ถ้ามี)</label>
+              <textarea class="form-control" name="note" rows="2"
+                placeholder="เช่น สลิปไม่ชัดเจน, ยอดเงินไม่ตรง"></textarea>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button name="action" value="approve" type="submit" class="btn btn-success flex-grow-1 fw-bold">
+                <i class="bi bi-check-circle-fill me-2"></i>อนุมัติ (ผ่าน)
+              </button>
+              <button name="action" value="reject" type="submit" class="btn btn-warning flex-grow-1 fw-bold">
+                <i class="bi bi-x-circle-fill me-2"></i>ปฏิเสธ (ไม่ผ่าน)
+              </button>
+              <button name="action" value="delete" type="submit" class="btn btn-outline-danger flex-grow-1 fw-bold"
+                onclick="return confirm('ยืนยันที่จะลบสลิปนี้? สถานะจะถูกรีเซ็ตเป็น รอชำระเงิน');">
+                <i class="bi bi-trash-fill me-2"></i>ลบสลิป
+              </button>
+            </div>
+          </form>
+
+          {% else %}
+          <div class="alert alert-warning">
+            ยังไม่มีการอัปโหลดสลิปสำหรับคำสั่งซื้อนี้
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

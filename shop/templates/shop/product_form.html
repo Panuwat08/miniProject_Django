@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- ==========================================
+     ส่วนหัวฟอร์ม (Form Header)
+     แสดงไอคอนและชื่อหัวข้อ (เพิ่มสินค้า / แก้ไขสินค้า)
+     ========================================== -->
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+
+    <!-- หัวข้อพร้อมไอคอน gradient -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <div class="stat-icon gradient-primary shadow" style="width: 58px; height: 58px; font-size: 1.6rem;">
+        {% if 'แก้ไข' in title %}
+        <i class="bi bi-pencil-square"></i>
+        {% else %}
+        <i class="bi bi-plus-circle"></i>
+        {% endif %}
+      </div>
+      <div>
+        <h1 class="h3 fw-bold mb-1">{{ title }}</h1>
+        <p class="text-muted mb-0">กรอกข้อมูลสินค้าด้านล่างให้ครบถ้วน</p>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         การ์ดฟอร์ม (Form Card)
+         ใช้ glass-card style กับ premium-form
+         ========================================== -->
+    <div class="glass-card overflow-hidden">
+      <div class="p-4 p-md-5">
+        <form method="post" enctype="multipart/form-data" id="productForm" class="premium-form">
+          {% csrf_token %}
+
+          <!-- วนลูปแสดง field แต่ละตัวของฟอร์ม -->
+          {% for field in form %}
+          <div class="mb-4">
+
+            <!-- Label ของ field พร้อมไอคอน -->
+            <label class="form-label fw-bold d-flex align-items-center gap-2 mb-2">
+              {% if field.name == 'name' %}
+              <i class="bi bi-tag-fill" style="color: #667eea;"></i> ชื่อสินค้า
+              {% elif field.name == 'description' %}
+              <i class="bi bi-text-paragraph" style="color: #667eea;"></i> รายละเอียด
+              {% elif field.name == 'price' %}
+              <i class="bi bi-cash-coin" style="color: #667eea;"></i> ราคา (บาท)
+              {% elif field.name == 'stock' %}
+              <i class="bi bi-boxes" style="color: #667eea;"></i> จำนวนสต็อก
+              {% elif field.name == 'image' %}
+              <i class="bi bi-image-fill" style="color: #667eea;"></i> รูปภาพสินค้า
+              {% else %}
+              <i class="bi bi-circle" style="color: #667eea;"></i> {{ field.label }}
+              {% endif %}
+            </label>
+
+            <!-- ช่องอัปโหลดรูปภาพ (แบบ drag & drop) -->
+            {% if field.name == 'image' %}
+            <div class="border border-2 rounded-4 p-4 text-center position-relative"
+              style="border-style: dashed !important; border-color: #cbd5e0 !important; background: linear-gradient(135deg, #f8f9fa, #edf2f7); cursor: pointer; transition: var(--transition-smooth);"
+              id="dropArea"
+              onmouseover="this.style.borderColor='#667eea !important'; this.style.background='linear-gradient(135deg, #eef2ff, #e8e3ff)'"
+              onmouseout="this.style.borderColor='#cbd5e0 !important'; this.style.background='linear-gradient(135deg, #f8f9fa, #edf2f7)'">
+              <i class="bi bi-cloud-arrow-up" style="font-size: 2.5rem; color: #a0aec0;"></i>
+              <p class="text-muted mb-0 mt-2">คลิกหรือลากไฟล์มาวางที่นี่</p>
+              <p class="text-muted small mb-0">รองรับ JPG, PNG, WebP</p>
+              <!-- input file ซ่อนไว้เต็มพื้นที่ -->
+              <input type="file" name="{{ field.html_name }}"
+                class="position-absolute top-0 start-0 w-100 h-100 opacity-0" style="cursor: pointer;"
+                id="{{ field.auto_id }}" accept="image/*" {% if field.field.required %}required{% endif %}>
+            </div>
+
+            <!-- ส่วนแสดงตัวอย่างรูปภาพ (Image Preview) -->
+            <div class="text-center mt-3" id="imagePreview" style="display: none;">
+              <img id="previewImg" src="#" alt="Preview" class="img-fluid rounded-4 shadow"
+                style="max-height: 220px; border: 3px solid white;">
+              <div class="small text-muted mt-2"><i class="bi bi-eye me-1"></i>ตัวอย่างรูปภาพ</div>
+            </div>
+
+            {% else %}
+
+            <!-- ช่อง input ปกติ (text, number, textarea) -->
+            {% if field.field.widget.input_type == "checkbox" %}
+            <div class="form-check">
+              {{ field }}
+            </div>
+            {% else %}
+            <input type="{{ field.field.widget.input_type|default:'text' }}" name="{{ field.html_name }}"
+              class="form-control form-control-lg" id="{{ field.auto_id }}" value="{{ field.value|default:'' }}"
+              placeholder="กรอก{{ field.label }}..." {% if field.field.required %}required{% endif %}>
+            {% endif %}
+            {% endif %}
+
+            <!-- ข้อความช่วยเหลือ (Help Text) -->
+            {% if field.help_text %}
+            <div class="form-text"><i class="bi bi-info-circle me-1"></i>{{ field.help_text }}</div>
+            {% endif %}
+
+            <!-- แสดง Error ของ field (ถ้ามี) -->
+            {% for error in field.errors %}
+            <div class="text-danger small mt-2 d-flex align-items-center gap-1">
+              <i class="bi bi-exclamation-circle-fill"></i> {{ error }}
+            </div>
+            {% endfor %}
+          </div>
+          {% endfor %}
+
+          <hr class="my-4" style="border-color: #e2e8f0;">
+
+          <!-- ==========================================
+               ปุ่มดำเนินการ (Action Buttons)
+               ปุ่มยกเลิก + ปุ่มบันทึก
+               ========================================== -->
+          <div class="d-flex justify-content-end gap-3">
+            <a href="{% url 'admin_product_list' %}" class="btn btn-light border-2 px-4 py-2 rounded-3 fw-bold">
+              <i class="bi bi-arrow-left me-1"></i> ยกเลิก
+            </a>
+            <button type="submit" class="btn btn-gradient px-4 py-2 rounded-pill">
+              <i class="bi bi-check-lg me-1"></i> บันทึกข้อมูล
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================
+     JavaScript: แสดงตัวอย่างรูปภาพก่อนอัปโหลด
+     ========================================== -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // === เลือก element สำหรับ preview ===
+    const fileInput = document.querySelector('#dropArea input[type="file"]');
+    const preview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+
+    if (fileInput) {
+      // เมื่อเลือกไฟล์ ให้แสดงตัวอย่างรูป
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            previewImg.src = ev.target.result; // แสดงรูปที่เลือก
+            preview.style.display = 'block';   // เปิดส่วน preview
+          };
+          reader.readAsDataURL(file); // อ่านไฟล์เป็น Data URL
+        } else {
+          preview.style.display = 'none'; // ซ่อน preview ถ้าไม่ใช่รูป
+        }
+      });
+    }
+
+    // === ทำให้ textarea มีสไตล์เดียวกับ form-control ===
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(ta => {
+      ta.classList.add('form-control');
+      ta.style.borderRadius = '12px';
+      ta.style.padding = '12px 16px';
+    });
+  });
+</script>
+
+{% endblock %}

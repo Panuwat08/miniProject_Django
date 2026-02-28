@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- ==========================================
+     ส่วนหัวหน้า (Page Header)
+     แสดงชื่อหน้า + ปุ่มเพิ่มสินค้าใหม่
+     ========================================== -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+  <div class="mb-2 mb-md-0">
+    <h1 class="h3 fw-bold mb-1">
+      <span class="me-2"
+        style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        <i class="bi bi-gear-wide-connected"></i>
+      </span>
+      ระบบจัดการสินค้า
+    </h1>
+    <p class="text-muted mb-0">เพิ่ม แก้ไข ลบสินค้า และดูแลสต็อกสินค้าทั้งหมด</p>
+  </div>
+
+  <!-- ปุ่มเพิ่มสินค้าใหม่ -->
+  <a href="{% url 'product_create' %}" class="btn btn-gradient rounded-pill px-4 py-2">
+    <i class="bi bi-plus-lg me-1"></i> เพิ่มสินค้าใหม่
+  </a>
+</div>
+
+<!-- ==========================================
+     แถว Stats (สรุปสถิติสินค้า)
+     แสดง: สินค้าทั้งหมด, รายการในระบบ, สต็อกต่ำ
+     ========================================== -->
+<div class="row g-3 mb-4">
+
+  <!-- การ์ด: สินค้าทั้งหมด -->
+  <div class="col-md-4">
+    <div class="glass-card p-3 d-flex align-items-center">
+      <div class="stat-icon gradient-success me-3">
+        <i class="bi bi-box-seam"></i>
+      </div>
+      <div>
+        <h3 class="fw-bold mb-0" id="totalProducts">{{ products|length }}</h3>
+        <p class="text-muted mb-0 small">สินค้าทั้งหมด</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- การ์ด: รายการในระบบ -->
+  <div class="col-md-4">
+    <div class="glass-card p-3 d-flex align-items-center">
+      <div class="stat-icon gradient-warning me-3">
+        <i class="bi bi-cash-coin"></i>
+      </div>
+      <div>
+        <h3 class="fw-bold mb-0">{{ products|length }}</h3>
+        <p class="text-muted mb-0 small">รายการในระบบ</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- การ์ด: สต็อกต่ำ (คำนวณด้วย JavaScript) -->
+  <div class="col-md-4">
+    <div class="glass-card p-3 d-flex align-items-center">
+      <div class="stat-icon gradient-danger me-3">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <div>
+        <h3 class="fw-bold mb-0 text-danger" id="lowStock">-</h3>
+        <p class="text-muted mb-0 small">สต็อกต่ำ</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================
+     ช่องค้นหาสินค้า (Search Bar)
+     กรองสินค้าแบบ real-time ตามชื่อ
+     ========================================== -->
+<div class="mb-4">
+  <div class="search-box input-group bg-white">
+    <span class="input-group-text text-muted"><i class="bi bi-search"></i></span>
+    <input type="text" id="searchInput" class="form-control" placeholder="🔍 ค้นหาสินค้า..." oninput="filterProducts()">
+  </div>
+</div>
+
+<!-- ==========================================
+     ตารางสินค้า (Product Grid)
+     แสดง card สินค้าแบบ responsive grid
+     ========================================== -->
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="productGrid">
+  {% for product in products %}
+  <div class="col product-card" data-name="{{ product.name|lower }}"
+    style="animation: fadeInUp 0.4s ease-out {{ forloop.counter0 }}00ms both;">
+    <div class="product-admin-card h-100 d-flex flex-column">
+
+      <!-- ส่วนแสดงรูปภาพสินค้า -->
+      <div class="img-wrapper position-relative">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+        {% else %}
+        <!-- กรณีไม่มีรูป แสดงไอคอนแทน -->
+        <div class="card-img-top d-flex align-items-center justify-content-center"
+          style="height: 200px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+          <i class="bi bi-image text-muted" style="font-size: 3rem; opacity: 0.4;"></i>
+        </div>
+        {% endif %}
+
+        <!-- Badge แสดงจำนวนสต็อก (มุมขวาบน) -->
+        <div class="position-absolute top-0 end-0 p-2">
+          {% if product.stock < 5 %} <!-- สต็อกต่ำมาก: แดง -->
+            <span class="stock-badge text-white" style="background: var(--danger-gradient);">
+              <i class="bi bi-exclamation-circle me-1"></i>{{ product.stock }} ชิ้น
+            </span>
+            {% elif product.stock < 20 %} <!-- สต็อกปานกลาง: ส้ม -->
+              <span class="stock-badge text-white" style="background: var(--warning-gradient);">
+                <i class="bi bi-exclamation-triangle me-1"></i>{{ product.stock }} ชิ้น
+              </span>
+              {% else %}
+              <!-- สต็อกเพียงพอ: เขียว -->
+              <span class="stock-badge text-white" style="background: var(--success-gradient);">
+                <i class="bi bi-check-circle me-1"></i>{{ product.stock }} ชิ้น
+              </span>
+              {% endif %}
+        </div>
+      </div>
+
+      <!-- เนื้อหาการ์ด: ชื่อ, ราคา, ปุ่มจัดการ -->
+      <div class="card-body d-flex flex-column p-4">
+        <h6 class="fw-bold text-dark mb-1 text-truncate" title="{{ product.name }}">{{ product.name }}</h6>
+        {% if product.description %}
+        <p class="text-muted small mb-3 text-truncate">{{ product.description }}</p>
+        {% else %}
+        <p class="text-muted small mb-3 fst-italic">ไม่มีรายละเอียด</p>
+        {% endif %}
+
+        <div class="mt-auto">
+          <!-- แสดงราคาสินค้า -->
+          <h5 class="mb-3"
+            style="background: var(--success-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700;">
+            ฿{{ product.price|floatformat:2 }}
+          </h5>
+
+          <!-- ปุ่ม แก้ไข / ลบ -->
+          <div class="d-flex gap-2">
+            <a href="{% url 'product_update' product.pk %}"
+              class="btn btn-outline-primary btn-sm w-50 rounded-3 fw-bold" style="border-width: 2px;">
+              <i class="bi bi-pencil-square"></i> แก้ไข
+            </a>
+            <a href="{% url 'product_delete' product.pk %}" class="btn btn-outline-danger btn-sm w-50 rounded-3 fw-bold"
+              style="border-width: 2px;">
+              <i class="bi bi-trash3"></i> ลบ
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+
+  <!-- ==========================================
+       แสดงเมื่อไม่มีสินค้าในระบบ (Empty State)
+       ========================================== -->
+  <div class="col-12 text-center py-5">
+    <div class="glass-card p-5 mx-auto" style="max-width: 500px;">
+      <div class="mb-4" style="font-size: 4rem; opacity: 0.3;">
+        <i class="bi bi-inbox"></i>
+      </div>
+      <h3 class="text-muted fw-bold mb-2">ยังไม่มีสินค้าในระบบ</h3>
+      <p class="text-muted mb-4">เริ่มเพิ่มสินค้าตัวแรกของคุณได้เลย!</p>
+      <a href="{% url 'product_create' %}" class="btn btn-gradient rounded-pill px-4">
+        <i class="bi bi-plus-lg"></i> เพิ่มสินค้าใหม่
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ==========================================
+     JavaScript
+     - นับจำนวนสินค้าที่สต็อกต่ำ (low-stock counter)
+     - ฟังก์ชันค้นหา/กรองสินค้า (Search filter)
+     ========================================== -->
+<script>
+  // === นับจำนวนสินค้าที่มีสต็อกต่ำ (badge สีแดง) ===
+  document.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.product-card');
+    let lowCount = 0;
+    cards.forEach(card => {
+      // ค้นหา badge ที่มี gradient แดง (สต็อกต่ำมาก)
+      const badges = card.querySelectorAll('.stock-badge');
+      badges.forEach(badge => {
+        if (badge.style.background.includes('eb3349')) lowCount++;
+      });
+    });
+    const el = document.getElementById('lowStock');
+    if (el) el.textContent = lowCount;
+  });
+
+  // === ฟังก์ชันค้นหาสินค้าแบบ real-time ===
+  function filterProducts() {
+    const q = document.getElementById('searchInput').value.toLowerCase(); // คำค้นหา
+    const cards = document.querySelectorAll('.product-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const name = card.getAttribute('data-name') || '';
+      const show = name.includes(q); // ตรวจสอบว่าชื่อสินค้าตรงกับคำค้น
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    // อัปเดตจำนวนสินค้าที่แสดง
+    document.getElementById('totalProducts').textContent = visible;
+  }
+</script>
+
+{% endblock %}

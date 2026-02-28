@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>คำอธิบายระบบตะกร้าสินค้าและการชำระเงิน</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 15px;
+    line-height: 1.8;
+    color: #1a1a2e;
+    background: #fff;
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 40px 50px;
+  }
+
+  h1 {
+    font-size: 26px;
+    color: #1a1a2e;
+    border-bottom: 3px solid #3b82f6;
+    padding-bottom: 12px;
+    margin: 30px 0 20px;
+  }
+  h2 {
+    font-size: 21px;
+    color: #1e3a5f;
+    margin: 28px 0 14px;
+    border-left: 4px solid #3b82f6;
+    padding-left: 12px;
+  }
+  h3 {
+    font-size: 17px;
+    color: #2563eb;
+    margin: 22px 0 10px;
+  }
+  h4 {
+    font-size: 15px;
+    color: #4b5563;
+    margin: 16px 0 8px;
+  }
+
+  p { margin: 8px 0; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 14px;
+  }
+  th {
+    background: #eff6ff;
+    color: #1e3a5f;
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid #d0d7e5;
+  }
+  td {
+    padding: 9px 14px;
+    border: 1px solid #e5e7eb;
+    vertical-align: top;
+  }
+  tr:nth-child(even) { background: #f9fafb; }
+
+  code {
+    font-family: 'Fira Code', monospace;
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #c7254e;
+  }
+
+  pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 18px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 14px 0;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    font-size: 13px;
+  }
+
+  blockquote {
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    padding: 12px 18px;
+    margin: 14px 0;
+    border-radius: 0 8px 8px 0;
+    color: #1e3a5f;
+  }
+
+  hr {
+    border: none;
+    border-top: 2px solid #e5e7eb;
+    margin: 30px 0;
+  }
+
+  strong { color: #1e3a5f; }
+
+  ul, ol {
+    margin: 8px 0 8px 24px;
+  }
+  li {
+    margin: 4px 0;
+  }
+
+  /* Print styles */
+  @media print {
+    body {
+      padding: 20px 30px;
+      font-size: 13px;
+    }
+    pre {
+      background: #f1f5f9 !important;
+      color: #1a1a2e !important;
+      border: 1px solid #d0d7e5;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    pre code {
+      color: #1a1a2e !important;
+    }
+    h1 { font-size: 22px; }
+    h2 { font-size: 18px; page-break-after: avoid; }
+    h3 { font-size: 15px; page-break-after: avoid; }
+    table { page-break-inside: avoid; }
+    th { background: #eff6ff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<h1>คำอธิบายการทำงานระบบตะกร้าสินค้าและการชำระเงิน (ฉบับเต็ม)</h1>
+<hr />
+<h2>1. สถาปัตยกรรมระบบ (MVT Pattern)</h2>
+<p>ระบบพัฒนาด้วย <strong>Django (Python)</strong> ใช้รูปแบบ <strong>MVT (Model-View-Template)</strong>:</p>
+<pre style="background:#f0f4ff;padding:16px;border-radius:8px;font-size:13px;line-height:1.6;white-space:pre-wrap;border:1px solid #d0d7e5;">flowchart LR
+    A["🌐 Browser\n(ผู้ใช้)"] -->|"HTTP Request\n(GET/POST)"| B["📋 urls.py\n(URL Router)"]
+    B -->|"เรียก Function"| C["⚙️ views.py\n(Business Logic)"]
+    C -->|"Query/Save"| D["🗄️ models.py\n(Database)"]
+    D -->|"ส่งข้อมูลกลับ"| C
+    C -->|"ส่งข้อมูลไป render"| E["🖼️ template.html\n(หน้าเว็บ)"]
+    E -->|"HTTP Response\n(HTML)"| A
+</pre>
+
+<table>
+<thead>
+<tr>
+<th>ชั้น</th>
+<th>หน้าที่</th>
+<th>ไฟล์</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Model</strong></td>
+<td>กำหนดโครงสร้างตารางในฐานข้อมูล</td>
+<td><code>models.py</code></td>
+</tr>
+<tr>
+<td><strong>View</strong></td>
+<td>รับ Request → ประมวลผล → ส่ง Response</td>
+<td><code>views.py</code></td>
+</tr>
+<tr>
+<td><strong>Template</strong></td>
+<td>แสดงผล HTML + ข้อมูลจาก View</td>
+<td><code>*.html</code></td>
+</tr>
+<tr>
+<td><strong>URL</strong></td>
+<td>จับคู่ URL path กับ View function</td>
+<td><code>urls.py</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. ระบบตะกร้าสินค้า (Cart System)</h2>
+<h3>2.1 โครงสร้างข้อมูล (Models)</h3>
+<p><strong>ไฟล์:</strong> <a href="file:///d:/miniProject_Django-main/miniProject_Django-main/shop/models.py">shop/models.py</a></p>
+<pre class="codehilite"><code class="language-python"># ตารางสินค้า
+class Product(models.Model):
+    name = models.CharField(max_length=255)          # ชื่อสินค้า (ข้อความ สูงสุด 255 ตัวอักษร)
+    price = models.DecimalField(max_digits=10,        # ราคา (ทศนิยม 2 ตำแหน่ง)
+                                decimal_places=2)
+    stock = models.PositiveIntegerField(default=0)    # จำนวนสต็อก (จำนวนเต็มบวก)
+    image = models.ImageField(upload_to=&quot;products/&quot;,  # รูปสินค้า (เก็บในโฟลเดอร์ media/products/)
+                              null=True, blank=True)
+    is_active = models.BooleanField(default=True)     # เปิด/ปิดการขาย
+
+# ตารางตะกร้า — ผู้ใช้ 1 คน มี 1 ตะกร้า (OneToOne)
+class Cart(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    #   OneToOneField = ความสัมพันธ์ 1:1
+    #   on_delete=CASCADE = ถ้าลบ User → ลบ Cart ด้วย
+    updated_at = models.DateTimeField(auto_now=True)  # อัปเดตอัตโนมัติเมื่อมีการเปลี่ยนแปลง
+
+    def total_price(self):
+        # คำนวณราคารวมทั้งตะกร้า = ผลรวมของ subtotal ทุกรายการ
+        return sum([item.subtotal() for item in self.items.select_related(&quot;product&quot;)])
+
+# ตารางรายการในตะกร้า — ตะกร้า 1 ใบ มีได้หลายรายการ (ForeignKey = 1:N)
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, related_name=&quot;items&quot;, on_delete=models.CASCADE)
+    #   related_name=&quot;items&quot; → เข้าถึงได้ด้วย cart.items.all()
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    qty = models.PositiveIntegerField(default=1)      # จำนวนสินค้า
+
+    class Meta:
+        unique_together = (&quot;cart&quot;, &quot;product&quot;)
+        # ป้องกันสินค้าซ้ำในตะกร้าเดียวกัน (ถ้าเพิ่มซ้ำ → เพิ่ม qty แทน)
+
+    def subtotal(self):
+        return self.product.price * self.qty  # ราคารวมต่อรายการ = ราคา × จำนวน
+</code></pre>
+
+<p><strong>ER Diagram:</strong></p>
+<pre style="background:#f0f4ff;padding:16px;border-radius:8px;font-size:13px;line-height:1.6;white-space:pre-wrap;border:1px solid #d0d7e5;">erDiagram
+    User ||--|| Cart : "มี 1 ตะกร้า"
+    Cart ||--o{ CartItem : "มีหลายรายการ"
+    CartItem }o--|| Product : "อ้างอิงสินค้า"
+
+    Product {
+        int id PK
+        string name
+        decimal price
+        int stock
+        image image
+        bool is_active
+    }
+    Cart {
+        int id PK
+        int user_id FK
+        datetime updated_at
+    }
+    CartItem {
+        int id PK
+        int cart_id FK
+        int product_id FK
+        int qty
+    }
+</pre>
+
+<h3>2.2 URL Routing (เส้นทาง)</h3>
+<p><strong>ไฟล์:</strong> <a href="file:///d:/miniProject_Django-main/miniProject_Django-main/shop/urls.py">shop/urls.py</a></p>
+<table>
+<thead>
+<tr>
+<th>URL</th>
+<th>Method</th>
+<th>View Function</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/</code></td>
+<td>GET</td>
+<td><code>home</code></td>
+<td>หน้าแรก แสดงสินค้าทั้งหมด</td>
+</tr>
+<tr>
+<td><code>/product/&lt;id&gt;/</code></td>
+<td>GET</td>
+<td><code>product_detail</code></td>
+<td>หน้ารายละเอียดสินค้า</td>
+</tr>
+<tr>
+<td><code>/cart/</code></td>
+<td>GET</td>
+<td><code>cart_detail</code></td>
+<td>แสดงตะกร้าสินค้า</td>
+</tr>
+<tr>
+<td><code>/cart/add/&lt;product_id&gt;/</code></td>
+<td>POST</td>
+<td><code>cart_add</code></td>
+<td>เพิ่มสินค้าลงตะกร้า</td>
+</tr>
+<tr>
+<td><code>/cart/update/&lt;item_id&gt;/</code></td>
+<td>POST</td>
+<td><code>cart_update_qty</code></td>
+<td>อัปเดตจำนวนสินค้า</td>
+</tr>
+<tr>
+<td><code>/cart/remove/&lt;item_id&gt;/</code></td>
+<td>GET</td>
+<td><code>cart_remove</code></td>
+<td>ลบสินค้าออกจากตะกร้า</td>
+</tr>
+</tbody>
+</table>
+<h3>2.3 View Functions (โค้ดจริง + คำอธิบาย)</h3>
+<p><strong>ไฟล์:</strong> <a href="file:///d:/miniProject_Django-main/miniProject_Django-main/shop/views.py">shop/views.py</a></p>
+<h4>ฟังก์ชันช่วย: ดึงตะกร้าของผู้ใช้</h4>
+<pre class="codehilite"><code class="language-python">def _get_cart(user):
+    cart, _ = Cart.objects.get_or_create(user=user)
+    # get_or_create() → ถ้ามี Cart อยู่แล้ว → ดึงมาใช้
+    #                   → ถ้ายังไม่มี → สร้างใหม่อัตโนมัติ
+    return cart
+</code></pre>
+
+<h4>เพิ่มสินค้าลงตะกร้า (<code>cart_add</code>)</h4>
+<pre class="codehilite"><code class="language-python">@login_required  # ← บังคับให้ Login ก่อน ถ้ายังไม่ Login จะ redirect ไปหน้า Login
+def cart_add(request, product_id):
+    product = get_object_or_404(Product, id=product_id, is_active=True)
+    #   get_object_or_404() → หาสินค้าจาก ID
+    #   ถ้าไม่เจอ → แสดงหน้า 404 (Not Found)
+    #   is_active=True → เอาเฉพาะสินค้าที่ยังเปิดขายอยู่
+
+    cart = _get_cart(request.user)
+
+    item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+    #   created=True  → สินค้านี้ยังไม่เคยอยู่ในตะกร้า (สร้างใหม่ qty=1)
+    #   created=False → สินค้านี้มีอยู่แล้ว → เพิ่มจำนวน
+    if not created:
+        item.qty += 1
+
+    if item.qty &gt; product.stock:   # ป้องกันจำนวนเกินสต็อก
+        item.qty = product.stock
+        messages.error(request, &quot;จำนวนเกินสต็อก&quot;)
+
+    item.save()                    # บันทึกลงฐานข้อมูล
+    return redirect(&quot;cart_detail&quot;) # กลับไปหน้าตะกร้า
+</code></pre>
+
+<h4>อัปเดตจำนวนสินค้า (<code>cart_update_qty</code>)</h4>
+<pre class="codehilite"><code class="language-python">@login_required
+def cart_update_qty(request, item_id):
+    item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    #   cart__user=request.user → ตรวจสอบว่าเป็นเจ้าของตะกร้าจริง (Security)
+    #   &quot;__&quot; คือ Django Lookup → ข้ามความสัมพันธ์ (CartItem → Cart → User)
+
+    qty_str = request.POST.get(&quot;qty&quot;, &quot;1&quot;)  # รับค่าจาก form
+    try:
+        qty = int(qty_str)
+    except:
+        qty = 1
+
+    if qty &lt; 1:                    # ป้องกันค่าติดลบ
+        qty = 1
+    if qty &gt; item.product.stock:   # ป้องกันเกินสต็อก
+        qty = item.product.stock
+        messages.error(request, &quot;จำนวนเกินสต็อก&quot;)
+
+    item.qty = qty
+    item.save()
+    return redirect(&quot;cart_detail&quot;)
+</code></pre>
+
+<h4>ลบสินค้าจากตะกร้า (<code>cart_remove</code>)</h4>
+<pre class="codehilite"><code class="language-python">@login_required
+def cart_remove(request, item_id):
+    item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
+    #   ตรวจสอบสิทธิ์เจ้าของก่อนลบ
+    item.delete()                  # ลบออกจากฐานข้อมูล
+    return redirect(&quot;cart_detail&quot;)
+</code></pre>
+
+<h3>2.4 Sequence Diagram — เพิ่มสินค้าลงตะกร้า</h3>
+<pre style="background:#f0f4ff;padding:16px;border-radius:8px;font-size:13px;line-height:1.6;white-space:pre-wrap;border:1px solid #d0d7e5;">sequenceDiagram
+    actor U as ผู้ใช้
+    participant B as Browser
+    participant V as views.py
+    participant DB as Database
+
+    U->>B: กดปุ่ม "เพิ่มลงตะกร้า"
+    B->>V: POST /cart/add/5/
+    V->>V: ตรวจสอบ @login_required
+    V->>DB: หาสินค้า ID=5
+    DB-->>V: Product object
+    V->>DB: get_or_create(CartItem)
+    DB-->>V: CartItem (created=True/False)
+    alt สินค้ามีอยู่แล้ว
+        V->>V: qty += 1
+    end
+    V->>DB: item.save()
+    V-->>B: Redirect → /cart/
+    B-->>U: แสดงหน้าตะกร้า
+</pre>
+
+<hr />
+<h2>3. ระบบการชำระเงิน (Payment System)</h2>
+<h3>3.1 โครงสร้างข้อมูล (Models)</h3>
+<p><strong>ไฟล์:</strong> <a href="file:///d:/miniProject_Django-main/miniProject_Django-main/orders/models.py">orders/models.py</a></p>
+<pre class="codehilite"><code class="language-python"># ตัวเลือกวิธีชำระเงิน (TextChoices = Enum)
+class PaymentMethod(models.TextChoices):
+    COD = &quot;COD&quot;, &quot;เก็บเงินปลายทาง&quot;          # ชำระเงินตอนรับของ
+    TRANSFER = &quot;TRANSFER&quot;, &quot;โอนเงิน&quot;         # โอนเงินผ่านธนาคาร
+    ONLINE = &quot;ONLINE&quot;, &quot;ชำระเงินผ่าน QR Code&quot; # สแกน QR PromptPay
+
+# สถานะของคำสั่งซื้อ
+class OrderStatus(models.TextChoices):
+    PENDING = &quot;PENDING&quot;       # รอชำระเงิน / รอตรวจสอบ
+    PAID = &quot;PAID&quot;             # ชำระแล้ว (แอดมินอนุมัติสลิป)
+    REJECTED = &quot;REJECTED&quot;     # สลิปไม่ถูกต้อง
+    SHIPPED = &quot;SHIPPED&quot;       # จัดส่งแล้ว
+    COMPLETED = &quot;COMPLETED&quot;   # สำเร็จ
+    CANCELLED = &quot;CANCELLED&quot;   # ยกเลิก
+
+# ที่อยู่จัดส่ง
+class ShippingAddress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=255)    # ชื่อผู้รับ
+    phone = models.CharField(max_length=30)         # เบอร์โทร
+    address_line = models.TextField()               # ที่อยู่
+    created_at = models.DateTimeField(auto_now_add=True)
+
+# คำสั่งซื้อ
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    shipping = models.ForeignKey(ShippingAddress, on_delete=models.PROTECT)
+    #   PROTECT = ป้องกันไม่ให้ลบที่อยู่ถ้ายังมี Order อ้างอิงอยู่
+    payment_method = models.CharField(max_length=20, choices=PaymentMethod.choices)
+    status = models.CharField(max_length=20, choices=OrderStatus.choices,
+                              default=OrderStatus.PENDING)
+    total = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)  # วันที่สร้าง (อัตโนมัติ)
+
+# รายการสินค้าในออเดอร์
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, related_name=&quot;items&quot;, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    #   เก็บราคาแยกไว้ ← เพราะราคาสินค้าอาจเปลี่ยนในอนาคต
+    qty = models.PositiveIntegerField()
+
+    def subtotal(self):
+        return self.price * self.qty
+
+# สลิปการชำระเงิน
+class PaymentSlip(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name=&quot;slip&quot;)
+    #   OneToOne = 1 ออเดอร์ มี 1 สลิปเท่านั้น
+    image = models.ImageField(upload_to=&quot;slips/&quot;)    # รูปสลิป (media/slips/)
+    approved = models.BooleanField(null=True, blank=True)
+    #   None = ยังไม่ตรวจ | True = ผ่าน | False = ไม่ผ่าน
+    note = models.TextField(blank=True, default=&quot;&quot;)  # หมายเหตุจากแอดมิน
+    checked_at = models.DateTimeField(null=True, blank=True)
+
+# การแจ้งเตือน
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)     # อ่านแล้ว/ยังไม่อ่าน
+</code></pre>
+
+<p><strong>ER Diagram:</strong></p>
+<pre style="background:#f0f4ff;padding:16px;border-radius:8px;font-size:13px;line-height:1.6;white-space:pre-wrap;border:1px solid #d0d7e5;">erDiagram
+    User ||--o{ Order : "สั่งซื้อ"
+    User ||--o{ Notification : "ได้รับแจ้งเตือน"
+    Order ||--o{ OrderItem : "มีรายการ"
+    Order ||--o| PaymentSlip : "แนบสลิป"
+    Order }o--|| ShippingAddress : "ส่งไป"
+    OrderItem }o--|| Product : "อ้างอิง"
+
+    Order {
+        int id PK
+        int user_id FK
+        int shipping_id FK
+        string payment_method
+        string status
+        decimal total
+        datetime created_at
+    }
+    PaymentSlip {
+        int id PK
+        int order_id FK
+        image image
+        bool approved
+        string note
+        datetime checked_at
+    }
+    Notification {
+        int id PK
+        int user_id FK
+        string title
+        string message
+        bool is_read
+    }
+</pre>
+
+<h3>3.2 URL Routing (เส้นทาง)</h3>
+<p><strong>ไฟล์:</strong> <a href="file:///d:/miniProject_Django-main/miniProject_Django-main/orders/urls.py">orders/urls.py</a></p>
+<table>
+<thead>
+<tr>
+<th>URL</th>
+<th>Method</th>
+<th>View</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/checkout/</code></td>
+<td>GET/POST</td>
+<td><code>checkout</code></td>
+<td>หน้าชำระเงิน + สร้าง Order</td>
+</tr>
+<tr>
+<td><code>/order/&lt;id&gt;/</code></td>
+<td>GET</td>
+<td><code>order_detail</code></td>
+<td>รายละเอียดออเดอร์</td>
+</tr>
+<tr>
+<td><code>/order/&lt;id&gt;/slip/</code></td>
+<td>POST</td>
+<td><code>upload_slip</code></td>
+<td>อัปโหลดสลิป</td>
+</tr>
+<tr>
+<td><code>/order/&lt;id&gt;/slip/remove/</code></td>
+<td>POST</td>
+<td><code>remove_slip</code></td>
+<td>ลบสลิป (ฝั่งลูกค้า)</td>
+</tr>
+<tr>
+<td><code>/admin-panel/orders/</code></td>
+<td>GET</td>
+<td><code>admin_orders</code></td>
+<td>รายการออเดอร์ (Admin)</td>
+</tr>
+<tr>
+<td><code>/admin-panel/orders/&lt;id&gt;/check-slip/</code></td>
+<td>GET/POST</td>
+<td><code>admin_check_slip</code></td>
+<td>ตรวจสลิป (Admin)</td>
+</tr>
+<tr>
+<td><code>/admin-panel/orders/&lt;id&gt;/delete/</code></td>
+<td>POST</td>
+<td><code>admin_delete_order</code></td>
+<td>ลบออเดอร์ (Admin)</td>
+</tr>
+</tbody>
+</table>
+<h3>3.3 View Functions (โค้ดจริง + คำอธิบาย)</h3>
+<p><strong>ไฟล์:</strong> <a href="file:///d:/miniProject_Django-main/miniProject_Django-main/orders/views.py">orders/views.py</a></p>
+<h4>Checkout — สร้างคำสั่งซื้อ</h4>
+<pre class="codehilite"><code class="language-python">@login_required
+def checkout(request):
+    cart = Cart.objects.get(user=request.user)
+    if cart.items.count() == 0:            # ตะกร้าว่าง → ไม่ให้ชำระ
+        messages.error(request, &quot;ตะกร้าว่าง&quot;)
+        return redirect(&quot;cart_detail&quot;)
+
+    if request.method == &quot;POST&quot;:
+        # 1. รับข้อมูลจาก form
+        full_name = request.POST.get(&quot;full_name&quot;, &quot;&quot;).strip()
+        phone = request.POST.get(&quot;phone&quot;, &quot;&quot;).strip()
+        address_line = request.POST.get(&quot;address_line&quot;, &quot;&quot;).strip()
+        payment_method = request.POST.get(&quot;payment_method&quot;)
+
+        # 2. Validate ข้อมูล
+        if not full_name or not phone or not address_line:
+            messages.error(request, &quot;กรอกข้อมูลจัดส่งให้ครบ&quot;)
+            return redirect(&quot;checkout&quot;)
+
+        try:
+            # 3. ★★★ transaction.atomic() ★★★
+            #    = ทำทุกอย่างในก้อนเดียว ถ้า error → ยกเลิกทั้งหมด (rollback)
+            with transaction.atomic():
+                # 3.1 สร้างที่อยู่จัดส่ง
+                shipping = ShippingAddress.objects.create(
+                    user=request.user, full_name=full_name,
+                    phone=phone, address_line=address_line
+                )
+                # 3.2 สร้าง Order
+                order = Order.objects.create(
+                    user=request.user, shipping=shipping,
+                    payment_method=payment_method,
+                    status=OrderStatus.PENDING,
+                    total=cart.total_price()
+                )
+                # 3.3 ย้ายของจากตะกร้า → OrderItem + ตัดสต็อก
+                for ci in cart.items.select_related(&quot;product&quot;):
+                    if ci.qty &gt; ci.product.stock:
+                        raise ValueError(f&quot;สินค้า {ci.product.name} สต็อกไม่พอ&quot;)
+
+                    OrderItem.objects.create(
+                        order=order, product=ci.product,
+                        price=ci.product.price, qty=ci.qty
+                    )
+                    ci.product.stock -= ci.qty   # ★ ตัดสต็อก
+                    ci.product.save()
+
+                # 3.4 เคลียร์ตะกร้า
+                cart.items.all().delete()
+
+            # 4. แจ้งเตือนลูกค้า
+            Notification.objects.create(
+                user=request.user,
+                title=&quot;สร้างคำสั่งซื้อสำเร็จ&quot;,
+                message=f&quot;คำสั่งซื้อ #{order.id} ถูกสร้างแล้ว&quot;
+            )
+            return redirect(&quot;order_detail&quot;, order_id=order.id)
+
+        except Exception as e:
+            messages.error(request, f&quot;ไม่สามารถสร้างคำสั่งซื้อได้: {e}&quot;)
+            return redirect(&quot;checkout&quot;)
+
+    return render(request, &quot;orders/checkout.html&quot;, {...})
+</code></pre>
+
+<h4>Order Detail — แสดงรายละเอียด + QR Code</h4>
+<pre class="codehilite"><code class="language-python">@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    #   user=request.user → ลูกค้าเห็นแค่ออเดอร์ของตัวเอง (Security)
+
+    qr_code_img = None
+    # ★ สร้าง QR Code เฉพาะกรณี: วิธีชำระ = QR Code + สถานะ = PENDING
+    if order.status == OrderStatus.PENDING and order.payment_method == PaymentMethod.ONLINE:
+        from promptpay import qrcode as pp_qrcode  # สร้าง PromptPay payload
+        import qrcode, base64
+        from io import BytesIO
+
+        payload = pp_qrcode.generate_payload(settings.PROMPTPAY_ID, float(order.total))
+        #   สร้างข้อมูล PromptPay (เบอร์โทร/บัตรปชช. + ยอดเงิน)
+        img = qrcode.make(payload)            # สร้างรูป QR Code จาก payload
+        buffer = BytesIO()
+        img.save(buffer, format=&quot;PNG&quot;)
+        qr_code_img = base64.b64encode(buffer.getvalue()).decode()
+        #   แปลงรูปเป็น Base64 → แสดงใน HTML ได้เลย
+
+    return render(request, &quot;orders/order_detail.html&quot;, {
+        &quot;order&quot;: order, &quot;qr_code_img&quot;: qr_code_img, ...
+    })
+</code></pre>
+
+<h4>Upload Slip — อัปโหลดสลิป</h4>
+<pre class="codehilite"><code class="language-python">@login_required
+def upload_slip(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    # ตรวจสอบว่าวิธีชำระต้องอัปโหลดสลิป
+    if order.payment_method not in [PaymentMethod.TRANSFER, PaymentMethod.ONLINE]:
+        messages.error(request, &quot;ออเดอร์นี้ไม่ต้องอัปโหลดสลิป&quot;)
+        return redirect(&quot;order_detail&quot;, order_id=order.id)
+
+    if request.method == &quot;POST&quot;:
+        img = request.FILES.get(&quot;slip&quot;)  # รับไฟล์รูปจาก form
+        if not img:
+            messages.error(request, &quot;กรุณาเลือกไฟล์รูปสลิป&quot;)
+            return redirect(&quot;upload_slip&quot;, order_id=order.id)
+
+        slip, _ = PaymentSlip.objects.get_or_create(order=order)
+        #   get_or_create → ถ้ามีสลิปเดิม → อัปเดต (ไม่สร้างซ้ำ)
+        slip.image = img
+        slip.approved = None      # รีเซ็ตสถานะ → รอตรวจใหม่
+        slip.note = &quot;&quot;
+        slip.checked_at = None
+        slip.save()               # บันทึกรูปลง media/slips/
+
+        Notification.objects.create(...)
+        return redirect(&quot;order_detail&quot;, order_id=order.id)
+</code></pre>
+
+<h4>Remove Slip — ลบสลิป (ฝั่งลูกค้า)</h4>
+<pre class="codehilite"><code class="language-python">@login_required
+def remove_slip(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    if request.method == &quot;POST&quot;:
+        if hasattr(order, 'slip'):     # ตรวจว่ามีสลิปอยู่หรือไม่
+            order.slip.delete()        # ลบสลิปออก
+            if order.status == OrderStatus.REJECTED:
+                order.status = OrderStatus.PENDING  # รีเซ็ตสถานะ
+                order.save()
+            messages.success(request, &quot;ลบสลิปเรียบร้อยแล้ว&quot;)
+    return redirect(&quot;order_detail&quot;, order_id=order.id)
+</code></pre>
+
+<h3>3.4 Admin Views (โค้ดจริง + คำอธิบาย)</h3>
+<p><strong>ไฟล์:</strong> <a href="file:///d:/miniProject_Django-main/miniProject_Django-main/orders/admin_views.py">orders/admin_views.py</a></p>
+<h4>ตรวจสอบสลิป (<code>admin_check_slip</code>)</h4>
+<pre class="codehilite"><code class="language-python">@staff_member_required  # ★ เฉพาะ Admin (is_staff=True) เท่านั้น
+def admin_check_slip(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    slip = getattr(order, &quot;slip&quot;, None)  # ดึงสลิป (ถ้ามี)
+
+    if request.method == &quot;POST&quot;:
+        if not slip:
+            return redirect(&quot;admin_orders&quot;)
+
+        action = request.POST.get(&quot;action&quot;)  # รับ action จากปุ่มที่กด
+
+        if action == &quot;approve&quot;:              # ★ อนุมัติ
+            slip.approved = True
+            order.status = OrderStatus.PAID
+
+        elif action == &quot;reject&quot;:             # ★ ปฏิเสธ
+            slip.approved = False
+            order.status = OrderStatus.REJECTED
+
+        elif action == &quot;delete&quot;:             # ★ ลบสลิป
+            slip.delete()
+            order.status = OrderStatus.PENDING
+            order.save()
+            Notification.objects.create(...)
+            return redirect(&quot;admin_orders&quot;)  # ← return ก่อน เพราะ slip ถูกลบแล้ว
+
+        slip.save()
+        order.save()
+        Notification.objects.create(...)     # แจ้งเตือนลูกค้า
+        return redirect(&quot;admin_orders&quot;)
+</code></pre>
+
+<h4>ลบคำสั่งซื้อ (<code>admin_delete_order</code>)</h4>
+<pre class="codehilite"><code class="language-python">@staff_member_required
+def admin_delete_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    if request.method == &quot;POST&quot;:
+        # ★ คืนสต็อกก่อนลบ (สำคัญมาก!)
+        for item in order.items.select_related(&quot;product&quot;):
+            item.product.stock += item.qty   # คืนสต็อกกลับ
+            item.product.save()
+
+        order_num = order.id
+        user = order.user
+        order.delete()
+        #   CASCADE → ลบ OrderItem + PaymentSlip อัตโนมัติ
+
+        Notification.objects.create(
+            user=user,
+            title=&quot;คำสั่งซื้อถูกลบ&quot;,
+            message=f&quot;คำสั่งซื้อ #{order_num} ถูกลบโดยแอดมิน&quot;
+        )
+    return redirect(&quot;admin_orders&quot;)
+</code></pre>
+
+<h3>3.5 Sequence Diagram — กระบวนการ Checkout</h3>
+<pre style="background:#f0f4ff;padding:16px;border-radius:8px;font-size:13px;line-height:1.6;white-space:pre-wrap;border:1px solid #d0d7e5;">sequenceDiagram
+    actor U as ลูกค้า
+    participant B as Browser
+    participant V as views.py
+    participant DB as Database
+
+    U->>B: กดปุ่ม "ชำระเงิน"
+    B->>V: POST /checkout/
+    V->>DB: ดึงข้อมูลตะกร้า
+    DB-->>V: Cart + CartItems
+
+    rect rgb(255, 240, 240)
+        Note over V,DB: ★ transaction.atomic() — ถ้า error จะ rollback ทั้งหมด
+        V->>DB: สร้าง ShippingAddress
+        V->>DB: สร้าง Order
+        loop ทุกสินค้าในตะกร้า
+            V->>DB: สร้าง OrderItem
+            V->>DB: ตัดสต็อก (stock -= qty)
+        end
+        V->>DB: ลบ CartItem ทั้งหมด
+    end
+
+    V->>DB: สร้าง Notification
+    V-->>B: Redirect → /order/15/
+    B-->>U: แสดงหน้า Order Detail
+</pre>
+
+<h3>3.6 Sequence Diagram — อัปโหลดสลิปและตรวจสอบ</h3>
+<pre style="background:#f0f4ff;padding:16px;border-radius:8px;font-size:13px;line-height:1.6;white-space:pre-wrap;border:1px solid #d0d7e5;">sequenceDiagram
+    actor C as ลูกค้า
+    actor A as แอดมิน
+    participant B as Browser
+    participant V as views.py
+    participant AV as admin_views.py
+    participant DB as Database
+
+    C->>B: เลือกไฟล์สลิป + กดอัปโหลด
+    B->>V: POST /order/15/slip/
+    V->>DB: get_or_create(PaymentSlip)
+    V->>DB: บันทึกรูป (media/slips/)
+    V->>DB: สร้าง Notification
+    V-->>B: Redirect → Order Detail
+
+    Note over A: แอดมินเข้าหน้าตรวจสลิป
+    A->>B: เปิด /admin-panel/orders/15/check-slip/
+    B->>AV: GET
+    AV->>DB: ดึง Order + Slip
+    AV-->>B: แสดงรูปสลิป + ปุ่ม
+
+    alt อนุมัติ
+        A->>AV: POST action=approve
+        AV->>DB: slip.approved=True, status=PAID
+    else ปฏิเสธ
+        A->>AV: POST action=reject
+        AV->>DB: slip.approved=False, status=REJECTED
+    else ลบ
+        A->>AV: POST action=delete
+        AV->>DB: ลบ slip, status=PENDING
+    end
+    AV->>DB: สร้าง Notification แจ้งลูกค้า
+</pre>
+
+<hr />
+<h2>4. ระบบ Notification (การแจ้งเตือน)</h2>
+<p>ระบบแจ้งเตือนจะสร้าง <strong>Notification</strong> อัตโนมัติเมื่อเกิดเหตุการณ์สำคัญ:</p>
+<table>
+<thead>
+<tr>
+<th>เหตุการณ์</th>
+<th>ข้อความ</th>
+<th>สร้างโดย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>สร้างคำสั่งซื้อสำเร็จ</td>
+<td>"คำสั่งซื้อ #15 ถูกสร้างแล้ว"</td>
+<td><code>checkout()</code></td>
+</tr>
+<tr>
+<td>อัปโหลดสลิปสำเร็จ</td>
+<td>"ระบบได้รับสลิป...กำลังรอตรวจสอบ"</td>
+<td><code>upload_slip()</code></td>
+</tr>
+<tr>
+<td>แอดมินอนุมัติ/ปฏิเสธสลิป</td>
+<td>"สลิปผ่าน/ไม่ผ่านการตรวจสอบ"</td>
+<td><code>admin_check_slip()</code></td>
+</tr>
+<tr>
+<td>แอดมินลบสลิป</td>
+<td>"สลิปถูกลบโดยแอดมิน"</td>
+<td><code>admin_check_slip()</code></td>
+</tr>
+<tr>
+<td>แอดมินลบออเดอร์</td>
+<td>"คำสั่งซื้อถูกลบโดยแอดมิน"</td>
+<td><code>admin_delete_order()</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. ระบบ Security (การรักษาความปลอดภัย)</h2>
+<table>
+<thead>
+<tr>
+<th>กลไก</th>
+<th>วิธีการ</th>
+<th>ป้องกันอะไร</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@login_required</code></td>
+<td>บังคับ Login ก่อนเข้าถึง View</td>
+<td>ผู้ไม่ได้ Login เข้าถึงข้อมูล</td>
+</tr>
+<tr>
+<td><code>@staff_member_required</code></td>
+<td>เฉพาะ Admin เท่านั้น</td>
+<td>ผู้ใช้ทั่วไปเข้าถึง Admin Panel</td>
+</tr>
+<tr>
+<td><code>{% csrf_token %}</code></td>
+<td>สร้าง Token ในทุก Form</td>
+<td>Cross-Site Request Forgery (CSRF)</td>
+</tr>
+<tr>
+<td><code>cart__user=request.user</code></td>
+<td>ตรวจสอบเจ้าของข้อมูล</td>
+<td>ผู้ใช้แก้ไขตะกร้าของคนอื่น</td>
+</tr>
+<tr>
+<td><code>get_object_or_404()</code></td>
+<td>แสดง 404 ถ้าไม่พบข้อมูล</td>
+<td>Error จากการเข้าถึง ID ที่ไม่มีอยู่</td>
+</tr>
+<tr>
+<td><code>transaction.atomic()</code></td>
+<td>Rollback ถ้ามี Error</td>
+<td>ข้อมูลค้างผิดพลาดในฐานข้อมูล</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6. คำถามที่อาจารย์อาจถาม (พร้อมคำตอบ)</h2>
+<p><strong>Q1: ทำไมต้องใช้ <code>transaction.atomic()</code> ตอนสร้าง Order?</strong></p>
+<blockquote>
+<p>เพราะกระบวนการมีหลายขั้นตอน: สร้างที่อยู่ → สร้าง Order → ย้ายของจากตะกร้า → ตัดสต็อก → ลบตะกร้า ถ้ามี error ระหว่างทาง (เช่น สต็อกไม่พอ) ระบบจะ <strong>rollback ทุกอย่าง</strong> กลับไปเหมือนเดิมครับ</p>
+</blockquote>
+<p><strong>Q2: ทำไมใช้ OneToOneField ระหว่าง Order กับ PaymentSlip?</strong></p>
+<blockquote>
+<p>เพราะ 1 ออเดอร์ มีสลิปได้แค่ 1 ใบครับ ถ้าอัปโหลดใหม่ ระบบจะอัปเดตสลิปเดิม (ใช้ <code>get_or_create()</code>)</p>
+</blockquote>
+<p><strong>Q3: ทำไม Cart ใช้ OneToOne กับ User?</strong></p>
+<blockquote>
+<p>เพราะผู้ใช้ 1 คน มีตะกร้า 1 ใบ ทำให้ไม่ต้องจัดการหลายตะกร้า และเข้าถึงง่ายครับ</p>
+</blockquote>
+<p><strong>Q4: ลบ Order แล้วทำไมต้องคืนสต็อก?</strong></p>
+<blockquote>
+<p>เพราะตอนสร้าง Order ระบบตัดสต็อกไปแล้ว (<code>stock -= qty</code>) ถ้าลบ Order โดยไม่คืนสต็อก จำนวนสินค้าจะหายไปจากระบบครับ</p>
+</blockquote>
+<p><strong>Q5: QR Code สร้างยังไง?</strong></p>
+<blockquote>
+<p>ใช้ library <code>promptpay</code> สร้าง Payload (เลขบัญชี + ยอดเงิน) → library <code>qrcode</code> แปลงเป็นรูป QR → แปลงเป็น Base64 string → แสดงใน <code>&lt;img&gt;</code> tag ครับ</p>
+</blockquote>
+<p><strong>Q6: CSRF Token คืออะไร? ทำไมต้องใส่?</strong></p>
+<blockquote>
+<p>CSRF Token เป็นกลไกป้องกันการโจมตีแบบ Cross-Site Request Forgery คือป้องกันไม่ให้เว็บอื่นส่ง Form มาหลอกระบบของเราครับ Django บังคับใส่ <code>{% csrf_token %}</code> ในทุก <code>&lt;form method="POST"&gt;</code></p>
+</blockquote>
+<p><strong>Q7: <code>get_or_create()</code> ทำงานยังไง?</strong></p>
+<blockquote>
+<p>ค้นหาข้อมูลในฐานข้อมูลก่อน ถ้าเจอ → ใช้ตัวที่มีอยู่ ถ้าไม่เจอ → สร้างใหม่ ประโยชน์คือไม่ต้องเช็ค if/else เองครับ คืนค่า <code>(object, created)</code> โดย <code>created=True</code> ถ้าสร้างใหม่</p>
+</blockquote>
+<p><strong>Q8: <code>on_delete=CASCADE</code> vs <code>PROTECT</code> ต่างกันยังไง?</strong></p>
+<blockquote>
+<ul>
+<li><code>CASCADE</code> = ถ้าลบต้นทาง → ลบปลายทางด้วย (เช่น ลบ User → ลบ Cart อัตโนมัติ)</li>
+<li><code>PROTECT</code> = ป้องกันไม่ให้ลบต้นทาง ถ้ายังมีปลายทางอ้างอิงอยู่ (เช่น ไม่ให้ลบ Product ถ้ายังมี OrderItem อ้างอิง)</li>
+</ul>
+</blockquote>
+<p><strong>Q9: <code>related_name</code> คืออะไร?</strong></p>
+<blockquote>
+<p>เป็นชื่อที่ใช้เข้าถึงข้อมูลย้อนกลับครับ เช่น <code>Cart</code> มี <code>CartItem</code> เป็น ForeignKey ถ้าตั้ง <code>related_name="items"</code> จะเข้าถึงได้ด้วย <code>cart.items.all()</code> แทนที่จะเขียน <code>CartItem.objects.filter(cart=cart)</code></p>
+</blockquote>
+<p><strong>Q10: ทำไม OrderItem ถึงเก็บ price แยก ไม่ดึงจาก Product โดยตรง?</strong></p>
+<blockquote>
+<p>เพราะราคาสินค้าอาจเปลี่ยนในอนาคตครับ ถ้าดึงจาก Product โดยตรง ราคาในออเดอร์เก่าจะเปลี่ยนตาม ซึ่งไม่ถูกต้อง</p>
+</blockquote>
+<hr />
+<h2>7. สรุปไฟล์ทั้งหมด</h2>
+<h3>ระบบตะกร้า (<code>shop/</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>ไฟล์</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="file:///d:/miniProject_Django-main/miniProject_Django-main/shop/models.py">shop/models.py</a></td>
+<td>Product, Cart, CartItem</td>
+</tr>
+<tr>
+<td><a href="file:///d:/miniProject_Django-main/miniProject_Django-main/shop/views.py">shop/views.py</a></td>
+<td>cart_add, cart_detail, cart_update_qty, cart_remove</td>
+</tr>
+<tr>
+<td><a href="file:///d:/miniProject_Django-main/miniProject_Django-main/shop/urls.py">shop/urls.py</a></td>
+<td>URL routing ตะกร้า</td>
+</tr>
+<tr>
+<td><a href="file:///d:/miniProject_Django-main/miniProject_Django-main/shop/templates/shop/cart.html">cart.html</a></td>
+<td>Template แสดงตะกร้า</td>
+</tr>
+</tbody>
+</table>
+<h3>ระบบชำระเงิน (<code>orders/</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>ไฟล์</th>
+<th>หน้าที่</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="file:///d:/miniProject_Django-main/miniProject_Django-main/orders/models.py">orders/models.py</a></td>
+<td>Order, OrderItem, PaymentSlip, Notification</td>
+</tr>
+<tr>
+<td><a href="file:///d:/miniProject_Django-main/miniProject_Django-main/orders/views.py">orders/views.py</a></td>
+<td>checkout, order_detail, upload_slip, remove_slip</td>
+</tr>
+<tr>
+<td><a href="file:///d:/miniProject_Django-main/miniProject_Django-main/orders/admin_views.py">orders/admin_views.py</a></td>
+<td>admin_orders, admin_check_slip, admin_delete_order</td>
+</tr>
+<tr>
+<td><a href="file:///d:/miniProject_Django-main/miniProject_Django-main/orders/urls.py">orders/urls.py</a></td>
+<td>URL routing ออเดอร์</td>
+</tr>
+</tbody>
+</table>
+<div style="margin-top:40px; padding-top:20px; border-top:2px solid #e5e7eb; text-align:center; color:#9ca3af; font-size:13px;">
+  สร้างโดยระบบอัตโนมัติ — miniProject Django E-Commerce
+</div>
+</body>
+</html>
