@@ -1,0 +1,245 @@
+<!-- 
+    [กลุ่มที่ 2] หน้าแสดงรายการสินค้าอุปกรณ์โรงแรม (Product Listing Template)
+    - รองรับ FR-05: แสดงรายการสินค้าแบบ Grid
+    - รองรับ FR-06: การกรองตามหมวดหมู่ผ่าน Sidebar
+    - รองรับ FR-08: กล่องค้นหาสินค้าเบื้องต้น
+    - รองรับระบบจัดการ (Admin CRUD Integration)
+-->
+{% extends "base.html" %}
+{% block title %}
+  {% if current_category %}{{ current_category.name }} — {% endif %}คอลเลกชันอุปกรณ์โรงแรม
+{% endblock %}
+
+{% block content %}
+<style>
+  /* [Design System] ปรับให้ดู Minimalist แต่พรีเมียม (กลุ่มที่ 2) */
+  :root {
+    --minimal-dark: #1e293b;
+    --minimal-blue: #3b82f6;
+    --minimal-bg: #ffffff;
+    --minimal-gray: #f1f5f9;
+    --minimal-rose: #f43f5e;
+    --minimal-gold: #fbbf24;
+  }
+
+  body {
+    background-color: #fafafa;
+    color: #334155;
+    font-family: 'Prompt', 'Inter', sans-serif;
+  }
+
+  .minimal-sidebar {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #eee;
+  }
+
+  .search-input-minimal {
+    border-radius: 12px;
+    background: var(--minimal-gray);
+    border: 1px solid transparent;
+    padding: 12px 15px;
+    transition: all 0.2s;
+  }
+  .search-input-minimal:focus {
+    background: white;
+    border-color: var(--minimal-blue);
+    box-shadow: none;
+  }
+
+  .minimal-card {
+    border: none;
+    border-radius: 16px;
+    background: white;
+    transition: all 0.3s ease;
+    border: 1px solid #f0f0f0;
+    position: relative;
+  }
+  .minimal-card:hover {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    transform: translateY(-5px);
+  }
+
+  .img-wrapper {
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 5px;
+  }
+
+  .category-link-minimal {
+    padding: 10px 15px;
+    border-radius: 10px;
+    display: block;
+    text-decoration: none;
+    color: #64748b;
+    transition: 0.2s;
+    font-weight: 500;
+  }
+  .category-link-minimal:hover, .category-link-minimal.active {
+    background: var(--minimal-gray);
+    color: var(--minimal-dark);
+  }
+
+  .btn-minimal {
+    background: var(--minimal-dark);
+    color: white;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-weight: 600;
+    border: none;
+    transition: 0.2s;
+  }
+  .btn-minimal:hover {
+    background: var(--minimal-blue);
+    color: white;
+  }
+
+  .badge-minimal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: white;
+    color: var(--minimal-dark);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 2;
+  }
+
+  /* Admin Actions Style */
+  .admin-actions {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 5px;
+    z-index: 3;
+    opacity: 0;
+    transition: 0.2s;
+  }
+  .minimal-card:hover .admin-actions {
+    opacity: 1;
+  }
+  .btn-admin {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid #eee;
+    color: var(--minimal-dark);
+    text-decoration: none;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  .btn-admin:hover {
+    background: var(--minimal-gray);
+  }
+  .btn-admin-del:hover {
+    color: var(--minimal-rose);
+  }
+</style>
+
+<div class="container py-4">
+  <div class="row mb-5 align-items-end">
+    <div class="col-md-7">
+      <h2 class="fw-bold text-dark">
+        {% if current_category %}{{ current_category.name }}{% else %}รายการอุปกรณ์โรงแรม{% endif %}
+      </h2>
+      <p class="text-muted mb-0">ผลิตภัณฑ์พรีเมียมสำหรับธุรกิจโรงแรมและโฮสเทลชั้นนำ</p>
+    </div>
+    <div class="col-md-5 text-md-end">
+      <!-- ส่วนจัดการสำหรับ Admin (ถ้าต้องการ) -->
+      <a href="{% url 'products:product_create' %}" class="btn-minimal btn-sm text-decoration-none me-2">+ เพิ่มสินค้าใหม่</a>
+      <!-- แสดงจำนวนผลลัพธ์ที่พบ -->
+      <div class="text-muted small d-inline-block mt-2">พบสินค้า {{ products|length }} รายการ</div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    {# [FR-06 / FR-08] ส่วน Sidebar สำหรับค้นหาและกรองหมวดหมู่ #}
+    <div class="col-lg-3">
+      <div class="minimal-sidebar sticky-top" style="top: 20px;">
+        <!-- [FR-08] ช่องค้นหาด่วน (Quick Search) -->
+        <div class="mb-4">
+          <label class="form-label small fw-bold text-uppercase text-muted">ค้นหา</label>
+          <form action="{% url 'products:product_search' %}" method="get">
+            <input type="text" name="q" class="form-control search-input-minimal" placeholder="ชื่อสินค้าหรือประเภท...">
+          </form>
+        </div>
+
+        <!-- [FR-06] รายการหมวดหมู่สินค้าสำหรับการกรองข้อมูล -->
+        <div>
+          <label class="form-label small fw-bold text-uppercase text-muted">หมวดหมู่สินค้า</label>
+          <a href="{% url 'products:product_list' %}" class="category-link-minimal {% if not current_category %}active{% endif %}">
+            🛒 สินค้าทั้งหมด
+          </a>
+          {% for cat in categories %}
+            <a href="{% url 'products:product_by_category' cat.slug %}" class="category-link-minimal {% if current_category.id == cat.id %}active{% endif %}">
+              📦 {{ cat.name }}
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    {# [FR-05] ส่วนแสดง Grid สินค้าทั้งหมด #}
+    <div class="col-lg-9">
+      {% if products %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+          {% for p in products %}
+            <div class="col">
+              <div class="card minimal-card p-3 h-100">
+                <!-- [Admin Actions] ปุ่มแก้ไขและลบสินค้า -->
+                <div class="admin-actions">
+                  <a href="{% url 'products:product_update' p.pk %}" class="btn-admin" title="แก้ไข"><i class="bi bi-pencil"></i></a>
+                  <a href="{% url 'products:product_delete' p.pk %}" class="btn-admin btn-admin-del" title="ลบ"><i class="bi bi-trash"></i></a>
+                </div>
+
+                <div class="position-relative">
+                  <!-- [Stock Status] แสดงสถานะสต็อกสินค้าแบบทันที [FR-21, FR-22] -->
+                  {% if p.stock_qty > 0 %}
+                    <span class="badge-minimal">พร้อมส่ง ({{ p.stock_qty }})</span>
+                  {% else %}
+                    <span class="badge-minimal text-danger">สินค้าหมด</span>
+                  {% endif %}
+                  
+                  <a href="{% url 'products:product_detail' p.slug %}" class="img-wrapper d-block">
+                    {% if p.image %}
+                      <img src="{{ p.image.url }}" class="w-100" style="height: 220px; object-fit: cover; border-radius: 12px;">
+                    {% else %}
+                      <div class="bg-light w-100 d-flex align-items-center justify-content-center" style="height: 220px; border-radius: 12px;">🏨</div>
+                    {% endif %}
+                  </a>
+                </div>
+
+                <div class="card-body px-0 pb-0 pt-3">
+                  <div class="text-primary small fw-bold mb-1">{{ p.category.name|default:"ทั่วไป" }}</div>
+                  <h6 class="fw-bold text-dark mb-2">{{ p.name }}</h6>
+                  <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="fs-5 fw-bold text-dark">฿{{ p.price|floatformat:2 }}</span>
+                    <!-- ปุ่มเข้าสู่หน้ารายละเอียด [FR-07] -->
+                    <a href="{% url 'products:product_detail' p.slug %}" class="btn-minimal btn-sm text-decoration-none">ข้อมูลสินค้า</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <!-- [Empty State] กรณีไม่พบสินค้าในระบบ -->
+        <div class="py-5 text-center bg-white rounded-4 border">
+          <h4 class="text-muted">ไม่พบรายการสินค้า</h4>
+          <p class="small text-muted">กำลังเตรียมข้อมูลใหม่เร็วๆ นี้</p>
+          <a href="{% url 'products:product_list' %}" class="btn btn-dark btn-sm px-4 rounded-pill">กลับหน้าหลัก</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

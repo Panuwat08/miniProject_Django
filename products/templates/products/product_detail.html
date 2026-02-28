@@ -1,0 +1,127 @@
+<!-- 
+    [กลุ่มที่ 2] หน้าแสดงรายละเอียดสินค้าอุปกรณ์โรงแรม (Product Detail Template)
+    - รองรับ FR-07: แสดงข้อมูลเชิงลึก (รูปภาพ, สต็อก, คำอธิบาย)
+-->
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — รายละเอียดสินค้าพรีเมียม{% endblock %}
+
+{% block content %}
+<style>
+  /* [Design System] สไตล์หน้ารายละเอียดที่เน้นความชัดเจนและเรียบหรู (กลุ่มที่ 2) */
+  .detail-container {
+    background: white;
+    border-radius: 24px;
+    padding: 30px;
+    border: 1px solid #f0f0f0;
+  }
+  /* ... (ส่วนที่เหลือของ Style ยังคงเดิม) ... */
+</style>
+
+<div class="container py-4">
+  {# ปุ่มย้อนกลับเพื่อ UX ที่ดี #}
+  <div class="mb-4">
+    <a href="{% url 'products:product_list' %}" class="text-decoration-none text-muted small fw-bold">
+      ← กลับไปหน้ารายการสินค้า
+    </a>
+  </div>
+
+  <div class="detail-container shadow-sm">
+    <div class="row g-5">
+      {# [FR-07] ส่วนแสดงรูปภาพสินค้าหลัก #}
+      <div class="col-lg-6">
+        {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-img-detail">
+        {% else %}
+          <div class="bg-light w-100 d-flex align-items-center justify-content-center border" style="height: 500px; border-radius: 16px;">
+            <span class="fs-1 text-muted">🖼️ ไม่มีรูปภาพสินค้า</span>
+          </div>
+        {% endif %}
+      </div>
+
+      {# [FR-07] ส่วนแสดงข้อมูลตัวอักษร ราคา และสถานะสต็อก #}
+      <div class="col-lg-6">
+        <!-- Breadcrumb สำหรับบอกตำแหน่งสินค้าในหมวดหมู่ต่างๆ -->
+        <nav aria-label="breadcrumb" class="breadcrumb-minimal">
+          <ol class="breadcrumb m-0">
+            <li class="breadcrumb-item"><a href="{% url 'products:product_list' %}">สินค้าทั้งหมด</a></li>
+            {% if product.category %}
+              <li class="breadcrumb-item"><a href="{% url 'products:product_by_category' product.category.slug %}">{{ product.category.name }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active text-dark">{{ product.name|truncatechars:15 }}</li>
+          </ol>
+        </nav>
+
+        <h1 class="fw-bold text-dark mb-3">{{ product.name }}</h1>
+        
+        <!-- ส่วนแสดงราคาเบื้องต้น -->
+        <div class="price-minimal mb-4">
+          <small class="fs-4 fw-normal text-muted">฿</small>{{ product.price|floatformat:2 }}
+        </div>
+
+        <!-- รายละเอียดเนื้อหาสินค้า -->
+        <div class="description-text mb-4">
+          {% if product.description %}
+            {{ product.description|linebreaks }}
+          {% else %}
+            <p class="fst-italic text-muted">ข้อมูลสินค้าชิ้นนี้กำลังอยู่ระหว่างการปรับปรุงให้สมบูรณ์ยิ่งขึ้น</p>
+          {% endif %}
+        </div>
+
+        <!-- ข้อมูลทางเทคนิคและสถานะ (Technical Specs & Status) -->
+        <div class="mb-4">
+          <div class="spec-box">
+            <span class="spec-label">สถานะคลังสินค้า</span>
+            <span class="spec-value">
+              {% if product.stock_qty > 0 %}
+                <span class="text-success">พร้อมส่ง ({{ product.stock_qty }} ชิ้น)</span>
+              {% else %}
+                <span class="text-danger">สินค้าหมดชั่วคราว</span>
+              {% endif %}
+            </span>
+          </div>
+          <div class="spec-box">
+            <span class="spec-label">หมวดหมู่</span>
+            <span class="spec-value">{{ product.category.name|default:"ทั่วไป" }}</span>
+          </div>
+          <div class="spec-box">
+            <span class="spec-label">เงื่อนไข</span>
+            <span class="spec-value">สินค้าใหม่ 100%</span>
+          </div>
+        </div>
+
+        <!-- ปุ่ม Action หลักสำหรับการติดต่อ B2B -->
+        <button class="btn-cta-minimal mt-3" {% if product.stock == 0 %}disabled{% endif %}>
+          ติดต่อสอบถาม / สั่งซื้อสินค้า
+        </button>
+        <p class="text-center mt-3 small text-muted">* ราคานี้ยังไม่รวมค่าจัดส่งในกรณีซื้อปลีก</p>
+      </div>
+    </div>
+  </div>
+
+  {# [Recommendation Section] ระบบแนะนำสินค้าที่เกี่ยวข้องในหมวดเดียวกัน #}
+  {% if related_products %}
+    <div class="mt-5 pt-4">
+      <h5 class="fw-bold mb-4 text-dark">สินค้าแนะนำเพิ่มเติม</h5>
+      <div class="row row-cols-2 row-cols-lg-4 g-3">
+        {% for rp in related_products %}
+          <div class="col">
+            <div class="card h-100 border-0 shadow-sm p-2 rounded-4">
+              <a href="{% url 'products:product_detail' rp.slug %}">
+                {% if rp.image %}
+                  <img src="{{ rp.image.url }}" class="card-img-top rounded-3" style="height: 160px; object-fit: cover;">
+                {% else %}
+                  <div class="bg-light rounded-3 d-flex align-items-center justify-content-center" style="height: 160px;">🏨</div>
+                {% endif %}
+              </a>
+              <div class="card-body p-2 text-center">
+                <h6 class="small fw-bold mb-1"><a href="{% url 'products:product_detail' rp.slug %}" class="text-dark text-decoration-none">{{ rp.name }}</a></h6>
+                <div class="text-primary small fw-bold">฿{{ rp.price|floatformat:2 }}</div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

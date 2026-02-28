@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}หมวดหมู่สินค้า — อุปกรณ์โรงแรม{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">หมวดหมู่สินค้าอุปกรณ์โรงแรม</h3>
+
+{% if categories %}
+  <div class="row g-3">
+    {% for cat in categories %}
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+        <a href="{% url 'products:product_by_category' cat.slug %}" class="text-decoration-none">
+          <div class="card h-100 shadow-sm border-0 text-center">
+            {% if cat.image %}
+              <img src="{{ cat.image.url }}" class="card-img-top" alt="{{ cat.name }}" style="height:180px; object-fit:cover;">
+            {% else %}
+              <div class="bg-primary-subtle d-flex align-items-center justify-content-center" style="height:180px;">
+                <span class="text-primary fs-1">📦</span>
+              </div>
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title text-dark">{{ cat.name }}</h5>
+              <span class="badge text-bg-secondary">{{ cat.products.count }} สินค้า</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-warning text-center">
+    ยังไม่มีหมวดหมู่ — เพิ่มได้ที่ <a href="/admin/">Django Admin</a>
+  </div>
+{% endif %}
+{% endblock %}

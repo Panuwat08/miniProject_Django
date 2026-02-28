@@ -1,0 +1,298 @@
+{% extends 'products/base.html' %}
+
+{% block content %}
+
+<style>
+    .form-page {
+        max-width: 620px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 28px;
+    }
+
+    .form-header-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #7c3aed, #a78bfa);
+        color: #fff;
+        font-size: 1.3rem;
+        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.15);
+    }
+
+    .form-header-text h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .form-header-text p {
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        margin-top: 2px;
+    }
+
+    .form-card {
+        padding: 32px;
+    }
+
+    .field-group {
+        margin-bottom: 22px;
+    }
+
+    .field-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+
+    .field-label i {
+        font-size: 0.95rem;
+        color: var(--accent-emerald);
+    }
+
+    .field-group input[type="text"],
+    .field-group input[type="number"],
+    .field-group textarea,
+    .field-group select {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all var(--duration-fast) var(--ease-out);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .field-group input:focus,
+    .field-group textarea:focus,
+    .field-group select:focus {
+        border-color: var(--accent-emerald);
+        box-shadow: 0 0 0 3px var(--accent-emerald-glow);
+    }
+
+    .field-group input::placeholder,
+    .field-group textarea::placeholder {
+        color: var(--text-muted);
+    }
+
+    .field-group textarea {
+        resize: vertical;
+        min-height: 90px;
+    }
+
+    .file-upload-area {
+        position: relative;
+        border: 2px dashed rgba(0, 0, 0, 0.1);
+        border-radius: var(--radius-md);
+        padding: 28px;
+        text-align: center;
+        cursor: pointer;
+        transition: all var(--duration-fast) var(--ease-out);
+        background: #fafbfc;
+    }
+
+    .file-upload-area:hover {
+        border-color: var(--accent-emerald);
+        background: var(--accent-emerald-light);
+    }
+
+    .file-upload-area i {
+        font-size: 2rem;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .file-upload-area span {
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+    }
+
+    .file-upload-area input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .image-preview {
+        margin-top: 12px;
+        text-align: center;
+        display: none;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-subtle);
+        object-fit: cover;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .image-preview .preview-label {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-top: 6px;
+    }
+
+    .field-error {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 6px;
+        font-size: 0.82rem;
+        color: var(--accent-rose);
+    }
+
+    .field-help {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 5px;
+    }
+
+    .form-divider {
+        border: none;
+        border-top: 1px solid var(--border-subtle);
+        margin: 28px 0;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+        .form-card {
+            padding: 20px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .form-actions a,
+        .form-actions button {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="form-page">
+    <div class="form-header animate-in">
+        <div class="form-header-icon">
+            <i class="bi bi-pencil-square"></i>
+        </div>
+        <div class="form-header-text">
+            <h1>{{ title }}</h1>
+            <p>กรอกข้อมูลสินค้าด้านล่าง</p>
+        </div>
+    </div>
+
+    <div class="glass-card form-card animate-in animate-delay-1">
+        <form method="post" enctype="multipart/form-data" id="productForm">
+            {% csrf_token %}
+
+            {% for field in form %}
+            <div class="field-group">
+                <label class="field-label">
+                    {% if field.name == 'name' %}
+                    <i class="bi bi-tag"></i>
+                    {% elif field.name == 'description' %}
+                    <i class="bi bi-text-paragraph"></i>
+                    {% elif field.name == 'price' %}
+                    <i class="bi bi-cash-coin"></i>
+                    {% elif field.name == 'stock_qty' %}
+                    <i class="bi bi-boxes"></i>
+                    {% elif field.name == 'image' %}
+                    <i class="bi bi-image"></i>
+                    {% else %}
+                    <i class="bi bi-circle"></i>
+                    {% endif %}
+                    {{ field.label }}
+                </label>
+
+                {% if field.name == 'image' %}
+                <div class="file-upload-area" id="dropArea">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                    <span>คลิกหรือลากไฟล์มาวางที่นี่</span>
+                    {{ field }}
+                </div>
+                <div class="image-preview" id="imagePreview">
+                    <img id="previewImg" src="#" alt="Preview">
+                    <div class="preview-label">ตัวอย่างรูปภาพ</div>
+                </div>
+                {% else %}
+                {{ field }}
+                {% endif %}
+
+                {% if field.help_text %}
+                <div class="field-help">{{ field.help_text }}</div>
+                {% endif %}
+
+                {% for error in field.errors %}
+                <div class="field-error">
+                    <i class="bi bi-exclamation-circle"></i>
+                    {{ error }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <hr class="form-divider">
+
+            <div class="form-actions">
+                <a href="{% url 'product_list' %}" class="btn-secondary-outline">
+                    <i class="bi bi-arrow-left"></i> ยกเลิก
+                </a>
+                <button type="submit" class="btn-primary-glow">
+                    <i class="bi bi-check-lg"></i> บันทึกข้อมูล
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const fileInput = document.querySelector('#dropArea input[type="file"]');
+        const preview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        previewImg.src = ev.target.result;
+                        preview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    preview.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock %}

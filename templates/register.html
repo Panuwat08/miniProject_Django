@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>สมัครสมาชิก | ระบบจำหน่ายอุปกรณ์เครื่องใช้โรงแรม</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #4377d8, #000000, #0066ff);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* กล่องสมัคร */
+.register-box {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 45px;
+    width: 380px;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    text-align: center;
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* หัวข้อ */
+.register-box h2 {
+    margin-bottom: 8px;
+    color: #0d3b66;
+    font-weight: 600;
+}
+
+.register-box p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 25px;
+}
+
+/* ช่องกรอก */
+input {
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 15px;
+    border: 1px solid #d0e4ff;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+input:focus {
+    border-color: #1e90ff;
+    outline: none;
+    box-shadow: 0 0 8px rgba(30, 144, 255, 0.4);
+}
+
+/* ปุ่ม */
+button {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, #1e90ff, #005bea);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 91, 234, 0.4);
+}
+
+/* ลิงก์ */
+a {
+    display: block;
+    margin-top: 15px;
+    text-decoration: none;
+    color: #0d3b66;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+a:hover {
+    color: #1e90ff;
+}
+
+/* ข้อความแจ้งเตือน */
+.message {
+    font-size: 13px;
+    margin-bottom: 12px;
+    padding: 8px;
+    border-radius: 6px;
+}
+
+.error {
+    background: #ffe5e5;
+    color: #d00000;
+}
+
+.success {
+    background: #e6f4ff;
+    color: #0077b6;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const usernameInput = document.querySelector("input[name='username']");
+
+    usernameInput.addEventListener("input", function() {
+        this.value = this.value.replace(/[^A-Za-z0-9_]/g, '');
+    });
+
+});
+</script>
+
+</head>
+
+<body>
+
+<div class="register-box">
+    <h2>สมัครสมาชิก</h2>
+    <p>ระบบจำหน่ายอุปกรณ์เครื่องใช้โรงแรม</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <input name="username"
+               placeholder="Username (อังกฤษเท่านั้น)"
+               pattern="[A-Za-z0-9_]+"
+               required>
+
+        <input name="email"
+               type="email"
+               placeholder="Email"
+               required>
+
+        <input name="password1"
+               type="password"
+               placeholder="Password"
+               required>
+
+        <input name="password2"
+               type="password"
+               placeholder="Confirm Password"
+               required>
+
+        <button type="submit">สมัครสมาชิก</button>
+    </form>
+
+    <a href="/login/">เข้าสู่ระบบ</a>
+</div>
+
+</body>
+</html>

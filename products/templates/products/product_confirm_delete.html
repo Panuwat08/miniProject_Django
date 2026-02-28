@@ -1,0 +1,207 @@
+{% extends 'products/base.html' %}
+
+{% block content %}
+
+<style>
+    .delete-page {
+        max-width: 480px;
+        margin: 40px auto;
+    }
+
+    .delete-card {
+        text-align: center;
+        padding: 40px 32px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .warning-circle {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 24px;
+        border-radius: 50%;
+        background: var(--accent-rose-light);
+        border: 2px solid rgba(225, 29, 72, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulseRing 2s ease-in-out infinite;
+    }
+
+    .warning-circle i {
+        font-size: 2rem;
+        color: var(--accent-rose);
+    }
+
+    @keyframes pulseRing {
+
+        0%,
+        100% {
+            box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.12);
+        }
+
+        50% {
+            box-shadow: 0 0 0 16px rgba(225, 29, 72, 0);
+        }
+    }
+
+    .delete-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    .delete-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 28px;
+    }
+
+    .product-preview {
+        background: #f8fafc;
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        text-align: left;
+    }
+
+    .preview-img {
+        width: 64px;
+        height: 64px;
+        border-radius: 12px;
+        overflow: hidden;
+        flex-shrink: 0;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .preview-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .preview-img .no-img {
+        color: var(--text-muted);
+        font-size: 1.4rem;
+    }
+
+    .preview-info .preview-name {
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+    }
+
+    .preview-info .preview-detail {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+    }
+
+    .soft-delete-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        background: var(--accent-sky-light);
+        border: 1px solid rgba(2, 132, 199, 0.1);
+        border-radius: var(--radius-sm);
+        padding: 14px 16px;
+        margin-bottom: 28px;
+        text-align: left;
+    }
+
+    .soft-delete-notice i {
+        color: var(--accent-sky);
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    .soft-delete-notice span {
+        font-size: 0.84rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+
+    .delete-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+
+    @media (max-width: 480px) {
+        .delete-card {
+            padding: 28px 20px;
+        }
+
+        .delete-actions {
+            flex-direction: column;
+        }
+
+        .delete-actions a,
+        .delete-actions button {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .product-preview {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="delete-page">
+    <div class="glass-card delete-card animate-in">
+
+        <div class="warning-circle">
+            <i class="bi bi-trash3"></i>
+        </div>
+
+        <div class="delete-title">ยืนยันการลบสินค้า?</div>
+        <div class="delete-subtitle">สินค้านี้จะถูกซ่อนจากรายการขาย</div>
+
+        <div class="product-preview">
+            <div class="preview-img">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                <span class="no-img"><i class="bi bi-image"></i></span>
+                {% endif %}
+            </div>
+            <div class="preview-info">
+                <div class="preview-name">{{ product.name }}</div>
+                <div class="preview-detail">
+                    ราคา ฿{{ product.price }} • สต็อก {{ product.stock_qty }} ชิ้น
+                </div>
+            </div>
+        </div>
+
+        <div class="soft-delete-notice">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>การลบนี้เป็นเพียงการซ่อนสินค้า (Soft Delete) ข้อมูลจะยังคงอยู่ในระบบ
+                ไม่ส่งผลกระทบต่อประวัติการขาย</span>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="delete-actions">
+                <a href="{% url 'product_list' %}" class="btn-secondary-outline">
+                    <i class="bi bi-arrow-left"></i> ยกเลิก
+                </a>
+                <button type="submit" class="btn-danger-glow">
+                    <i class="bi bi-trash3"></i> ยืนยันการลบ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
