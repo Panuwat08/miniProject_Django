@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}
+รายงานยอดขาย
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="fw-bold mb-4">รายงานยอดขาย</h2>
+
+    <form method="GET">
+
+        <div class="card shadow-sm mb-4">
+
+            <div class="card-body d-flex flex-wrap gap-3 align-items-end">
+
+                <div>
+                    <label class="form-label">ช่วงเวลา</label>
+                    <select class="form-select" name="type">
+                        <option value="daily">รายวัน</option>
+                        <option value="monthly">รายเดือน</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">วันที่เริ่มต้น</label>
+                    <input type="date" name="start_date" class="form-control">
+                </div>
+
+                <div>
+                    <label class="form-label">วันที่สิ้นสุด</label>
+                    <input type="date" name="end_date" class="form-control">
+                </div>
+
+                <div>
+                    <button class="btn btn-primary">
+                        🔍 ค้นหา
+                    </button>
+                </div>
+
+                <!-- ปุ่ม Export -->
+                <div class="ms-auto d-flex gap-2">
+
+                    <a href="/reports/export/excel/?start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}&type={{ request.GET.type }}"
+                        class="btn btn-success">
+                        📊 Export Excel
+                    </a>
+
+                    <a href="/reports/export/pdf/?start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}&type={{ request.GET.type }}"
+                        class="btn btn-danger">
+                        📄 Export PDF
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+</div>
+
+</form>
+
+
+<!-- ===================== -->
+<!-- กราฟยอดขาย -->
+<!-- ===================== -->
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+
+        <h5 class="mb-3">กราฟยอดขาย</h5>
+
+        <canvas id="salesChart"></canvas>
+
+    </div>
+</div>
+
+
+<!-- ===================== -->
+<!-- สินค้าขายดี -->
+<!-- ===================== -->
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+
+        <h5 class="mb-3">สินค้าขายดี</h5>
+
+        <table class="table table-striped table-bordered">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>ลำดับ</th>
+                    <th>สินค้า</th>
+                    <th>จำนวนที่ขาย</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for p in top_products %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ p.product__name }}</td>
+                    <td>{{ p.total_qty }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">ไม่มีข้อมูล</td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
+
+
+<!-- ===================== -->
+<!-- ตารางยอดขาย -->
+<!-- ===================== -->
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <h5 class="mb-3">ตารางยอดขาย</h5>
+
+        <table class="table table-striped table-bordered">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>ช่วงเวลา</th>
+                    <th>ยอดขาย</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for s in sales %}
+                <tr>
+                    <td>{{ s.period }}</td>
+                    <td>{{ s.total_sales }} บาท</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center">ไม่มีข้อมูล</td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+    const labels = {{ labels| safe }};
+    const data = {{ data| safe }};
+
+    const ctx = document.getElementById('salesChart');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'ยอดขาย',
+                data: data,
+                backgroundColor: '#6366f1'
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+</script>
+
+{% endblock %}

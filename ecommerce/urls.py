@@ -11,6 +11,9 @@ urlpatterns = [
 
     # orders: /checkout /order/...
     path("", include("orders.urls")),
+
+    # report
+    path('reports/', include('reports.urls')),
 ]
 
 if settings.DEBUG:

@@ -18,8 +18,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    "products",
+    "accounts",
     "shop",
     "orders",
+    "reports",
 ]
 
 MIDDLEWARE = [
@@ -56,7 +59,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": os.getenv("DB_NAME", "ecommerce_db"),
         "USER": os.getenv("DB_USER", "root"),
-        "PASSWORD": os.getenv("DB_PASSWORD", ""),
+        "PASSWORD": os.getenv("DB_PASSWORD", "12345678"),
         "HOST": os.getenv("DB_HOST", "127.0.0.1"),
         "PORT": os.getenv("DB_PORT", "3306"),
         "OPTIONS": {"charset": "utf8mb4"},
