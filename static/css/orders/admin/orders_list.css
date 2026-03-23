@@ -1,0 +1,157 @@
+﻿.orders-hero {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    color: white;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .orders-hero .hero-subtitle {
+    color: rgba(255, 255, 255, 0.84);
+  }
+
+  .summary-card {
+    background: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 1.25rem;
+    height: 100%;
+  }
+
+  .summary-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .orders-panel {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+  }
+
+  .orders-toolbar {
+    padding: 1.5rem 1.5rem 0;
+  }
+
+  .orders-search {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+  }
+
+  .orders-search .input-group-text,
+  .orders-search .form-control {
+    border: none;
+    background: #f8fafc;
+  }
+
+  .orders-search .form-control:focus {
+    box-shadow: none;
+    background: white;
+  }
+
+  .orders-table {
+    min-width: 1120px;
+  }
+
+  .orders-table thead th {
+    white-space: nowrap;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.86rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .orders-table tbody td {
+    white-space: nowrap;
+    vertical-align: middle;
+    border-color: #eef2f7;
+  }
+
+  .order-id {
+    font-weight: 700;
+    color: #243b6b;
+  }
+
+  .soft-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.42rem 0.72rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .chip-pending {
+    background: #fff7e6;
+    color: #b7791f;
+  }
+
+  .chip-paid {
+    background: #ecfdf3;
+    color: #1f7a45;
+  }
+
+  .chip-rejected {
+    background: #fff1f2;
+    color: #be123c;
+  }
+
+  .chip-neutral {
+    background: #eef2f7;
+    color: #475569;
+  }
+
+  .stack-line {
+    line-height: 1.35;
+  }
+
+  .stack-line .subtle {
+    color: #64748b;
+    font-size: 0.82rem;
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .empty-state {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: #64748b;
+  }
+
+  @media (max-width: 991.98px) {
+    .orders-table {
+      min-width: 980px;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .orders-hero,
+    .orders-toolbar {
+      padding: 1.25rem;
+    }
+
+    .orders-table {
+      min-width: 860px;
+    }
+
+    .action-buttons {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+  }
+

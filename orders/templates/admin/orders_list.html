@@ -1,138 +1,365 @@
-{% extends "base.html" %}
-{% block title %}Admin Orders{% endblock %}
+﻿{% extends "base.html" %}
+{% load static %}
+{% block title %}จัดการคำสั่งซื้อ{% endblock %}
 
-{% block content %}
+{% block extra_head %}
 <style>
-  /* กันล้นจอแบบชัวร์ */
-  .page-wrap {
-    max-width: 100%;
+.orders-hero {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    color: white;
+    box-shadow: var(--shadow-soft);
   }
 
-  .table-responsive {
-    overflow-x: auto;
+  .orders-hero .hero-subtitle {
+    color: rgba(255, 255, 255, 0.84);
   }
 
-  #ordersTable {
-    min-width: 900px;
+  .summary-card {
+    background: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 1.25rem;
+    height: 100%;
   }
 
-  /* ถ้าจอแคบให้เลื่อนแทนล้น */
-  td,
-  th {
+  .summary-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .orders-panel {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+  }
+
+  .orders-toolbar {
+    padding: 1.5rem 1.5rem 0;
+  }
+
+  .orders-search {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+  }
+
+  .orders-search .input-group-text,
+  .orders-search .form-control {
+    border: none;
+    background: #f8fafc;
+  }
+
+  .orders-search .form-control:focus {
+    box-shadow: none;
+    background: white;
+  }
+
+  .orders-table {
+    min-width: 1120px;
+  }
+
+  .orders-table thead th {
     white-space: nowrap;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.86rem;
+    border-bottom: 1px solid #e2e8f0;
   }
 
-  /* กันคำยาวดันตาราง */
+  .orders-table tbody td {
+    white-space: nowrap;
+    vertical-align: middle;
+    border-color: #eef2f7;
+  }
+
+  .order-id {
+    font-weight: 700;
+    color: #243b6b;
+  }
+
+  .soft-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.42rem 0.72rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  .chip-pending {
+    background: #fff7e6;
+    color: #b7791f;
+  }
+
+  .chip-paid {
+    background: #ecfdf3;
+    color: #1f7a45;
+  }
+
+  .chip-rejected {
+    background: #fff1f2;
+    color: #be123c;
+  }
+
+  .chip-neutral {
+    background: #eef2f7;
+    color: #475569;
+  }
+
+  .stack-line {
+    line-height: 1.35;
+  }
+
+  .stack-line .subtle {
+    color: #64748b;
+    font-size: 0.82rem;
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .empty-state {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: #64748b;
+  }
+
+  @media (max-width: 991.98px) {
+    .orders-table {
+      min-width: 980px;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .orders-hero,
+    .orders-toolbar {
+      padding: 1.25rem;
+    }
+
+    .orders-table {
+      min-width: 860px;
+    }
+
+    .action-buttons {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+  }
+
+
 </style>
+{% endblock %}
 
-<div class="page-wrap">
-  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-    <div>
-      <h3 class="mb-0">Admin Panel: รายการคำสั่งซื้อ</h3>
-      <div class="text-muted">ตรวจสอบสถานะและสลิปการโอนเงิน</div>
+{% block content %}<div class="d-flex flex-column gap-4">
+  <section class="orders-hero">
+    <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+      <div>
+        <div class="text-uppercase small fw-semibold opacity-75 mb-2">Admin Panel</div>
+        <h1 class="h3 mb-2">จัดการคำสั่งซื้อ</h1>
+        <div class="hero-subtitle">
+          ตรวจสอบข้อมูลคำสั่งซื้อ อนุมัติหรือปฏิเสธรายการ และติดตามสถานะการสั่งซื้อสินค้าโรงแรม
+        </div>
+      </div>
     </div>
-    <div class="d-flex gap-2">
-      <a class="btn btn-outline-secondary" href="/admin/">Django Admin</a>
-      <a class="btn btn-outline-primary" href="/">กลับหน้าเว็บ</a>
-    </div>
-  </div>
+  </section>
 
-  <div class="card shadow-sm border-0">
-    <div class="card-body pb-0">
-      <div class="row g-2 align-items-center">
+  <section class="row g-3">
+    <div class="col-md-6 col-xl">
+      <div class="summary-card">
+        <div class="summary-icon gradient-primary">
+          <i class="bi bi-receipt"></i>
+        </div>
+        <div class="text-muted small mb-1">คำสั่งซื้อทั้งหมด</div>
+        <div class="h4 mb-0">{{ summary.total_orders|default:0 }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl">
+      <div class="summary-card">
+        <div class="summary-icon gradient-warning">
+          <i class="bi bi-hourglass-split"></i>
+        </div>
+        <div class="text-muted small mb-1">รอตรวจสอบ</div>
+        <div class="h4 mb-0">{{ summary.pending_orders|default:0 }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl">
+      <div class="summary-card">
+        <div class="summary-icon gradient-success">
+          <i class="bi bi-patch-check"></i>
+        </div>
+        <div class="text-muted small mb-1">อนุมัติแล้ว</div>
+        <div class="h4 mb-0">{{ summary.paid_orders|default:0 }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl">
+      <div class="summary-card">
+        <div class="summary-icon gradient-danger">
+          <i class="bi bi-image-alt"></i>
+        </div>
+        <div class="text-muted small mb-1">QR รอตรวจสลิป</div>
+        <div class="h4 mb-0">{{ summary.slip_waiting|default:0 }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl">
+      <div class="summary-card">
+        <div class="summary-icon gradient-primary">
+          <i class="bi bi-truck"></i>
+        </div>
+        <div class="text-muted small mb-1">COD รอตรวจข้อมูล</div>
+        <div class="h4 mb-0">{{ summary.cod_waiting|default:0 }}</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="orders-panel">
+    <div class="orders-toolbar">
+      <div class="row g-3 align-items-center">
         <div class="col-lg-6">
-          <div class="fw-semibold">สรุป</div>
-          <div class="small text-muted">ทั้งหมด {{ orders|length }} รายการ</div>
+          <div class="fw-semibold fs-5">รายการคำสั่งซื้อ</div>
+          <div class="text-muted small">รวม {{ summary.total_orders|default:0 }} รายการ สามารถค้นหาจากรหัสออเดอร์ ชื่อลูกค้า หรือเบอร์โทรได้</div>
         </div>
         <div class="col-lg-6">
-          <div class="input-group">
-            <span class="input-group-text">ค้นหา</span>
-            <input id="orderSearch" type="text" class="form-control" placeholder="ค้นหา ID หรือ Username...">
+          <div class="input-group orders-search">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input id="orderSearch" type="text" class="form-control" placeholder="ค้นหา Order ID, Username, ชื่อลูกค้า หรือเบอร์โทร">
           </div>
         </div>
       </div>
-      <hr class="my-3">
+      <hr class="my-4">
     </div>
 
+    {% if orders %}
     <div class="table-responsive">
-      <table class="table align-middle mb-0" id="ordersTable">
-        <thead class="table-light">
+      <table class="table align-middle mb-0 orders-table" id="ordersTable">
+        <thead>
           <tr>
-            <th style="width:90px;">ID</th>
-            <th>User</th>
-            <th>Status</th>
-            <th class="text-end">Total</th>
-            <th>Slip</th>
-            <th class="text-end" style="width:180px;">Action</th>
+            <th>Order</th>
+            <th>ลูกค้า</th>
+            <th>สถานะ</th>
+            <th>การชำระเงิน</th>
+            <th>จัดส่ง</th>
+            <th class="text-end">ยอดรวม</th>
+            <th>วันที่สร้าง</th>
+            <th class="text-end">จัดการ</th>
           </tr>
         </thead>
-
         <tbody>
           {% for o in orders %}
           <tr>
-            <td class="fw-semibold">#{{ o.id }}</td>
-
             <td>
-              <div class="fw-semibold text-truncate" style="max-width: 220px;">{{ o.user.username }}</div>
-              <div class="small text-muted">user id: {{ o.user.id }}</div>
+              <div class="order-id">{{ o.order_code }}</div>
+              <div class="text-muted small">Order ID {{ o.id }}</div>
             </td>
-
             <td>
-              <span class="badge text-bg-light border">{{ o.status }}</span>
+              <div class="stack-line">
+                <div class="fw-semibold">{{ o.user.username }}</div>
+                <div class="subtle">{{ o.shipping.full_name }}</div>
+                <div class="subtle">{{ o.shipping.phone }}</div>
+              </div>
             </td>
-
-            <td class="text-end fw-bold">{{ o.total }} ฿</td>
-
             <td>
-              {% if o.slip %}
-              <span class="badge
-                  {% if o.slip.approved == None %} text-bg-warning
-                  {% elif o.slip.approved %} text-bg-success
-                  {% else %} text-bg-danger
-                  {% endif %}
-                ">
-                {% if o.slip.approved == None %} รอตรวจ
-                {% elif o.slip.approved %} ผ่าน
-                {% else %} ไม่ผ่าน
-                {% endif %}
-              </span>
+              {% if o.status == OrderStatus.PENDING %}
+              <span class="soft-chip chip-pending"><i class="bi bi-hourglass-split"></i> {{ o.status_label }}</span>
+              {% elif o.status == OrderStatus.PAID or o.status == OrderStatus.SHIPPED or o.status == OrderStatus.COMPLETED %}
+              <span class="soft-chip chip-paid"><i class="bi bi-patch-check"></i> {{ o.status_label }}</span>
+              {% elif o.status == OrderStatus.REJECTED or o.status == OrderStatus.CANCELLED %}
+              <span class="soft-chip chip-rejected"><i class="bi bi-x-circle"></i> {{ o.status_label }}</span>
               {% else %}
-              <span class="text-muted">-</span>
+              <span class="soft-chip chip-neutral"><i class="bi bi-dot"></i> {{ o.status_label }}</span>
               {% endif %}
             </td>
-
+            <td>
+              <div class="stack-line">
+                <div class="fw-semibold">{{ o.get_payment_method_display }}</div>
+                <div class="subtle">
+                  {% if o.payment_method == PaymentMethod.COD %}
+                    {% if o.status == OrderStatus.PAID or o.status == OrderStatus.SHIPPED or o.status == OrderStatus.COMPLETED %}
+                    ตรวจข้อมูลแล้ว
+                    {% elif o.status == OrderStatus.CANCELLED %}
+                    ไม่ผ่านการตรวจสอบข้อมูล
+                    {% else %}
+                    รอตรวจข้อมูลคำสั่งซื้อ
+                    {% endif %}
+                  {% else %}
+                    {% if o.slip %}
+                      {% if o.slip.approved == None %}
+                      รอตรวจสลิป
+                      {% elif o.slip.approved %}
+                      สลิปผ่านแล้ว
+                      {% else %}
+                      สลิปไม่ผ่าน
+                      {% endif %}
+                    {% else %}
+                    ยังไม่มีสลิป
+                    {% endif %}
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="stack-line">
+                <div class="fw-semibold">{{ o.shipping.full_name }}</div>
+                <div class="subtle text-truncate" style="max-width: 220px;">{{ o.shipping.address_line }}</div>
+              </div>
+            </td>
+            <td class="text-end fw-bold">{{ o.total }} บาท</td>
+            <td>
+              <div class="small fw-semibold">{{ o.created_at|date:"d/m/Y" }}</div>
+              <div class="text-muted small">{{ o.created_at|date:"H:i" }} น.</div>
+            </td>
             <td class="text-end">
-              <div class="d-flex gap-1 justify-content-end">
-                <a class="btn btn-outline-primary btn-sm" href="{% url 'admin_check_slip' o.id %}">
-                  ตรวจสลิป / อัปเดต
+              <div class="action-buttons">
+                <a class="btn btn-outline-primary btn-sm rounded-3" href="{% url 'admin_check_slip' o.id %}">
+                  <i class="bi bi-search me-1"></i>
+                  {% if o.status == OrderStatus.PENDING %}
+                    {% if o.payment_method == PaymentMethod.COD %}ตรวจข้อมูล{% else %}ตรวจสลิป{% endif %}
+                  {% else %}
+                    ดูข้อมูล
+                  {% endif %}
                 </a>
                 <form method="post" action="{% url 'admin_delete_order' o.id %}" class="d-inline"
-                  onsubmit="return confirm('ยืนยันลบคำสั่งซื้อ #{{ o.id }}? (สต็อกจะถูกคืนกลับ)');">
+                  data-swal-confirm="true"
+                  data-swal-title="ลบคำสั่งซื้อ {{ o.order_code }}?"
+                  data-swal-text="หากออเดอร์นี้เคยอนุมัติแล้ว ระบบจะคืนสต็อกให้อัตโนมัติ"
+                  data-swal-confirm-text="ลบคำสั่งซื้อ"
+                  data-swal-cancel-text="ยกเลิก"
+                  data-swal-icon="warning"
+                  data-swal-confirm-color="#dc3545">
                   {% csrf_token %}
-                  <button type="submit" class="btn btn-outline-danger btn-sm">
-                    <i class="bi bi-trash"></i> ลบ
+                  <button type="submit" class="btn btn-outline-danger btn-sm rounded-3">
+                    <i class="bi bi-trash me-1"></i> ลบ
                   </button>
                 </form>
               </div>
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="6" class="text-center text-muted py-4">
-              ยังไม่มีคำสั่งซื้อในระบบ
             </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
-
-    <div class="card-footer bg-white border-0">
-      <div class="small text-muted">
-        * แนะนำ: ตรวจสลิปที่สถานะ “รอตรวจ” ก่อน
-      </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="fs-1 mb-2"><i class="bi bi-inbox"></i></div>
+      <div class="fw-semibold mb-1">ยังไม่มีคำสั่งซื้อในระบบ</div>
+      <div class="small">เมื่อมีการสั่งซื้อจากลูกค้า รายการจะแสดงในหน้านี้เพื่อให้ผู้ดูแลระบบตรวจสอบและอนุมัติ</div>
     </div>
-  </div>
+    {% endif %}
+  </section>
 </div>
 
 <script>
@@ -152,3 +379,6 @@
   })();
 </script>
 {% endblock %}
+
+
+

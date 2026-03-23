@@ -1,0 +1,47 @@
+﻿.review-hero {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    color: white;
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 1.5rem;
+  }
+
+  .review-hero .subtitle {
+    color: rgba(255, 255, 255, 0.84);
+  }
+
+  .review-panel {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .review-head {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #eef2f7;
+    background: #fbfdff;
+  }
+
+  .review-body {
+    padding: 1.5rem;
+  }
+
+  .info-card {
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  .slip-image {
+    max-width: 100%;
+    max-height: 520px;
+    border-radius: 18px;
+    box-shadow: var(--shadow-soft);
+    object-fit: contain;
+  }
+

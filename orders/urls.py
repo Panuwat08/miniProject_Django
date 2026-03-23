@@ -5,8 +5,11 @@ from . import admin_views
 urlpatterns = [
     path("checkout/", views.checkout, name="checkout"),
     path("order/<int:order_id>/", views.order_detail, name="order_detail"),
+    path("order/<int:order_id>/receipt/", views.order_receipt, name="order_receipt"),
+    path("order/<int:order_id>/receipt/download/", views.download_receipt, name="download_receipt"),
     path("order/<int:order_id>/slip/", views.upload_slip, name="upload_slip"),
     path("order/<int:order_id>/slip/remove/", views.remove_slip, name="remove_slip"),
+    path("orders/", views.orders_list, name="orders_list"),
 
     path("admin-panel/orders/", admin_views.admin_orders, name="admin_orders"),
     path("admin-panel/orders/<int:order_id>/check-slip/", admin_views.admin_check_slip, name="admin_check_slip"),

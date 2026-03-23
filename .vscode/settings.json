@@ -2,5 +2,11 @@
     "[html]": {
         "editor.formatOnSave": false,
         "editor.defaultFormatter": null
+    },
+    "chat.tools.terminal.autoApprove": {
+        "/^python manage\\.py check$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
     }
 }

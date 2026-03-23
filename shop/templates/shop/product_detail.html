@@ -1,65 +1,198 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
+{% load static %}
 {% block title %}{{ product.name }}{% endblock %}
 
-{% block content %}
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/">หน้าแรก</a></li>
+{% block extra_head %}
+<style>
+.detail-breadcrumb {
+    background: white;
+    border-radius: 999px;
+    box-shadow: var(--shadow-soft);
+    padding: 0.85rem 1.15rem;
+    margin-bottom: 1rem;
+  }
+
+  .detail-shell {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+  }
+
+  .detail-cover-wrap {
+    background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
+    height: 100%;
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .detail-cover {
+    width: 100%;
+    max-height: 460px;
+    object-fit: cover;
+    border-radius: 24px;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .detail-placeholder {
+    color: #94a3b8;
+    text-align: center;
+  }
+
+  .category-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.38rem 0.75rem;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .price-block {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    color: #157347;
+    font-weight: 800;
+    font-size: 2rem;
+  }
+
+  .stock-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 700;
+  }
+
+  .stock-ok {
+    background: #ecfdf3;
+    color: #157347;
+  }
+
+  .stock-out {
+    background: #fff1f2;
+    color: #be123c;
+  }
+
+  .info-card {
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+  }
+
+  .action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .cart-btn {
+    background: var(--primary-gradient);
+    color: white !important;
+    border: none;
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.24);
+  }
+
+  .cart-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3);
+  }
+
+
+</style>
+{% endblock %}
+
+{% block content %}<nav class="detail-breadcrumb" aria-label="breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">สินค้า</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
   </ol>
 </nav>
 
-<div class="card shadow-sm border-0">
-  <div class="card-body p-4">
-    <div class="row">
-      <!-- Product Image -->
-      <div class="col-md-5 mb-4 mb-md-0">
+<section class="detail-shell">
+  <div class="row g-0">
+    <div class="col-lg-5">
+      <div class="detail-cover-wrap">
         {% if product.image %}
-          <img src="{{ product.image.url }}" class="img-fluid rounded shadow-sm w-100" alt="{{ product.name }}">
+        <img src="{{ product.image.url }}" class="detail-cover" alt="{{ product.name }}">
         {% else %}
-          <div class="bg-secondary-subtle d-flex align-items-center justify-content-center rounded" style="height: 400px;">
-            <span class="text-muted fs-4">No Image</span>
-          </div>
-        {% endif %}
-      </div>
-
-      <!-- Product Details -->
-      <div class="col-md-7">
-        <h1 class="fw-bold mb-2">{{ product.name }}</h1>
-        <div class="fs-3 fw-bold text-primary mb-3">{{ product.price }} ฿</div>
-        
-        <p class="text-muted mb-4">
-            รายละเอียดสินค้า... (สามารถเพิ่ม Field Description ใน Model ได้ในอนาคต)
-        </p>
-
-        <div class="mb-4">
-            {% if product.stock > 0 %}
-                <span class="badge bg-success">มีสินค้า {{ product.stock }} ชิ้น</span>
-            {% else %}
-                <span class="badge bg-danger">สินค้าหมด</span>
-            {% endif %}
+        <div class="detail-placeholder">
+          <div class="fs-1 mb-2"><i class="bi bi-image"></i></div>
+          <div class="fw-semibold">ไม่มีรูปสินค้า</div>
         </div>
-
-        <hr>
-
-        {% if product.stock > 0 %}
-        <form action="{% url 'cart_add' product.id %}" method="get" class="d-flex align-items-center gap-3">
-             <!-- Note: using GET for simplicity as cart_add currently expects just ID, 
-                  but ideally we should update cart_add to handle POST with qty. 
-                  For now, we link directly like product_list but visually represented here. -->
-             <!-- Actually cart_add logic in views.py adds 1 by default. 
-                  To support Qty selector, we would need to update views.py.
-                  For scope of "Detail Page", I will stick to "Add to Cart" button similar to list.
-             -->
-            <a href="{% url 'cart_add' product.id %}" class="btn btn-primary btn-lg px-4">
-                <i class="bi bi-cart-plus"></i> เพิ่มลงตะกร้า
-            </a>
-        </form>
-        {% else %}
-            <button class="btn btn-secondary btn-lg" disabled>สินค้าหมด</button>
         {% endif %}
       </div>
     </div>
+
+    <div class="col-lg-7">
+      <div class="p-4 p-xl-5">
+        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+          <span class="category-chip">{{ product.category.name|default:"ทั่วไป" }}</span>
+          {% if product.stock > 0 %}
+          <span class="stock-pill stock-ok"><i class="bi bi-check-circle"></i> พร้อมขาย {{ product.stock }} ชิ้น</span>
+          {% else %}
+          <span class="stock-pill stock-out"><i class="bi bi-x-circle"></i> สินค้าหมด</span>
+          {% endif %}
+        </div>
+
+        <h1 class="display-6 fw-bold mb-3">{{ product.name }}</h1>
+
+        <div class="price-block mb-4">
+          <span>{{ product.price|floatformat:2 }}</span>
+          <small class="text-muted fs-6 fw-semibold">บาท</small>
+        </div>
+
+        <div class="info-card mb-4">
+          <div class="small text-muted mb-2">รายละเอียดสินค้า</div>
+          <div class="mb-0 text-secondary">
+            {{ product.description|default:"สินค้าสำหรับใช้งานในโรงแรม เลือกซื้อได้ตามความต้องการของหน่วยงานหรือแผนกที่เกี่ยวข้อง" }}
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="info-card h-100">
+              <div class="small text-muted mb-2">หมวดหมู่</div>
+              <div class="fw-semibold">{{ product.category.name|default:"ทั่วไป" }}</div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="info-card h-100">
+              <div class="small text-muted mb-2">สต็อกคงเหลือ</div>
+              <div class="fw-semibold">{{ product.stock }} ชิ้น</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <a href="{% url 'home' %}" class="btn btn-light border rounded-3 px-4 py-2">
+            <i class="bi bi-arrow-left me-1"></i> กลับไปหน้าสินค้า
+          </a>
+          {% if product.stock > 0 %}
+          <a href="{% url 'cart_add' product.id %}" class="btn cart-btn rounded-3 px-4 py-2 fw-bold">
+            <i class="bi bi-cart-plus me-1"></i> เพิ่มลงตะกร้า
+          </a>
+          {% else %}
+          <button class="btn btn-light border rounded-3 px-4 py-2 text-muted" disabled>
+            <i class="bi bi-cart-x me-1"></i> สินค้าหมด
+          </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+</section>
 {% endblock %}
+
+
+

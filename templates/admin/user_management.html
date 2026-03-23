@@ -1,0 +1,321 @@
+﻿{% extends "base.html" %}
+{% block title %}จัดการผู้ใช้{% endblock %}
+
+{% block content %}
+<style>
+  .users-hero {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    color: white;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .users-hero .subtitle {
+    color: rgba(255, 255, 255, 0.84);
+  }
+
+  .summary-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 1.25rem;
+    height: 100%;
+  }
+
+  .summary-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .create-panel,
+  .users-panel {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+  }
+
+  .create-panel {
+    padding: 1.5rem;
+  }
+
+  .users-toolbar {
+    padding: 1.5rem;
+    border-bottom: 1px solid #eef2f7;
+    background: #fbfdff;
+  }
+
+  .search-input,
+  .role-select {
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 0.85rem 1rem;
+    background: #f8fafc;
+  }
+
+  .search-input:focus,
+  .role-select:focus {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+    border-color: #667eea;
+    background: white;
+  }
+
+  .users-table {
+    min-width: 1120px;
+  }
+
+  .users-table thead th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .users-table tbody td {
+    vertical-align: middle;
+    border-color: #eef2f7;
+  }
+
+  .role-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.42rem 0.72rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .role-customer {
+    background: #eef2ff;
+    color: #4f46e5;
+  }
+
+  .role-staff {
+    background: #fff7e6;
+    color: #b7791f;
+  }
+
+  .role-admin {
+    background: #fff1f2;
+    color: #be123c;
+  }
+
+  .status-active {
+    color: #157347;
+    font-weight: 700;
+  }
+
+  .status-inactive {
+    color: #be123c;
+    font-weight: 700;
+  }
+
+  .empty-state {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: #64748b;
+  }
+</style>
+
+<div class="d-flex flex-column gap-4">
+  <section class="users-hero">
+    <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+      <div>
+        <h1 class="h3 mb-2">จัดการผู้ใช้</h1>
+        <div class="subtitle">ดูรายชื่อผู้ใช้ ค้นหา ปรับบทบาท และเปิดหรือปิดการใช้งานบัญชีจากหน้านี้ได้เลย</div>
+      </div>
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-light rounded-3 px-4 py-2 fw-semibold">
+        <i class="bi bi-arrow-left me-1"></i> กลับ Dashboard
+      </a>
+    </div>
+  </section>
+
+  <section class="row g-3">
+    <div class="col-md-6 col-xl">
+      <div class="summary-card">
+        <div class="summary-icon gradient-primary"><i class="bi bi-people"></i></div>
+        <div class="text-muted small mb-1">ผู้ใช้ทั้งหมด</div>
+        <div class="h4 mb-0">{{ summary.total_users }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl">
+      <div class="summary-card">
+        <div class="summary-icon gradient-success"><i class="bi bi-person-check"></i></div>
+        <div class="text-muted small mb-1">ใช้งานอยู่</div>
+        <div class="h4 mb-0">{{ summary.active_users }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl">
+      <div class="summary-card">
+        <div class="summary-icon gradient-primary"><i class="bi bi-building"></i></div>
+        <div class="text-muted small mb-1">ลูกค้า</div>
+        <div class="h4 mb-0">{{ summary.customers }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl">
+      <div class="summary-card">
+        <div class="summary-icon gradient-warning"><i class="bi bi-person-workspace"></i></div>
+        <div class="text-muted small mb-1">พนักงาน</div>
+        <div class="h4 mb-0">{{ summary.staffs }}</div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl">
+      <div class="summary-card">
+        <div class="summary-icon gradient-danger"><i class="bi bi-shield-lock"></i></div>
+        <div class="text-muted small mb-1">ผู้ดูแลระบบ</div>
+        <div class="h4 mb-0">{{ summary.admins }}</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="create-panel">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+      <div>
+        <div class="fw-bold fs-5">เพิ่มผู้ใช้ใหม่</div>
+        <div class="text-muted small">สร้างบัญชีใหม่จากหน้านี้ได้ทันที และกำหนดบทบาทเริ่มต้นได้เลย</div>
+      </div>
+    </div>
+    <form method="post" action="{% url 'create_user_account' %}" class="row g-3">
+      {% csrf_token %}
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Username</label>
+        <input type="text" name="username" class="form-control search-input" placeholder="username" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Email</label>
+        <input type="email" name="email" class="form-control search-input" placeholder="email@example.com" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Password</label>
+        <input type="text" name="password" class="form-control search-input" placeholder="อย่างน้อย 6 ตัว" required>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">บทบาท</label>
+        <select name="role" class="form-select role-select">
+          {% for value, label in role_choices %}
+          {% if not user.profile.is_staff_member or value != 'ADMIN' %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">เบอร์โทร</label>
+        <input type="text" name="phone" class="form-control search-input" placeholder="08x-xxx-xxxx">
+      </div>
+      <div class="col-md-4 ms-md-auto d-flex align-items-end">
+        <button type="submit" class="btn btn-gradient w-100 py-3">เพิ่มผู้ใช้</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="users-panel">
+    <div class="users-toolbar">
+      <form method="get" class="row g-3">
+        <div class="col-lg-8">
+          <input type="text" class="form-control search-input" name="q" value="{{ query }}"
+            placeholder="ค้นหาจาก username, email, ชื่อบริษัท หรือเบอร์โทร">
+        </div>
+        <div class="col-lg-3">
+          <select class="form-select role-select" name="role">
+            <option value="">ทุกบทบาท</option>
+            {% for value, label in role_choices %}
+            <option value="{{ value }}" {% if role_filter == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-lg-1">
+          <button type="submit" class="btn btn-gradient w-100 h-100">ค้นหา</button>
+        </div>
+      </form>
+    </div>
+
+    {% if users %}
+    <div class="table-responsive">
+      <table class="table align-middle mb-0 users-table">
+        <thead>
+          <tr>
+            <th>ผู้ใช้</th>
+            <th>ติดต่อ</th>
+            <th>บทบาท</th>
+            <th>สถานะบัญชี</th>
+            <th>วันที่สมัคร</th>
+            <th class="text-end">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for member in users %}
+          <tr>
+            <td>
+              <div class="fw-semibold">{{ member.username }}</div>
+              <div class="text-muted small">{{ member.profile.company_name|default:"-" }}</div>
+            </td>
+            <td>
+              <div>{{ member.email|default:"-" }}</div>
+              <div class="text-muted small">{{ member.profile.phone|default:"-" }}</div>
+            </td>
+            <td>
+              <span class="role-pill {% if member.profile.role == 'ADMIN' %}role-admin{% elif member.profile.role == 'STAFF' %}role-staff{% else %}role-customer{% endif %}">
+                {{ member.profile.get_role_display }}
+              </span>
+            </td>
+            <td>
+              {% if member.is_active %}
+              <span class="status-active"><i class="bi bi-check-circle-fill me-1"></i>ใช้งานอยู่</span>
+              {% else %}
+              <span class="status-inactive"><i class="bi bi-slash-circle-fill me-1"></i>ปิดการใช้งาน</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="fw-semibold">{{ member.date_joined|date:"d/m/Y" }}</div>
+              <div class="text-muted small">{{ member.date_joined|date:"H:i" }} น.</div>
+            </td>
+            <td class="text-end">
+              <div class="d-flex justify-content-end flex-wrap gap-2">
+                <form method="post" action="{% url 'update_user_role' member.id %}" class="d-flex gap-2">
+                  {% csrf_token %}
+                  <select class="form-select form-select-sm" name="role"
+                    {% if member == user and not user.profile.is_admin %}disabled{% endif %}
+                    {% if user.profile.is_staff_member and member.profile.role == 'ADMIN' %}disabled{% endif %}>
+                    {% for value, label in role_choices %}
+                    {% if not user.profile.is_staff_member or value != 'ADMIN' %}
+                    <option value="{{ value }}" {% if member.profile.role == value %}selected{% endif %}>{{ label }}</option>
+                    {% endif %}
+                    {% endfor %}
+                  </select>
+                  <button type="submit" class="btn btn-outline-primary btn-sm">บันทึก</button>
+                </form>
+                <form method="post" action="{% url 'toggle_user_active' member.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm {% if member.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}"
+                    {% if member == user or user.profile.is_staff_member and member.profile.role == 'ADMIN' %}disabled{% endif %}>
+                    {% if member.is_active %}ปิดใช้งาน{% else %}เปิดใช้งาน{% endif %}
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="fs-1 mb-2"><i class="bi bi-people"></i></div>
+      <div class="fw-semibold mb-1">ไม่พบผู้ใช้ที่ตรงกับเงื่อนไข</div>
+      <div class="small">ลองค้นหาด้วย username, email หรือเปลี่ยนตัวกรองบทบาทอีกครั้ง</div>
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

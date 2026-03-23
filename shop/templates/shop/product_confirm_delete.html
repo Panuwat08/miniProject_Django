@@ -72,7 +72,14 @@
            ปุ่มดำเนินการ (Action Buttons)
            ปุ่มยกเลิก + ปุ่มยืนยันลบ
            ========================================== -->
-      <form method="post">
+      <form method="post"
+        data-swal-confirm="true"
+        data-swal-title="ยืนยันการลบสินค้า?"
+        data-swal-text="การลบนี้เป็นการซ่อนสินค้าออกจากหน้าขายสินค้า"
+        data-swal-confirm-text="ยืนยันการลบ"
+        data-swal-cancel-text="ยกเลิก"
+        data-swal-icon="warning"
+        data-swal-confirm-color="#dc3545">
         {% csrf_token %}
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
           <!-- ปุ่มยกเลิก: กลับไปหน้ารายการสินค้า -->

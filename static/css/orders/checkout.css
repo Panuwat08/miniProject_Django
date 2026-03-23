@@ -1,0 +1,165 @@
+﻿.checkout-hero {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    color: white;
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 1.5rem;
+  }
+
+  .checkout-hero .subtitle {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .checkout-panel {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+  }
+
+  .checkout-head {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #eef2f7;
+    background: #fbfdff;
+  }
+
+  .checkout-body {
+    padding: 1.5rem;
+  }
+
+  .field-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 0.45rem;
+  }
+
+  .field-group .input-group-text,
+  .field-group .form-control,
+  .field-group .form-select,
+  .field-group textarea {
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+  }
+
+  .field-group .input-group-text {
+    border-right: none;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .field-group .input-group .form-control {
+    border-left: none;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  .field-group .form-control:focus,
+  .field-group textarea:focus,
+  .field-group .form-select:focus {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+    border-color: #667eea;
+    background: white;
+  }
+
+  .payment-option {
+    display: block;
+    cursor: pointer;
+  }
+
+  .payment-option .payment-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+    background: #fbfdff;
+    transition: var(--transition-smooth);
+  }
+
+  .payment-option:hover .payment-card {
+    border-color: #667eea;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .btn-check:checked + .payment-option .payment-card {
+    border-color: #667eea;
+    background: #eef2ff;
+    box-shadow: 0 10px 24px rgba(102, 126, 234, 0.14);
+  }
+
+  .payment-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    box-shadow: var(--shadow-soft);
+    color: #4f46e5;
+    font-size: 1.4rem;
+  }
+
+  .summary-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    position: sticky;
+    top: 2rem;
+  }
+
+  .summary-head {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .summary-body {
+    padding: 1.5rem;
+  }
+
+  .summary-item {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    background: #fbfdff;
+    border: 1px solid #edf2f7;
+    border-radius: 16px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .summary-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .summary-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .submit-btn {
+    background: var(--primary-gradient);
+    color: white !important;
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.24);
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3);
+  }
+

@@ -1,60 +1,177 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
+{% load static %}
 {% block title %}อัปโหลดสลิป{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-6">
+{% block extra_head %}
+<style>
+.slip-hero {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    color: white;
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 1.5rem;
+  }
 
-      <div class="text-center mb-4">
-        <h2 class="fw-bold">อัปโหลดหลักฐานการโอนเงิน</h2>
-        <p class="text-muted">คำสั่งซื้อ #{{ order.id }}</p>
+  .slip-hero .subtitle {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .slip-panel {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+  }
+
+  .slip-head {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #eef2f7;
+    background: #fbfdff;
+  }
+
+  .slip-body {
+    padding: 1.75rem;
+  }
+
+  .upload-badge {
+    width: 72px;
+    height: 72px;
+    border-radius: 24px;
+    background: #eef2ff;
+    color: #4f46e5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .upload-box {
+    border: 2px dashed #cbd5e1;
+    border-radius: 22px;
+    background: #fbfdff;
+    padding: 1.25rem;
+  }
+
+  .upload-box .form-control {
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 0.9rem 1rem;
+    background: white;
+  }
+
+  .upload-box .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+  }
+
+  .tips-card {
+    background: #eef6ff;
+    border: 1px solid #d9e8ff;
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+    color: #31537c;
+  }
+
+  .preview-card {
+    background: #fbfdff;
+    border: 1px solid #edf2f7;
+    border-radius: 22px;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+    text-align: center;
+  }
+
+  .preview-card img {
+    max-width: 100%;
+    max-height: 320px;
+    object-fit: cover;
+    border-radius: 18px;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .primary-btn {
+    background: var(--primary-gradient);
+    color: white !important;
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.24);
+  }
+
+  .primary-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3);
+  }
+
+
+</style>
+{% endblock %}
+
+{% block content %}<section class="slip-hero">
+  <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+    <div>
+      <div class="small text-uppercase fw-semibold opacity-75 mb-2">Payment Slip</div>
+      <h1 class="h3 mb-2">อัปโหลดสลิปการชำระเงิน</h1>
+      <div class="subtitle">คำสั่งซื้อ {{ order.order_code }} แนบรูปสลิปเพื่อส่งให้ระบบตรวจสอบการชำระเงินผ่าน QR Code</div>
+    </div>
+    <a href="{% url 'order_detail' order.id %}" class="btn btn-light rounded-3 px-4 py-2 fw-semibold">
+      <i class="bi bi-arrow-left me-1"></i> กลับไปหน้าคำสั่งซื้อ
+    </a>
+  </div>
+</section>
+
+<div class="row justify-content-center">
+  <div class="col-xl-7 col-lg-8">
+    <section class="slip-panel">
+      <div class="slip-head">
+        <div class="fw-bold fs-5"><i class="bi bi-cloud-upload me-2 text-primary"></i>แนบรูปสลิป</div>
       </div>
+      <div class="slip-body">
+        <div class="text-center mb-4">
+          <div class="upload-badge mb-3">
+            <i class="bi bi-cloud-arrow-up"></i>
+          </div>
+          <h5 class="fw-bold mb-1">อัปโหลดหลักฐานการชำระเงิน</h5>
+          <p class="text-muted mb-0">รองรับไฟล์รูปภาพ เช่น `.jpg`, `.jpeg`, `.png`</p>
+        </div>
 
-      <div class="card shadow border-0 rounded-4">
-        <div class="card-body p-4 p-md-5">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
 
-          <div class="text-center mb-4">
-            <div
-              class="bg-primary-subtle text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-              style="width: 64px; height: 64px;">
-              <i class="bi bi-cloud-upload fs-2"></i>
-            </div>
-            <h5 class="fw-bold">แนบรูปสลิป</h5>
-            <p class="small text-muted">รองรับไฟล์ .jpg, .png</p>
+          {% if order.slip and order.slip.image %}
+          <div class="preview-card">
+            <div class="fw-semibold mb-3">สลิปที่อัปโหลดล่าสุด</div>
+            <img src="{{ order.slip.image.url }}" alt="Uploaded Slip">
+          </div>
+          {% endif %}
+
+          <div class="upload-box mb-4">
+            <label class="form-label fw-semibold mb-3">เลือกไฟล์รูปภาพ</label>
+            <input class="form-control form-control-lg" type="file" name="slip" accept="image/*" required>
           </div>
 
-          <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-
-            <div class="mb-4">
-              <label class="form-label fw-semibold">เลือกไฟล์รูปภาพ</label>
-              <input class="form-control form-control-lg bg-light border-0" type="file" name="slip" accept="image/*"
-                required>
+          <div class="tips-card mb-4">
+            <div class="fw-semibold mb-1"><i class="bi bi-info-circle me-1"></i> คำแนะนำ</div>
+            <div class="small">
+              กรุณาตรวจสอบให้เห็นยอดเงิน วันที่ เวลา และรายละเอียดการชำระเงินบนสลิปอย่างชัดเจนก่อนอัปโหลด
             </div>
+          </div>
 
-            <div class="alert alert-info border-0 d-flex align-items-center role=" alert">
-              <i class="bi bi-info-circle-fill me-2 fs-5"></i>
-              <div>
-                กรุณาตรวจสอบยอดเงินและวันเวลาในสลิปให้ชัดเจน
-              </div>
-            </div>
-
-            <div class="d-grid gap-2 mt-4">
-              <button class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm" type="submit">
-                <i class="bi bi-send-fill me-2"></i>ยืนยันการอัปโหลด
-              </button>
-              <a href="{% url 'order_detail' order.id %}"
-                class="btn btn-light btn-lg rounded-pill fw-semibold text-secondary">
-                ยกเลิก / กลับไปหน้าคำสั่งซื้อ
-              </a>
-            </div>
-          </form>
-
-        </div>
+          <div class="d-grid gap-2">
+            <button class="btn primary-btn py-3 fw-bold" type="submit">
+              <i class="bi bi-send-fill me-1"></i> ยืนยันการอัปโหลด
+            </button>
+            <a href="{% url 'order_detail' order.id %}" class="btn btn-light border py-3 fw-semibold rounded-3 text-secondary">
+              ยกเลิก / กลับไปหน้าคำสั่งซื้อ
+            </a>
+          </div>
+        </form>
       </div>
-
-    </div>
+    </section>
   </div>
 </div>
 {% endblock %}
+
+
+

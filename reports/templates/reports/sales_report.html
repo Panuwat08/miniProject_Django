@@ -1,189 +1,309 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
+{% load static %}
+{% block title %}รายงานยอดขาย{% endblock %}
 
-{% block title %}
-รายงานยอดขาย
+{% block extra_head %}
+<style>
+.report-hero {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    color: white;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .report-hero .subtitle {
+    color: rgba(255, 255, 255, 0.84);
+  }
+
+  .filter-panel,
+  .chart-panel,
+  .table-panel {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+  }
+
+  .panel-head {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #eef2f7;
+    background: #fbfdff;
+  }
+
+  .panel-body {
+    padding: 1.5rem;
+  }
+
+  .summary-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 1.25rem;
+    height: 100%;
+  }
+
+  .summary-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .report-field,
+  .report-select {
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 0.85rem 1rem;
+    background: #f8fafc;
+  }
+
+  .report-field:focus,
+  .report-select:focus {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+    border-color: #667eea;
+    background: white;
+  }
+
+  .report-table thead th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+  }
+
+  .report-table tbody td {
+    border-color: #eef2f7;
+    vertical-align: middle;
+  }
+
+  .chart-wrap {
+    position: relative;
+    min-height: 340px;
+  }
+
+  @media (max-width: 767.98px) {
+    .report-hero,
+    .panel-head,
+    .panel-body {
+      padding-left: 1.1rem;
+      padding-right: 1.1rem;
+    }
+
+    .chart-wrap {
+      min-height: 260px;
+    }
+  }
+
+
+</style>
 {% endblock %}
 
-{% block content %}
-
-<div class="container mt-4">
-
-    <h2 class="fw-bold mb-4">รายงานยอดขาย</h2>
-
-    <form method="GET">
-
-        <div class="card shadow-sm mb-4">
-
-            <div class="card-body d-flex flex-wrap gap-3 align-items-end">
-
-                <div>
-                    <label class="form-label">ช่วงเวลา</label>
-                    <select class="form-select" name="type">
-                        <option value="daily">รายวัน</option>
-                        <option value="monthly">รายเดือน</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="form-label">วันที่เริ่มต้น</label>
-                    <input type="date" name="start_date" class="form-control">
-                </div>
-
-                <div>
-                    <label class="form-label">วันที่สิ้นสุด</label>
-                    <input type="date" name="end_date" class="form-control">
-                </div>
-
-                <div>
-                    <button class="btn btn-primary">
-                        🔍 ค้นหา
-                    </button>
-                </div>
-
-                <!-- ปุ่ม Export -->
-                <div class="ms-auto d-flex gap-2">
-
-                    <a href="/reports/export/excel/?start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}&type={{ request.GET.type }}"
-                        class="btn btn-success">
-                        📊 Export Excel
-                    </a>
-
-                    <a href="/reports/export/pdf/?start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}&type={{ request.GET.type }}"
-                        class="btn btn-danger">
-                        📄 Export PDF
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-</div>
-
-</form>
-
-
-<!-- ===================== -->
-<!-- กราฟยอดขาย -->
-<!-- ===================== -->
-
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-
-        <h5 class="mb-3">กราฟยอดขาย</h5>
-
-        <canvas id="salesChart"></canvas>
-
+{% block content %}<div class="d-flex flex-column gap-4">
+  <section class="report-hero">
+    <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+      <div>
+        <div class="small text-uppercase fw-semibold opacity-75 mb-2">Reports</div>
+        <h1 class="h3 mb-2">รายงานยอดขาย</h1>
+        <div class="subtitle">สรุปยอดขายตามช่วงเวลา พร้อมกราฟแนวโน้ม รายการสินค้าขายดี และตารางข้อมูลสำหรับส่งออก</div>
+      </div>
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-light rounded-3 px-4 py-2 fw-semibold">
+        <i class="bi bi-arrow-left me-1"></i> กลับ Dashboard
+      </a>
     </div>
-</div>
+  </section>
 
+  <section class="row g-3">
+    <div class="col-md-4">
+      <div class="summary-card">
+        <div class="summary-icon gradient-primary"><i class="bi bi-calendar-range"></i></div>
+        <div class="text-muted small mb-1">รูปแบบรายงาน</div>
+        <div class="h5 mb-0">{% if selected_type == "daily" %}รายวัน{% else %}รายเดือน{% endif %}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="summary-card">
+        <div class="summary-icon gradient-success"><i class="bi bi-bar-chart-line"></i></div>
+        <div class="text-muted small mb-1">ช่วงข้อมูล</div>
+        <div class="h5 mb-0">{{ sales|length }} ช่วงเวลา</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="summary-card">
+        <div class="summary-icon gradient-warning"><i class="bi bi-box-seam"></i></div>
+        <div class="text-muted small mb-1">สินค้าขายดี</div>
+        <div class="h5 mb-0">{{ top_products|length }} รายการ</div>
+      </div>
+    </div>
+  </section>
 
-<!-- ===================== -->
-<!-- สินค้าขายดี -->
-<!-- ===================== -->
+  <section class="filter-panel">
+    <div class="panel-head">
+      <div class="fw-bold fs-5">ตัวกรองรายงาน</div>
+    </div>
+    <div class="panel-body">
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-lg-3">
+          <label class="form-label fw-semibold">ช่วงเวลา</label>
+          <select class="form-select report-select" name="type">
+            <option value="daily" {% if selected_type == "daily" %}selected{% endif %}>รายวัน</option>
+            <option value="monthly" {% if selected_type == "monthly" %}selected{% endif %}>รายเดือน</option>
+          </select>
+        </div>
+        <div class="col-lg-3">
+          <label class="form-label fw-semibold">วันที่เริ่มต้น</label>
+          <input type="date" name="start_date" class="form-control report-field" value="{{ start_date }}">
+        </div>
+        <div class="col-lg-3">
+          <label class="form-label fw-semibold">วันที่สิ้นสุด</label>
+          <input type="date" name="end_date" class="form-control report-field" value="{{ end_date }}">
+        </div>
+        <div class="col-lg-3 d-flex gap-2">
+          <button class="btn btn-gradient w-100 h-100">ค้นหา</button>
+        </div>
+      </form>
+      <div class="d-flex flex-wrap gap-2 mt-3">
+        <a href="/reports/export/excel/?type={{ selected_type }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" class="btn btn-outline-success rounded-3">
+          <i class="bi bi-file-earmark-excel me-1"></i> Export Excel
+        </a>
+        <a href="/reports/export/pdf/?type={{ selected_type }}{% if start_date %}&start_date={{ start_date }}{% endif %}{% if end_date %}&end_date={{ end_date }}{% endif %}" class="btn btn-outline-danger rounded-3">
+          <i class="bi bi-file-earmark-pdf me-1"></i> Export PDF
+        </a>
+      </div>
+    </div>
+  </section>
 
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
+  <section class="chart-panel">
+    <div class="panel-head">
+      <div class="fw-bold fs-5">กราฟยอดขาย</div>
+    </div>
+    <div class="panel-body">
+      <div class="chart-wrap">
+        <canvas id="salesChart"></canvas>
+      </div>
+    </div>
+  </section>
 
-        <h5 class="mb-3">สินค้าขายดี</h5>
-
-        <table class="table table-striped table-bordered">
-
-            <thead class="table-dark">
+  <div class="row g-4">
+    <div class="col-xl-5">
+      <section class="table-panel h-100">
+        <div class="panel-head">
+          <div class="fw-bold fs-5">สินค้าขายดี</div>
+        </div>
+        <div class="panel-body">
+          <div class="table-responsive">
+            <table class="table align-middle mb-0 report-table">
+              <thead>
                 <tr>
-                    <th>ลำดับ</th>
-                    <th>สินค้า</th>
-                    <th>จำนวนที่ขาย</th>
+                  <th>ลำดับ</th>
+                  <th>สินค้า</th>
+                  <th class="text-end">จำนวนที่ขาย</th>
                 </tr>
-            </thead>
-
-            <tbody>
-
+              </thead>
+              <tbody>
                 {% for p in top_products %}
                 <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ p.product__name }}</td>
-                    <td>{{ p.total_qty }}</td>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ p.product__name }}</td>
+                  <td class="text-end fw-semibold">{{ p.total_qty }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="3" class="text-center">ไม่มีข้อมูล</td>
+                  <td colspan="3" class="text-center text-muted py-4">ไม่มีข้อมูล</td>
                 </tr>
                 {% endfor %}
-
-            </tbody>
-
-        </table>
-
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </div>
-</div>
 
-
-<!-- ===================== -->
-<!-- ตารางยอดขาย -->
-<!-- ===================== -->
-
-<div class="card shadow-sm">
-    <div class="card-body">
-
-        <h5 class="mb-3">ตารางยอดขาย</h5>
-
-        <table class="table table-striped table-bordered">
-
-            <thead class="table-dark">
+    <div class="col-xl-7">
+      <section class="table-panel h-100">
+        <div class="panel-head">
+          <div class="fw-bold fs-5">ตารางยอดขาย</div>
+        </div>
+        <div class="panel-body">
+          <div class="table-responsive">
+            <table class="table align-middle mb-0 report-table">
+              <thead>
                 <tr>
-                    <th>ช่วงเวลา</th>
-                    <th>ยอดขาย</th>
+                  <th>ช่วงเวลา</th>
+                  <th class="text-end">ยอดขาย</th>
                 </tr>
-            </thead>
-
-            <tbody>
-
+              </thead>
+              <tbody>
                 {% for s in sales %}
                 <tr>
-                    <td>{{ s.period }}</td>
-                    <td>{{ s.total_sales }} บาท</td>
+                  <td>{{ s.period }}</td>
+                  <td class="text-end fw-semibold">{{ s.total_sales }} บาท</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="2" class="text-center">ไม่มีข้อมูล</td>
+                  <td colspan="2" class="text-center text-muted py-4">ไม่มีข้อมูล</td>
                 </tr>
                 {% endfor %}
-
-            </tbody>
-
-        </table>
-
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </div>
+  </div>
 </div>
-
-</div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
+  const labels = {{ labels|safe }};
+  const data = {{ data|safe }};
+  const ctx = document.getElementById("salesChart");
 
-    const labels = {{ labels| safe }};
-    const data = {{ data| safe }};
-
-    const ctx = document.getElementById('salesChart');
-
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'ยอดขาย',
-                data: data,
-                backgroundColor: '#6366f1'
-            }]
-        },
-        options: {
-            responsive: true
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "ยอดขาย",
+        data: data,
+        backgroundColor: [
+          "rgba(102, 126, 234, 0.85)"
+        ],
+        borderRadius: 14,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true
         }
-    });
-
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false
+          }
+        },
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: "rgba(148, 163, 184, 0.15)"
+          }
+        }
+      }
+    }
+  });
 </script>
-
 {% endblock %}
+
+
+

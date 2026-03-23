@@ -1,213 +1,390 @@
-{% extends 'base.html' %}
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+.admin-hero {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    color: white;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .admin-hero .subtitle {
+    color: rgba(255, 255, 255, 0.84);
+  }
+
+  .summary-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 1.25rem;
+    height: 100%;
+  }
+
+  .summary-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .filter-panel {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    padding: 1.5rem;
+  }
+
+  .filter-input,
+  .filter-select {
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 0.85rem 1rem;
+    background: #f8fafc;
+  }
+
+  .filter-input:focus,
+  .filter-select:focus {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+    border-color: #667eea;
+    background: white;
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .clear-filter-btn {
+    background: var(--warning-gradient);
+    color: white !important;
+    border: none;
+    box-shadow: 0 10px 20px rgba(242, 153, 74, 0.22);
+  }
+
+  .clear-filter-btn:hover {
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(242, 153, 74, 0.28);
+  }
+
+  .products-grid {
+    row-gap: 1.5rem;
+  }
+
+  .product-card-shell {
+    animation: fadeInUp 0.35s ease-out both;
+  }
+
+  .product-admin-card {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: none;
+    background: white;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition-smooth);
+    height: 100%;
+  }
+
+  .product-admin-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-6px);
+  }
+
+  .product-admin-card .card-img-top {
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .img-wrapper {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .stock-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .empty-state {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    padding: 3rem 1.5rem;
+    text-align: center;
+  }
+
+  .pagination-shell {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    padding: 1rem 1.25rem;
+  }
+
+  .pagination .page-link {
+    border: none;
+    border-radius: 12px;
+    color: #475569;
+    min-width: 42px;
+    text-align: center;
+    box-shadow: none;
+  }
+
+  .pagination .page-item.active .page-link {
+    background: var(--primary-gradient);
+    color: white;
+  }
+
+  .pagination .page-link:hover {
+    background: #eef2ff;
+    color: #334155;
+  }
+
+  @media (max-width: 991.98px) {
+    .filter-actions {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .admin-hero,
+    .filter-panel,
+    .pagination-shell {
+      padding-left: 1.1rem;
+      padding-right: 1.1rem;
+    }
+
+    .product-admin-card .card-img-top {
+      height: 220px;
+    }
+
+    .filter-actions,
+    .clear-filter-btn {
+      width: 100%;
+    }
+
+    .pagination-shell .pagination {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
+
+</style>
+{% endblock %}
 
 {% block content %}
-
-<!-- ==========================================
-     ส่วนหัวหน้า (Page Header)
-     แสดงชื่อหน้า + ปุ่มเพิ่มสินค้าใหม่
-     ========================================== -->
-<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-  <div class="mb-2 mb-md-0">
-    <h1 class="h3 fw-bold mb-1">
-      <span class="me-2"
-        style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-        <i class="bi bi-gear-wide-connected"></i>
-      </span>
-      ระบบจัดการสินค้า
-    </h1>
-    <p class="text-muted mb-0">เพิ่ม แก้ไข ลบสินค้า และดูแลสต็อกสินค้าทั้งหมด</p>
-  </div>
-
-  <!-- ปุ่มเพิ่มสินค้าใหม่ -->
-  <a href="{% url 'product_create' %}" class="btn btn-gradient rounded-pill px-4 py-2">
-    <i class="bi bi-plus-lg me-1"></i> เพิ่มสินค้าใหม่
-  </a>
-</div>
-
-<!-- ==========================================
-     แถว Stats (สรุปสถิติสินค้า)
-     แสดง: สินค้าทั้งหมด, รายการในระบบ, สต็อกต่ำ
-     ========================================== -->
-<div class="row g-3 mb-4">
-
-  <!-- การ์ด: สินค้าทั้งหมด -->
-  <div class="col-md-4">
-    <div class="glass-card p-3 d-flex align-items-center">
-      <div class="stat-icon gradient-success me-3">
-        <i class="bi bi-box-seam"></i>
-      </div>
+<div class="d-flex flex-column gap-4">
+  <section class="admin-hero">
+    <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
       <div>
-        <h3 class="fw-bold mb-0" id="totalProducts">{{ products|length }}</h3>
-        <p class="text-muted mb-0 small">สินค้าทั้งหมด</p>
+        <div class="small text-uppercase fw-semibold opacity-75 mb-2">Product Admin</div>
+        <h1 class="h3 mb-2">จัดการสินค้า</h1>
+        <div class="subtitle">เพิ่ม แก้ไข ค้นหา และกรองสินค้าตามหมวดหมู่ได้จากหน้านี้</div>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'admin_category_list' %}" class="btn btn-outline-light rounded-3 px-4 py-2 fw-semibold">
+          <i class="bi bi-tags me-1"></i> จัดการหมวดหมู่
+        </a>
+        <a href="{% url 'product_create' %}" class="btn btn-light rounded-3 px-4 py-2 fw-semibold">
+          <i class="bi bi-plus-lg me-1"></i> เพิ่มสินค้าใหม่
+        </a>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- การ์ด: รายการในระบบ -->
-  <div class="col-md-4">
-    <div class="glass-card p-3 d-flex align-items-center">
-      <div class="stat-icon gradient-warning me-3">
-        <i class="bi bi-cash-coin"></i>
-      </div>
-      <div>
-        <h3 class="fw-bold mb-0">{{ products|length }}</h3>
-        <p class="text-muted mb-0 small">รายการในระบบ</p>
+  <section class="row g-3">
+    <div class="col-md-4">
+      <div class="summary-card">
+        <div class="summary-icon gradient-success"><i class="bi bi-box-seam"></i></div>
+        <div class="text-muted small mb-1">สินค้าทั้งหมด</div>
+        <div class="h4 mb-0">{{ products|length }}</div>
       </div>
     </div>
-  </div>
-
-  <!-- การ์ด: สต็อกต่ำ (คำนวณด้วย JavaScript) -->
-  <div class="col-md-4">
-    <div class="glass-card p-3 d-flex align-items-center">
-      <div class="stat-icon gradient-danger me-3">
-        <i class="bi bi-exclamation-triangle"></i>
-      </div>
-      <div>
-        <h3 class="fw-bold mb-0 text-danger" id="lowStock">-</h3>
-        <p class="text-muted mb-0 small">สต็อกต่ำ</p>
+    <div class="col-md-4">
+      <div class="summary-card">
+        <div class="summary-icon gradient-primary"><i class="bi bi-tags"></i></div>
+        <div class="text-muted small mb-1">หมวดหมู่สินค้าทั้งหมด</div>
+        <div class="h4 mb-0">{{ categories|length }}</div>
       </div>
     </div>
-  </div>
-</div>
+    <div class="col-md-4">
+      <div class="summary-card">
+        <div class="summary-icon gradient-danger"><i class="bi bi-exclamation-triangle"></i></div>
+        <div class="text-muted small mb-1">สินค้าหมดสต็อก</div>
+        <div class="h4 mb-0">{{ low_stock_count }}</div>
+      </div>
+    </div>
+  </section>
 
-<!-- ==========================================
-     ช่องค้นหาสินค้า (Search Bar)
-     กรองสินค้าแบบ real-time ตามชื่อ
-     ========================================== -->
-<div class="mb-4">
-  <div class="search-box input-group bg-white">
-    <span class="input-group-text text-muted"><i class="bi bi-search"></i></span>
-    <input type="text" id="searchInput" class="form-control" placeholder="🔍 ค้นหาสินค้า..." oninput="filterProducts()">
-  </div>
-</div>
-
-<!-- ==========================================
-     ตารางสินค้า (Product Grid)
-     แสดง card สินค้าแบบ responsive grid
-     ========================================== -->
-<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" id="productGrid">
-  {% for product in products %}
-  <div class="col product-card" data-name="{{ product.name|lower }}"
-    style="animation: fadeInUp 0.4s ease-out {{ forloop.counter0 }}00ms both;">
-    <div class="product-admin-card h-100 d-flex flex-column">
-
-      <!-- ส่วนแสดงรูปภาพสินค้า -->
-      <div class="img-wrapper position-relative">
-        {% if product.image %}
-        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
-        {% else %}
-        <!-- กรณีไม่มีรูป แสดงไอคอนแทน -->
-        <div class="card-img-top d-flex align-items-center justify-content-center"
-          style="height: 200px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
-          <i class="bi bi-image text-muted" style="font-size: 3rem; opacity: 0.4;"></i>
+  <section class="filter-panel">
+    <form method="get" class="row g-3 align-items-end" id="adminProductFilterForm">
+      <div class="col-lg-6">
+        <label class="form-label fw-semibold">ค้นหาสินค้า</label>
+        <input type="text" name="q" class="form-control filter-input" value="{{ query }}"
+          placeholder="ค้นหาจากชื่อสินค้า" id="adminProductSearchInput">
+      </div>
+      <div class="col-lg-4">
+        <label class="form-label fw-semibold">หมวดหมู่</label>
+        <select name="category" class="form-select filter-select" id="adminProductCategorySelect">
+          <option value="">ทุกหมวดหมู่</option>
+          {% for category in categories %}
+          <option value="{{ category.slug }}" {% if selected_category == category.slug %}selected{% endif %}>{{ category.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-lg-2">
+        <div class="filter-actions">
+          <a href="{% url 'admin_product_list' %}" class="btn clear-filter-btn w-100">ล้างตัวกรอง</a>
         </div>
-        {% endif %}
+      </div>
+    </form>
+  </section>
 
-        <!-- Badge แสดงจำนวนสต็อก (มุมขวาบน) -->
-        <div class="position-absolute top-0 end-0 p-2">
-          {% if product.stock < 5 %} <!-- สต็อกต่ำมาก: แดง -->
+  {% if products %}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 products-grid">
+    {% for product in products %}
+    <div class="col product-card-shell" style="animation-delay: {{ forloop.counter0 }}0ms;">
+      <div class="product-admin-card d-flex flex-column">
+        <div class="img-wrapper position-relative">
+          {% if product.image %}
+          <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+          {% else %}
+          <div class="card-img-top d-flex align-items-center justify-content-center"
+            style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+            <i class="bi bi-image text-muted" style="font-size: 3rem; opacity: 0.4;"></i>
+          </div>
+          {% endif %}
+
+          <div class="position-absolute top-0 end-0 p-2">
+            {% if product.stock < 5 %}
             <span class="stock-badge text-white" style="background: var(--danger-gradient);">
               <i class="bi bi-exclamation-circle me-1"></i>{{ product.stock }} ชิ้น
             </span>
-            {% elif product.stock < 20 %} <!-- สต็อกปานกลาง: ส้ม -->
-              <span class="stock-badge text-white" style="background: var(--warning-gradient);">
-                <i class="bi bi-exclamation-triangle me-1"></i>{{ product.stock }} ชิ้น
-              </span>
-              {% else %}
-              <!-- สต็อกเพียงพอ: เขียว -->
-              <span class="stock-badge text-white" style="background: var(--success-gradient);">
-                <i class="bi bi-check-circle me-1"></i>{{ product.stock }} ชิ้น
-              </span>
-              {% endif %}
+            {% elif product.stock < 20 %}
+            <span class="stock-badge text-white" style="background: var(--warning-gradient);">
+              <i class="bi bi-exclamation-triangle me-1"></i>{{ product.stock }} ชิ้น
+            </span>
+            {% else %}
+            <span class="stock-badge text-white" style="background: var(--success-gradient);">
+              <i class="bi bi-check-circle me-1"></i>{{ product.stock }} ชิ้น
+            </span>
+            {% endif %}
+          </div>
         </div>
-      </div>
 
-      <!-- เนื้อหาการ์ด: ชื่อ, ราคา, ปุ่มจัดการ -->
-      <div class="card-body d-flex flex-column p-4">
-        <h6 class="fw-bold text-dark mb-1 text-truncate" title="{{ product.name }}">{{ product.name }}</h6>
-        {% if product.description %}
-        <p class="text-muted small mb-3 text-truncate">{{ product.description }}</p>
-        {% else %}
-        <p class="text-muted small mb-3 fst-italic">ไม่มีรายละเอียด</p>
-        {% endif %}
+        <div class="card-body d-flex flex-column p-4">
+          <div class="small text-primary fw-semibold mb-2">{{ product.category.name|default:"ทั่วไป" }}</div>
+          <h6 class="fw-bold text-dark mb-1 text-truncate" title="{{ product.name }}">{{ product.name }}</h6>
+          {% if product.description %}
+          <p class="text-muted small mb-3 text-truncate">{{ product.description }}</p>
+          {% else %}
+          <p class="text-muted small mb-3 fst-italic">ไม่มีรายละเอียดเพิ่มเติม</p>
+          {% endif %}
 
-        <div class="mt-auto">
-          <!-- แสดงราคาสินค้า -->
-          <h5 class="mb-3"
-            style="background: var(--success-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700;">
-            ฿{{ product.price|floatformat:2 }}
-          </h5>
-
-          <!-- ปุ่ม แก้ไข / ลบ -->
-          <div class="d-flex gap-2">
-            <a href="{% url 'product_update' product.pk %}"
-              class="btn btn-outline-primary btn-sm w-50 rounded-3 fw-bold" style="border-width: 2px;">
-              <i class="bi bi-pencil-square"></i> แก้ไข
-            </a>
-            <a href="{% url 'product_delete' product.pk %}" class="btn btn-outline-danger btn-sm w-50 rounded-3 fw-bold"
-              style="border-width: 2px;">
-              <i class="bi bi-trash3"></i> ลบ
-            </a>
+          <div class="mt-auto">
+            <h5 class="mb-3" style="background: var(--success-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700;">
+              ฿{{ product.price|floatformat:2 }}
+            </h5>
+            <div class="d-flex gap-2">
+              <a href="{% url 'product_update' product.pk %}" class="btn btn-outline-primary btn-sm w-50 rounded-3 fw-bold" style="border-width: 2px;">
+                <i class="bi bi-pencil-square"></i> แก้ไข
+              </a>
+              <a href="{% url 'product_delete' product.pk %}" class="btn btn-outline-danger btn-sm w-50 rounded-3 fw-bold" style="border-width: 2px;">
+                <i class="bi bi-trash3"></i> ลบ
+              </a>
+            </div>
           </div>
         </div>
       </div>
     </div>
+    {% endfor %}
   </div>
-  {% empty %}
 
-  <!-- ==========================================
-       แสดงเมื่อไม่มีสินค้าในระบบ (Empty State)
-       ========================================== -->
-  <div class="col-12 text-center py-5">
-    <div class="glass-card p-5 mx-auto" style="max-width: 500px;">
-      <div class="mb-4" style="font-size: 4rem; opacity: 0.3;">
-        <i class="bi bi-inbox"></i>
+  {% if page_obj.paginator.num_pages > 1 %}
+  <div class="pagination-shell">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+      <div class="text-muted small">
+        หน้า {{ page_obj.number }} จาก {{ page_obj.paginator.num_pages }}
       </div>
-      <h3 class="text-muted fw-bold mb-2">ยังไม่มีสินค้าในระบบ</h3>
-      <p class="text-muted mb-4">เริ่มเพิ่มสินค้าตัวแรกของคุณได้เลย!</p>
-      <a href="{% url 'product_create' %}" class="btn btn-gradient rounded-pill px-4">
-        <i class="bi bi-plus-lg"></i> เพิ่มสินค้าใหม่
-      </a>
+      <nav aria-label="Product pagination">
+        <ul class="pagination mb-0 gap-2">
+          {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}">
+              <i class="bi bi-chevron-left"></i>
+            </a>
+          </li>
+          {% endif %}
+
+          {% for num in page_obj.paginator.page_range %}
+            {% if num == page_obj.number %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num >= page_obj.number|add:-1 and num <= page_obj.number|add:1 %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endif %}
+          {% endfor %}
+
+          {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if selected_category %}&category={{ selected_category|urlencode }}{% endif %}">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
     </div>
   </div>
-  {% endfor %}
+  {% endif %}
+  {% else %}
+  <div class="empty-state">
+    <div class="mb-4" style="font-size: 4rem; opacity: 0.3;">
+      <i class="bi bi-inbox"></i>
+    </div>
+    <h3 class="text-muted fw-bold mb-2">ไม่พบสินค้าที่ตรงกับเงื่อนไข</h3>
+    <p class="text-muted mb-4">ลองค้นหาด้วยชื่อสินค้าอื่น หรือเปลี่ยนหมวดหมู่ที่เลือก</p>
+    <a href="{% url 'admin_product_list' %}" class="btn btn-gradient rounded-pill px-4">
+      <i class="bi bi-arrow-counterclockwise me-1"></i> ล้างตัวกรอง
+    </a>
+  </div>
+  {% endif %}
 </div>
-
-<!-- ==========================================
-     JavaScript
-     - นับจำนวนสินค้าที่สต็อกต่ำ (low-stock counter)
-     - ฟังก์ชันค้นหา/กรองสินค้า (Search filter)
-     ========================================== -->
 <script>
-  // === นับจำนวนสินค้าที่มีสต็อกต่ำ (badge สีแดง) ===
-  document.addEventListener('DOMContentLoaded', () => {
-    const cards = document.querySelectorAll('.product-card');
-    let lowCount = 0;
-    cards.forEach(card => {
-      // ค้นหา badge ที่มี gradient แดง (สต็อกต่ำมาก)
-      const badges = card.querySelectorAll('.stock-badge');
-      badges.forEach(badge => {
-        if (badge.style.background.includes('eb3349')) lowCount++;
-      });
-    });
-    const el = document.getElementById('lowStock');
-    if (el) el.textContent = lowCount;
-  });
+  (function () {
+    const form = document.getElementById("adminProductFilterForm");
+    const searchInput = document.getElementById("adminProductSearchInput");
+    const categorySelect = document.getElementById("adminProductCategorySelect");
+    if (!form || !searchInput || !categorySelect) return;
 
-  // === ฟังก์ชันค้นหาสินค้าแบบ real-time ===
-  function filterProducts() {
-    const q = document.getElementById('searchInput').value.toLowerCase(); // คำค้นหา
-    const cards = document.querySelectorAll('.product-card');
-    let visible = 0;
-    cards.forEach(card => {
-      const name = card.getAttribute('data-name') || '';
-      const show = name.includes(q); // ตรวจสอบว่าชื่อสินค้าตรงกับคำค้น
-      card.style.display = show ? '' : 'none';
-      if (show) visible++;
+    let debounceTimer = null;
+
+    searchInput.addEventListener("input", function () {
+      window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(function () {
+        form.submit();
+      }, 350);
     });
-    // อัปเดตจำนวนสินค้าที่แสดง
-    document.getElementById('totalProducts').textContent = visible;
-  }
+
+    categorySelect.addEventListener("change", function () {
+      form.submit();
+    });
+  })();
 </script>
-
 {% endblock %}
+
+
+
+

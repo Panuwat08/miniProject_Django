@@ -1,0 +1,127 @@
+﻿.category-hero {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    color: white;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .category-hero .subtitle {
+    color: rgba(255, 255, 255, 0.84);
+  }
+
+  .panel-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+  }
+
+  .panel-head {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #eef2f7;
+    background: #fbfdff;
+  }
+
+  .panel-body {
+    padding: 1.5rem;
+  }
+
+  .search-input {
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 0.85rem 1rem;
+    background: #f8fafc;
+  }
+
+  .search-input:focus {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+    border-color: #667eea;
+    background: white;
+  }
+
+  .reset-filter-btn {
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 96px;
+  }
+
+  .category-row {
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+  }
+
+  .pagination-shell {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    padding: 1rem 1.25rem;
+  }
+
+  .pagination .page-link {
+    border: none;
+    border-radius: 12px;
+    color: #475569;
+    min-width: 42px;
+    text-align: center;
+    box-shadow: none;
+  }
+
+  .pagination .page-item.active .page-link {
+    background: var(--primary-gradient);
+    color: white;
+  }
+
+  .pagination .page-link:hover {
+    background: #eef2ff;
+    color: #334155;
+  }
+
+  @media (max-width: 991.98px) {
+    .panel-head form {
+      flex-wrap: wrap;
+    }
+
+    .panel-head form .search-input {
+      flex: 1 1 100%;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .category-hero,
+    .panel-body,
+    .panel-head,
+    .pagination-shell {
+      padding-left: 1.1rem;
+      padding-right: 1.1rem;
+    }
+
+    .category-row form.d-flex {
+      width: 100%;
+      flex-direction: column;
+    }
+
+    .category-row form.d-flex input {
+      min-width: 0 !important;
+      width: 100%;
+    }
+
+    .category-row .d-flex.flex-wrap.gap-2 {
+      width: 100%;
+    }
+
+    .category-row .btn,
+    .reset-filter-btn {
+      width: 100%;
+    }
+
+    .pagination-shell .pagination {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+

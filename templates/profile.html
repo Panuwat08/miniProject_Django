@@ -1,0 +1,243 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+.profile-hero {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    color: white;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .profile-panel {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    padding: 1.5rem;
+    height: 100%;
+  }
+
+  .info-card {
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+    height: 100%;
+  }
+
+  .account-overview {
+    background: linear-gradient(135deg, #eef2ff 0%, #f8fbff 100%);
+    border: 1px solid #dbe4ff;
+    border-radius: 22px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .overview-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    background: var(--primary-gradient);
+    box-shadow: 0 10px 24px rgba(102, 126, 234, 0.2);
+    font-size: 1.5rem;
+  }
+
+  .account-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+  }
+
+  .info-label {
+    color: #64748b;
+    font-size: 0.82rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .info-value {
+    color: #0f172a;
+    font-weight: 700;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+
+  .profile-form .form-control {
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 0.9rem 1rem;
+    background: #f8fafc;
+  }
+
+  .profile-form .form-control:focus {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+    border-color: #667eea;
+    background: white;
+  }
+
+  @media (max-width: 767.98px) {
+    .profile-hero,
+    .profile-panel {
+      padding: 1.25rem;
+    }
+
+    .account-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column gap-4">
+  <section class="profile-hero">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-8">
+        <div class="small text-white-50 text-uppercase fw-semibold mb-2">Profile</div>
+        <h1 class="h3 fw-bold mb-2">{{ user.get_full_name|default:user.username }}</h1>
+        <p class="mb-3 text-white-50">@{{ user.username }} | {{ profile.get_role_display }}</p>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="badge rounded-pill text-bg-light px-3 py-2">{{ user.email|default:"-" }}</span>
+          <span class="badge rounded-pill bg-white bg-opacity-25 px-3 py-2">{{ profile.phone|default:"ยังไม่ได้ระบุเบอร์โทร" }}</span>
+        </div>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-25 shadow" style="width: 110px; height: 110px;">
+          <i class="bi bi-person-circle" style="font-size: 3.75rem;"></i>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="profile-panel">
+        <div class="account-overview">
+          <div class="d-flex align-items-center gap-3">
+            <div class="overview-icon">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <div>
+              <div class="text-muted small mb-1">ข้อมูลบัญชี</div>
+              <div class="fw-bold fs-5">{{ profile.get_role_display }}</div>
+              <div class="text-muted small">@{{ user.username }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="account-grid">
+          <div class="info-card">
+            <div class="info-label">ชื่อผู้ใช้</div>
+            <div class="info-value">{{ user.username }}</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-label">บทบาท</div>
+            <div class="info-value">{{ profile.get_role_display }}</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-label">ชื่อ - นามสกุล</div>
+            <div class="info-value">{{ user.get_full_name|default:"-" }}</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-label">เบอร์โทร</div>
+            <div class="info-value">{{ profile.phone|default:"ยังไม่ได้ระบุเบอร์โทร" }}</div>
+          </div>
+
+          <div class="info-card" style="grid-column: 1 / -1;">
+            <div class="info-label">อีเมล</div>
+            <div class="info-value">{{ user.email|default:"-" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="profile-panel">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+          <div>
+            <h2 class="h4 fw-bold mb-1">แก้ไขข้อมูลส่วนตัว</h2>
+            <p class="text-muted mb-0">อัปเดตชื่อ อีเมล และเบอร์โทรของคุณได้จากหน้านี้</p>
+          </div>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="/" class="btn btn-gradient rounded-pill px-4">กลับหน้าแรก</a>
+            {% if profile.is_customer %}
+            <a href="{% url 'orders_list' %}" class="btn btn-light border rounded-pill px-4">ดูคำสั่งซื้อ</a>
+            {% endif %}
+          </div>
+        </div>
+
+        <form method="post" class="profile-form row g-3">
+          {% csrf_token %}
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">{{ form.first_name.label }}</label>
+            {{ form.first_name }}
+            {% if form.first_name.errors %}
+            <div class="text-danger small mt-1">{{ form.first_name.errors|join:", " }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">{{ form.last_name.label }}</label>
+            {{ form.last_name }}
+            {% if form.last_name.errors %}
+            <div class="text-danger small mt-1">{{ form.last_name.errors|join:", " }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">{{ form.email.label }}</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+            <div class="text-danger small mt-1">{{ form.email.errors|join:", " }}</div>
+            {% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">{{ form.phone.label }}</label>
+            {{ form.phone }}
+            {% if form.phone.errors %}
+            <div class="text-danger small mt-1">{{ form.phone.errors|join:", " }}</div>
+            {% endif %}
+          </div>
+          <div class="col-12 d-flex flex-wrap justify-content-end gap-2 pt-2">
+            <button type="submit" class="btn btn-gradient rounded-pill px-4">
+              <i class="bi bi-check2-circle me-1"></i> บันทึกข้อมูล
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const phoneInput = document.getElementById("phoneInput");
+    if (!phoneInput) return;
+
+    phoneInput.addEventListener("input", function () {
+      const digits = this.value.replace(/\D/g, "").slice(0, 10);
+      let formatted = digits;
+
+      if (digits.length > 6) {
+        formatted = `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+      } else if (digits.length > 3) {
+        formatted = `${digits.slice(0, 3)}-${digits.slice(3)}`;
+      }
+
+      this.value = formatted;
+    });
+  })();
+</script>
+{% endblock %}
+
+
+
+

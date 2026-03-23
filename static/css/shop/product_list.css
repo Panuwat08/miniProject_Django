@@ -1,0 +1,59 @@
+﻿.welcome-hero {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .welcome-hero-inner {
+    max-width: 760px;
+  }
+
+  .welcome-hero .hero-subtitle {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .welcome-cta {
+    border-radius: 12px;
+    font-weight: 700;
+    color: #4f46e5 !important;
+    box-shadow: 0 10px 24px rgba(255, 255, 255, 0.18);
+  }
+
+  .cart-add-btn {
+    background: var(--primary-gradient);
+    color: white !important;
+    border: none;
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.24);
+  }
+
+  .cart-add-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3);
+  }
+
+  .pagination-shell {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    padding: 1rem 1.25rem;
+  }
+
+  .pagination .page-link {
+    border: none;
+    border-radius: 12px;
+    color: #475569;
+    min-width: 42px;
+    text-align: center;
+    box-shadow: none;
+  }
+
+  .pagination .page-item.active .page-link {
+    background: var(--primary-gradient);
+    color: white;
+  }
+
+  .pagination .page-link:hover {
+    background: #eef2ff;
+    color: #334155;
+  }
+

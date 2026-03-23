@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}รายงานกำไร{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="fw-bold mb-4">รายงานกำไร</h2>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="mb-3">กำไรตามสินค้า</h5>
+      <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+          <tr>
+            <th>สินค้า</th>
+            <th>หมวดหมู่</th>
+            <th class="text-end">จำนวนขาย</th>
+            <th class="text-end">รายรับ</th>
+            <th class="text-end">ต้นทุน</th>
+            <th class="text-end">กำไร</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in profits %}
+          <tr>
+            <td>{{ row.product__name }}</td>
+            <td>{{ row.product__category__name|default:"-" }}</td>
+            <td class="text-end">{{ row.total_qty }}</td>
+            <td class="text-end">{{ row.revenue }}</td>
+            <td class="text-end">{{ row.cost_total }}</td>
+            <td class="text-end fw-bold">{{ row.profit }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center">ไม่มีข้อมูล</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="mb-3">สินค้าคงเหลือในสต็อก</h5>
+      <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+          <tr>
+            <th>สินค้า</th>
+            <th>หมวดหมู่</th>
+            <th class="text-end">ราคาขาย</th>
+            <th class="text-end">ต้นทุน</th>
+            <th class="text-end">คงเหลือ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in inventory %}
+          <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.category.name|default:"-" }}</td>
+            <td class="text-end">{{ item.price }}</td>
+            <td class="text-end">{{ item.cost }}</td>
+            <td class="text-end">{{ item.stock }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center">ไม่มีข้อมูล</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

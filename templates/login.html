@@ -1,33 +1,38 @@
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>เข้าสู่ระบบ | ระบบจำหน่ายอุปกรณ์เครื่องใช้โรงแรม</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เข้าสู่ระบบ | Hotel Shop</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 <style>
 body {
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: linear-gradient(135deg, #4377d8, #000000, #0066ff);
+    font-family: "Prompt", "Segoe UI", Tahoma, sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.18), transparent 30%),
+        linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
+    padding: 24px;
+    box-sizing: border-box;
 }
 
-/* กล่องหลัก */
 .login-box {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 45px 35px;
-    width: 360px;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    background: rgba(255, 255, 255, 0.96);
+    padding: 42px 34px;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 24px;
+    box-shadow: 0 24px 50px rgba(41, 52, 122, 0.28);
     text-align: center;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
     animation: fadeIn 0.6s ease-in-out;
 }
 
-/* Animation */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -39,111 +44,213 @@ body {
     }
 }
 
-/* หัวข้อ */
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    text-decoration: none;
+}
+
+.brand-mark {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.25);
+}
+
+.brand-mark img {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.18);
+    padding: 2px;
+}
+
 .login-box h2 {
-    margin-bottom: 8px;
-    color: #0f3057;
-    font-weight: 600;
+    margin: 0 0 8px;
+    color: #243b6b;
+    font-weight: 700;
 }
 
 .login-box p {
     font-size: 14px;
-    color: #555;
-    margin-bottom: 25px;
+    color: #5b6475;
+    margin-bottom: 24px;
 }
 
-/* ช่องกรอก */
-input {
-    width: 100%;
-    padding: 13px;
-    margin-bottom: 15px;
-    border: 1px solid #d0e4ff;
-    border-radius: 10px;
-    font-size: 14px;
-    background: #f4f9ff;
+.field-group {
+    text-align: left;
+    margin-bottom: 14px;
+}
+
+.field-label {
+    display: block;
+    margin-bottom: 7px;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.field-note {
+    display: block;
+    margin-top: 5px;
+    color: #7b8496;
+    font-size: 12px;
+}
+
+.input-shell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #d8def0;
+    border-radius: 12px;
+    background: #f8faff;
     transition: all 0.3s ease;
+    padding: 0 14px;
 }
 
-input:focus {
-    border-color: #1e90ff;
+.input-shell:focus-within {
+    border-color: #667eea;
     background: #ffffff;
-    outline: none;
-    box-shadow: 0 0 8px rgba(30, 144, 255, 0.4);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.14);
 }
 
-/* ปุ่ม */
+.input-icon {
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+.input-shell input {
+    width: 100%;
+    padding: 14px 0;
+    border: none;
+    font-size: 14px;
+    background: transparent;
+    box-sizing: border-box;
+}
+
+.input-shell input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
 button {
     width: 100%;
-    padding: 13px;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    padding: 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     color: white;
     font-size: 15px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 10px 24px rgba(102, 126, 234, 0.28);
 }
 
 button:hover {
-    background: linear-gradient(135deg, #2a5298, #1e3c72);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 14px 28px rgba(102, 126, 234, 0.34);
 }
 
-/* ลิงก์ */
-a {
-    display: block;
-    margin-top: 15px;
+a.link {
+    display: inline-block;
+    margin-top: 16px;
     text-decoration: none;
-    color: #1e3c72;
+    color: #5b4db3;
     font-size: 14px;
-    transition: 0.2s;
+    font-weight: 500;
 }
 
-a:hover {
-    color: #2a5298;
+a.link:hover {
     text-decoration: underline;
 }
 
-/* ข้อความ error */
 .message {
-    background: #ffe6e6;
-    color: #d8000c;
-    padding: 8px;
-    border-radius: 8px;
+    background: #fff1f2;
+    color: #be123c;
+    padding: 10px 12px;
+    border-radius: 10px;
     font-size: 13px;
     margin-bottom: 12px;
 }
 
-/* success */
-.success {
-    background: #e6f0ff;
-    color: #0047ab;
-    padding: 8px;
-    border-radius: 8px;
+.lock-note {
+    background: #fff7e6;
+    color: #b7791f;
+    padding: 10px 12px;
+    border-radius: 10px;
     font-size: 13px;
     margin-bottom: 12px;
 }
+
+button:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+
 </style>
+
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-
+document.addEventListener("DOMContentLoaded", function () {
     const usernameInput = document.querySelector("input[name='username']");
+    const passwordInput = document.querySelector("input[name='password']");
+    const submitButton = document.querySelector("button[type='submit']");
+    const lockNote = document.getElementById("login-lock-note");
+    let remaining = Number(lockNote?.dataset.remaining || 0);
 
-    usernameInput.addEventListener("input", function() {
-        this.value = this.value.replace(/[^A-Za-z0-9_]/g, '');
-    });
+    if (usernameInput) {
+        usernameInput.addEventListener("input", function () {
+            this.value = this.value.replace(/[^A-Za-z0-9_]/g, "");
+        });
+    }
 
+    function renderCountdown() {
+        if (!lockNote || !submitButton) return;
+
+        if (remaining <= 0) {
+            lockNote.style.display = "none";
+            submitButton.disabled = false;
+            if (usernameInput) usernameInput.disabled = false;
+            if (passwordInput) passwordInput.disabled = false;
+            return;
+        }
+
+        lockNote.style.display = "block";
+        lockNote.textContent = `กรุณารอ ${remaining} วินาทีก่อนลองเข้าสู่ระบบใหม่`;
+        submitButton.disabled = true;
+        if (usernameInput) usernameInput.disabled = true;
+        if (passwordInput) passwordInput.disabled = true;
+
+        remaining -= 1;
+        window.setTimeout(renderCountdown, 1000);
+    }
+
+    renderCountdown();
 });
 </script>
 </head>
 <body>
 
-
 <div class="login-box">
+    <a class="brand" href="/login/">
+        <div class="brand-mark">
+            <img src="{% static 'img/logo.png' %}" alt="Hotel Shop"
+                 onerror="this.style.display='none'; this.parentElement.innerHTML='<span style=&quot;color:white;font-size:22px;font-weight:700;&quot;>HS</span>';">
+        </div>
+    </a>
+
     <h2>เข้าสู่ระบบ</h2>
-    <p>ระบบจำหน่ายอุปกรณ์เครื่องใช้โรงแรม</p>
+    <p>เข้าสู่ระบบเพื่อสั่งซื้อสินค้าและติดตามคำสั่งซื้อของคุณ</p>
 
     {% if messages %}
         {% for message in messages %}
@@ -151,24 +258,45 @@ document.addEventListener("DOMContentLoaded", function() {
         {% endfor %}
     {% endif %}
 
+    <div id="login-lock-note" class="lock-note" data-remaining="{{ lock_remaining|default:0 }}" {% if not lock_remaining %}style="display:none;"{% endif %}></div>
+
     <form method="post">
         {% csrf_token %}
 
-        <input name="username"
-               placeholder="Username"
-               pattern="[A-Za-z0-9_]+"
-               required>
+        <div class="field-group">
+            <label class="field-label" for="login-username">Username</label>
+            <div class="input-shell">
+                <i class="bi bi-person input-icon"></i>
+                <input id="login-username"
+                       name="username"
+                       placeholder="กรอกชื่อผู้ใช้"
+                       pattern="[A-Za-z0-9_]+"
+                       required>
+            </div>
+            <span class="field-note">ใช้ได้เฉพาะตัวอักษรอังกฤษ ตัวเลข และ `_`</span>
+        </div>
 
-        <input name="password"
-               type="password"
-               placeholder="Password"
-               required>
+        <div class="field-group">
+            <label class="field-label" for="login-password">Password</label>
+            <div class="input-shell">
+                <i class="bi bi-lock input-icon"></i>
+                <input id="login-password"
+                       name="password"
+                       type="password"
+                       placeholder="กรอกรหัสผ่าน"
+                       required>
+            </div>
+            <span class="field-note">กรอกรหัสผ่านของบัญชีที่ลงทะเบียนไว้</span>
+        </div>
 
-        <button type="submit">Login</button>
+        <button type="submit">เข้าสู่ระบบ</button>
     </form>
 
-    <a href="/register/">สมัครสมาชิก</a>
+    <a class="link" href="/register/">สมัครสมาชิก Customer</a>
 </div>
 
 </body>
 </html>
+
+
+

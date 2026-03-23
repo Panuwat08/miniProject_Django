@@ -1,0 +1,104 @@
+﻿.detail-breadcrumb {
+    background: white;
+    border-radius: 999px;
+    box-shadow: var(--shadow-soft);
+    padding: 0.85rem 1.15rem;
+    margin-bottom: 1rem;
+  }
+
+  .detail-shell {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+  }
+
+  .detail-cover-wrap {
+    background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
+    height: 100%;
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .detail-cover {
+    width: 100%;
+    max-height: 460px;
+    object-fit: cover;
+    border-radius: 24px;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .detail-placeholder {
+    color: #94a3b8;
+    text-align: center;
+  }
+
+  .category-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.38rem 0.75rem;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #4f46e5;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .price-block {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    color: #157347;
+    font-weight: 800;
+    font-size: 2rem;
+  }
+
+  .stock-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.84rem;
+    font-weight: 700;
+  }
+
+  .stock-ok {
+    background: #ecfdf3;
+    color: #157347;
+  }
+
+  .stock-out {
+    background: #fff1f2;
+    color: #be123c;
+  }
+
+  .info-card {
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+  }
+
+  .action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .cart-btn {
+    background: var(--primary-gradient);
+    color: white !important;
+    border: none;
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.24);
+  }
+
+  .cart-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3);
+  }
+

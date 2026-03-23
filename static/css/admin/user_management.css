@@ -1,0 +1,145 @@
+﻿.users-hero {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    color: white;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .users-hero .subtitle {
+    color: rgba(255, 255, 255, 0.84);
+  }
+
+  .summary-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 1.25rem;
+    height: 100%;
+  }
+
+  .summary-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .create-panel,
+  .users-panel {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+  }
+
+  .create-panel {
+    padding: 1.5rem;
+  }
+
+  .users-toolbar {
+    padding: 1.5rem;
+    border-bottom: 1px solid #eef2f7;
+    background: #fbfdff;
+  }
+
+  .search-input,
+  .role-select {
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    padding: 0.85rem 1rem;
+    background: #f8fafc;
+  }
+
+  .search-input:focus,
+  .role-select:focus {
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.12);
+    border-color: #667eea;
+    background: white;
+  }
+
+  .users-table {
+    min-width: 1120px;
+  }
+
+  .users-table thead th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .users-table tbody td {
+    vertical-align: middle;
+    border-color: #eef2f7;
+  }
+
+  .role-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.42rem 0.72rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .role-customer {
+    background: #eef2ff;
+    color: #4f46e5;
+  }
+
+  .role-staff {
+    background: #fff7e6;
+    color: #b7791f;
+  }
+
+  .role-admin {
+    background: #fff1f2;
+    color: #be123c;
+  }
+
+  .status-active {
+    color: #157347;
+    font-weight: 700;
+  }
+
+  .status-inactive {
+    color: #be123c;
+    font-weight: 700;
+  }
+
+  .empty-state {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: #64748b;
+  }
+
+  @media (max-width: 991.98px) {
+    .users-table {
+      min-width: 980px;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .users-hero,
+    .create-panel,
+    .users-toolbar {
+      padding: 1.25rem;
+    }
+
+    .users-table {
+      min-width: 860px;
+    }
+
+    .summary-card {
+      padding: 1rem;
+    }
+  }
+

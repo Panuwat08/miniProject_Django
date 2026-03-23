@@ -1,0 +1,104 @@
+﻿.order-hero {
+    background: var(--primary-gradient);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    color: white;
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 1.5rem;
+  }
+
+  .order-hero .subtitle {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .order-panel {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+  }
+
+  .order-head {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #eef2f7;
+    background: #fbfdff;
+  }
+
+  .order-body {
+    padding: 1.5rem;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.48rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .status-pending { background: #fff7e6; color: #b7791f; }
+  .status-paid { background: #ecfdf3; color: #157347; }
+  .status-rejected { background: #fff1f2; color: #be123c; }
+  .status-other { background: #eef2f7; color: #475569; }
+
+  .item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.95rem 0;
+    border-bottom: 1px solid #eef2f7;
+  }
+
+  .item-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .info-card {
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    border-radius: 18px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  .qr-box {
+    background: #fbfdff;
+    border: 1px solid #edf2f7;
+    border-radius: 22px;
+    padding: 1.25rem;
+    text-align: center;
+  }
+
+  .qr-box img {
+    max-width: 220px;
+    width: 100%;
+    border-radius: 18px;
+    box-shadow: var(--shadow-soft);
+    background: white;
+    padding: 0.75rem;
+  }
+
+  .primary-btn {
+    background: var(--primary-gradient);
+    color: white !important;
+    border: none;
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.24);
+  }
+
+  .primary-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.3);
+  }
+
+  .slip-preview {
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 18px;
+    box-shadow: var(--shadow-soft);
+  }
+

@@ -1,0 +1,94 @@
+﻿.dashboard-hero {
+    background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    color: white;
+    overflow: hidden;
+  }
+
+  .dashboard-panel {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    padding: 1.5rem;
+    height: 100%;
+  }
+
+  .summary-mini-card {
+    background: white;
+    border-radius: 18px;
+    box-shadow: var(--shadow-soft);
+    padding: 1.25rem;
+    height: 100%;
+  }
+
+  .overview-link-card {
+    background: white;
+    border-radius: 18px;
+    box-shadow: var(--shadow-soft);
+    padding: 1.25rem;
+    height: 100%;
+    transition: var(--transition-smooth);
+  }
+
+  .overview-link-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .overview-link-title {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .overview-link-product {
+    color: #4f46e5;
+  }
+
+  .overview-link-orders {
+    color: #0f766e;
+  }
+
+  .overview-link-users {
+    color: #b45309;
+  }
+
+  .overview-link-reports {
+    color: #be123c;
+  }
+
+  .recent-order-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.42rem 0.72rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+  }
+
+  .recent-order-pending {
+    background: #fff7e6;
+    color: #b7791f;
+    border-color: #fde7b0;
+  }
+
+  .recent-order-paid {
+    background: #ecfdf3;
+    color: #157347;
+    border-color: #b7ebc6;
+  }
+
+  .recent-order-danger {
+    background: #fff1f2;
+    color: #be123c;
+    border-color: #fecdd3;
+  }
+
+  .recent-order-neutral {
+    background: #eef2f7;
+    color: #475569;
+    border-color: #d8e0ea;
+  }
+

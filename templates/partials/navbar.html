@@ -1,92 +1,69 @@
 {% load static %}
-<!-- ==========================================
-     แถบนำทาง (Navbar) หลัก
-     ใช้ gradient background สีม่วง-น้ำเงิน
-     ========================================== -->
-<nav class="navbar navbar-expand-lg shadow-lg" style="background: var(--primary-gradient); padding: 0.6rem 0;">
-  <div class="container">
-
-    <!-- โลโก้และชื่อร้าน -->
-    <a class="navbar-brand fw-bold d-flex align-items-center gap-2 text-white" href="/">
+<nav class="navbar navbar-expand-lg shadow-lg w-100 fixed-top"
+     style="background: var(--primary-gradient); padding: 0.6rem 0; z-index: 1030;">
+  <div class="container-fluid px-3 px-lg-4 px-xl-5">
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-2 text-white"
+       href="{% if user.is_authenticated and not user.profile.is_customer %}{% url 'dashboard' %}{% else %}/{% endif %}">
       <div class="bg-white bg-opacity-25 rounded-3 p-1 d-flex align-items-center justify-content-center"
-        style="width:44px; height:44px;">
+           style="width:44px; height:44px;">
         <img src="{% static 'img/logo.png' %}" alt="Logo" width="36" height="36" class="rounded"
           onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'bi bi-shop fs-4 text-white\'></i>';" />
       </div>
-      <span class="fs-5">Hotel Shop</span>
+      <div class="d-flex flex-column lh-sm">
+        <span class="fs-5">ระบบขายสินค้าโรงแรม</span>
+        {% if user.is_authenticated and user.profile.is_customer %}
+        <small class="text-white-50 fw-medium">ส่วนลูกค้า</small>
+        {% elif user.is_authenticated %}
+        <small class="text-white-50 fw-medium">ส่วนผู้ดูแลระบบ</small>
+        {% else %}
+        <small class="text-white-50 fw-medium">Hotel Shop</small>
+        {% endif %}
+      </div>
     </a>
 
-    <!-- ปุ่มเปิด-ปิดเมนูบนมือถือ (Hamburger) -->
     <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
       <i class="bi bi-list fs-3"></i>
     </button>
 
-    <!-- รายการเมนูนำทาง -->
     <div class="collapse navbar-collapse" id="nav">
       <ul class="navbar-nav ms-auto gap-1 align-items-center">
+        {% if user.is_authenticated %}
+          {% if user.profile.is_admin %}
+          <li class="nav-item ms-lg-2">
+            <a class="btn btn-light btn-sm fw-bold px-3 py-2 rounded-3 shadow-sm" href="/admin/">
+              <i class="bi bi-shield-lock me-1"></i> Admin
+            </a>
+          </li>
+          {% endif %}
 
-        <!-- ลิงก์ไปหน้าสินค้า -->
-        <li class="nav-item">
-          <a class="nav-link text-white px-3 py-2 rounded-3 fw-medium" href="/"
-            style="transition: var(--transition-smooth);" onmouseover="this.style.background='rgba(255,255,255,0.15)'"
-            onmouseout="this.style.background='transparent'">
-            <i class="bi bi-grid me-1"></i> สินค้า
-          </a>
-        </li>
-
-        <!-- ลิงก์ไปหน้าตะกร้า -->
-        <li class="nav-item">
-          <a class="nav-link text-white px-3 py-2 rounded-3 fw-medium" href="/cart/"
-            style="transition: var(--transition-smooth);" onmouseover="this.style.background='rgba(255,255,255,0.15)'"
-            onmouseout="this.style.background='transparent'">
-            <i class="bi bi-cart3 me-1"></i> ตะกร้า
-          </a>
-        </li>
-
-        <!-- ลิงก์ไปหน้าชำระเงิน -->
-        <li class="nav-item">
-          <a class="nav-link text-white px-3 py-2 rounded-3 fw-medium" href="/checkout/"
-            style="transition: var(--transition-smooth);" onmouseover="this.style.background='rgba(255,255,255,0.15)'"
-            onmouseout="this.style.background='transparent'">
-            <i class="bi bi-credit-card me-1"></i> ชำระเงิน
-          </a>
-        </li>
-
-        <!-- ลิงก์ไปหน้าตรวจสลิป -->
-        <li class="nav-item">
-          <a class="nav-link text-white px-3 py-2 rounded-3 fw-medium" href="/admin-panel/orders/"
-            style="transition: var(--transition-smooth);" onmouseover="this.style.background='rgba(255,255,255,0.15)'"
-            onmouseout="this.style.background='transparent'">
-            <i class="bi bi-receipt me-1"></i> ตรวจสลิป
-          </a>
-        </li>
-
-        <!-- ลิงก์ไปหน้าจัดการสินค้า (Admin) -->
-        <li class="nav-item">
-          <a class="nav-link text-white px-3 py-2 rounded-3 fw-medium" href="{% url 'admin_product_list' %}"
-            style="transition: var(--transition-smooth);" onmouseover="this.style.background='rgba(255,255,255,0.15)'"
-            onmouseout="this.style.background='transparent'">
-            <i class="bi bi-gear me-1"></i> จัดการสินค้า
-          </a>
-        </li>
-
-        <!-- ลิงก์ไปหน้ารายงานยอดขาย -->
-        <li class="nav-item">
-          <a class="nav-link text-white px-3 py-2 rounded-3 fw-medium" href="{% url 'sales_report' %}"
-            style="transition: var(--transition-smooth);" onmouseover="this.style.background='rgba(255,255,255,0.15)'"
-            onmouseout="this.style.background='transparent'">
-
-            <i class="bi bi-bar-chart-line me-1"></i> รายงานยอดขาย
-          </a>
-        </li>
-
-        <!-- ปุ่มเข้า Admin (เน้นพิเศษ) -->
-        <li class="nav-item ms-lg-2">
-          <a class="btn btn-light btn-sm fw-bold px-3 py-2 rounded-3 shadow-sm" href="/admin/">
-            <i class="bi bi-shield-lock me-1"></i> Admin
-          </a>
-        </li>
-
+          <li class="nav-item">
+            <a class="nav-link text-white px-3 py-2 rounded-3 fw-medium" href="{% url 'profile' %}">
+              <i class="bi bi-person-circle me-1"></i> {{ user.username }}
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white px-3 py-2 rounded-3 fw-medium" href="{% url 'logout' %}"
+              data-swal-confirm="true"
+              data-swal-title="ออกจากระบบ?"
+              data-swal-text="คุณต้องการออกจากระบบตอนนี้ใช่หรือไม่"
+              data-swal-confirm-text="ออกจากระบบ"
+              data-swal-cancel-text="ยกเลิก"
+              data-swal-icon="question">
+              <i class="bi bi-box-arrow-right me-1"></i> ออกจากระบบ
+            </a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link text-white px-3 py-2 rounded-3 fw-medium" href="{% url 'register' %}">
+              <i class="bi bi-person-plus me-1"></i> สมัครสมาชิก Customer
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link text-white px-3 py-2 rounded-3 fw-medium" href="{% url 'login' %}">
+              <i class="bi bi-box-arrow-in-right me-1"></i> เข้าสู่ระบบ
+            </a>
+          </li>
+        {% endif %}
       </ul>
     </div>
   </div>

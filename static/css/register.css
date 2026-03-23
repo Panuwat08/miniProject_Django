@@ -1,0 +1,176 @@
+﻿body {
+    margin: 0;
+    font-family: "Prompt", "Segoe UI", Tahoma, sans-serif;
+    background:
+        radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 30%),
+        linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.register-box {
+    background: rgba(255, 255, 255, 0.96);
+    padding: 42px 34px;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 24px;
+    box-shadow: 0 24px 50px rgba(41, 52, 122, 0.28);
+    text-align: center;
+    backdrop-filter: blur(12px);
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    text-decoration: none;
+}
+
+.brand-mark {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 12px 24px rgba(102, 126, 234, 0.25);
+}
+
+.brand-mark img {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.18);
+    padding: 2px;
+}
+
+.register-box h2 {
+    margin: 0 0 8px;
+    color: #243b6b;
+    font-weight: 700;
+}
+
+.register-box p {
+    font-size: 14px;
+    color: #5b6475;
+    margin-bottom: 24px;
+}
+
+.field-group {
+    text-align: left;
+    margin-bottom: 14px;
+}
+
+.field-label {
+    display: block;
+    margin-bottom: 7px;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.field-note {
+    display: block;
+    margin-top: 5px;
+    color: #7b8496;
+    font-size: 12px;
+}
+
+.input-shell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #d8def0;
+    border-radius: 12px;
+    background: #f8faff;
+    transition: all 0.3s ease;
+    padding: 0 14px;
+}
+
+.input-shell:focus-within {
+    border-color: #667eea;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.14);
+}
+
+.input-icon {
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+.input-shell input {
+    width: 100%;
+    padding: 14px 0;
+    border: none;
+    font-size: 14px;
+    background: transparent;
+    box-sizing: border-box;
+}
+
+.input-shell input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 24px rgba(102, 126, 234, 0.28);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(102, 126, 234, 0.34);
+}
+
+a.link {
+    display: inline-block;
+    margin-top: 16px;
+    text-decoration: none;
+    color: #5b4db3;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+a.link:hover {
+    text-decoration: underline;
+}
+
+.message {
+    font-size: 13px;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+}
+
+.error {
+    background: #fff1f2;
+    color: #be123c;
+}
+
+.success {
+    background: #eefbf3;
+    color: #157347;
+}
+

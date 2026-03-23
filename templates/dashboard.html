@@ -1,0 +1,301 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+.dashboard-hero {
+    background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    color: white;
+    overflow: hidden;
+  }
+
+  .dashboard-panel {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-soft);
+    padding: 1.5rem;
+    height: 100%;
+  }
+
+  .summary-mini-card {
+    background: white;
+    border-radius: 18px;
+    box-shadow: var(--shadow-soft);
+    padding: 1.25rem;
+    height: 100%;
+  }
+
+  .overview-link-card {
+    background: white;
+    border-radius: 18px;
+    box-shadow: var(--shadow-soft);
+    padding: 1.25rem;
+    height: 100%;
+    transition: var(--transition-smooth);
+  }
+
+  .overview-link-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .overview-link-title {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .overview-link-product {
+    color: #4f46e5;
+  }
+
+  .overview-link-orders {
+    color: #0f766e;
+  }
+
+  .overview-link-users {
+    color: #b45309;
+  }
+
+  .overview-link-reports {
+    color: #be123c;
+  }
+
+  .recent-order-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.42rem 0.72rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+  }
+
+  .recent-order-pending {
+    background: #fff7e6;
+    color: #b7791f;
+    border-color: #fde7b0;
+  }
+
+  .recent-order-paid {
+    background: #ecfdf3;
+    color: #157347;
+    border-color: #b7ebc6;
+  }
+
+  .recent-order-danger {
+    background: #fff1f2;
+    color: #be123c;
+    border-color: #fecdd3;
+  }
+
+  .recent-order-neutral {
+    background: #eef2f7;
+    color: #475569;
+    border-color: #d8e0ea;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12">
+    <div class="dashboard-hero mb-4">
+      <div class="p-4 p-md-5">
+        <div class="row align-items-center g-4">
+          <div class="col-lg-8">
+            <div class="small text-white-50 text-uppercase fw-semibold mb-2">Admin Dashboard</div>
+            <h1 class="display-6 fw-bold mb-2">สำหรับผู้ดูแลระบบ</h1>
+            <h1 class="display-6 fw-bold mb-2">สำหรับผู้ดูแลระบบ</h1>
+            <p class="mb-0 text-white-50">
+              ยินดีต้อนรับ {{ user.username }} | {{ profile.get_role_display }}
+            </p>
+          </div>
+          <div class="col-lg-4 text-lg-end">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-25 shadow" style="width: 120px; height: 120px;">
+              <i class="bi bi-speedometer2" style="font-size: 3.5rem;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if profile.is_staff_member or profile.is_admin %}
+    <div class="row g-4 mb-4">
+      <div class="col-md-6 col-xl-3">
+        <div class="glass-card stat-card h-100">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon gradient-primary shadow-sm">
+              <i class="bi bi-box-seam"></i>
+            </div>
+            <div>
+              <div class="text-muted small">สินค้าพร้อมขาย</div>
+              <div class="fw-bold fs-4">{{ product_count }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-xl-3">
+        <div class="glass-card stat-card h-100">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon gradient-success shadow-sm">
+              <i class="bi bi-bag-check"></i>
+            </div>
+            <div>
+              <div class="text-muted small">ออเดอร์ทั้งหมด</div>
+              <div class="fw-bold fs-4">{{ order_count }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-xl-3">
+        <div class="glass-card stat-card h-100">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon gradient-warning shadow-sm">
+              <i class="bi bi-hourglass-split"></i>
+            </div>
+            <div>
+              <div class="text-muted small">รอดำเนินการ</div>
+              <div class="fw-bold fs-4">{{ pending_count }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-xl-3">
+        <div class="glass-card stat-card h-100">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon gradient-danger shadow-sm">
+              <i class="bi bi-exclamation-diamond"></i>
+            </div>
+            <div>
+              <div class="text-muted small">สินค้าหมดสต็อก</div>
+              <div class="fw-bold fs-4">{{ low_stock_count }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-xl-8">
+        <div class="dashboard-panel">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+            <div>
+              <h2 class="h4 fw-bold mb-1">ภาพรวมล่าสุด</h2>
+              <p class="text-muted mb-0">สรุปข้อมูลสำคัญสำหรับแอดมิน</p>
+            </div>
+            <a href="{% url 'sales_report' %}" class="btn btn-gradient rounded-pill">ดูรายงานทั้งหมด</a>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <div class="summary-mini-card">
+                <div class="text-muted small mb-2">ยอดขายสะสม</div>
+                <div class="fw-bold fs-3 text-success">{{ sales_total }} บาท</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="summary-mini-card">
+                <div class="text-muted small mb-2">ลูกค้าในระบบ</div>
+                <div class="fw-bold fs-3 text-primary">{{ customer_count }} ราย</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <a href="{% url 'admin_product_list' %}" class="text-decoration-none">
+                <div class="overview-link-card">
+                  <div class="overview-link-title overview-link-product">
+                    <i class="bi bi-gear me-2"></i>จัดการสินค้า
+                  </div>
+                  <div class="text-muted">เพิ่ม แก้ไข และจัดการสต็อกสินค้าในระบบ</div>
+                </div>
+              </a>
+            </div>
+            <div class="col-md-6">
+              <a href="{% url 'admin_orders' %}" class="text-decoration-none">
+                <div class="overview-link-card">
+                  <div class="overview-link-title overview-link-orders">
+                    <i class="bi bi-receipt me-2"></i>จัดการคำสั่งซื้อ
+                  </div>
+                  <div class="text-muted">ตรวจสอบออเดอร์ อนุมัติรายการ และติดตามสถานะการสั่งซื้อ</div>
+                </div>
+              </a>
+            </div>
+            <div class="col-md-6">
+              <a href="{% url 'user_management' %}" class="text-decoration-none">
+                <div class="overview-link-card">
+                  <div class="overview-link-title overview-link-users">
+                    <i class="bi bi-people me-2"></i>จัดการผู้ใช้งาน
+                  </div>
+                  <div class="text-muted">ดูรายชื่อผู้ใช้ ปรับบทบาท และเปิดหรือปิดการใช้งานบัญชี</div>
+                </div>
+              </a>
+            </div>
+            <div class="col-md-6">
+              <a href="{% url 'sales_report' %}" class="text-decoration-none">
+                <div class="overview-link-card">
+                  <div class="overview-link-title overview-link-reports">
+                    <i class="bi bi-bar-chart-line me-2"></i>รายงานระบบ
+                  </div>
+                  <div class="text-muted">ดูรายงานยอดขาย สินค้าขายดี และข้อมูลสรุปของระบบในภาพรวม</div>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-4">
+        <div class="dashboard-panel">
+          <h2 class="h5 fw-bold mb-4">ออเดอร์ล่าสุด</h2>
+          <div class="d-flex flex-column gap-3">
+            {% for order in recent_orders %}
+            <div class="bg-white rounded-4 shadow-sm p-3">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <div>
+                  <div class="fw-bold">#{{ order.id }} โดย {{ order.user.username }}</div>
+                  <div class="text-muted small">{{ order.created_at|date:"d/m/Y H:i" }}</div>
+                </div>
+                <span class="recent-order-badge {% if order.status == 'PENDING' %}recent-order-pending{% elif order.status == 'PAID' or order.status == 'SHIPPED' or order.status == 'COMPLETED' %}recent-order-paid{% elif order.status == 'REJECTED' or order.status == 'CANCELLED' %}recent-order-danger{% else %}recent-order-neutral{% endif %}">
+                  {{ order.get_status_display }}
+                </span>
+              </div>
+              <div class="mt-2 fw-semibold">{{ order.total }}</div>
+            </div>
+            {% empty %}
+            <div class="text-muted">ยังไม่มีออเดอร์ในระบบ</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% else %}
+    <div class="dashboard-panel">
+      <h2 class="h4 fw-bold mb-3">ข้อมูลผู้ใช้งาน</h2>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="summary-mini-card">
+            <div class="text-muted small mb-2">ชื่อผู้ใช้</div>
+            <div class="fw-bold fs-5">{{ user.username }}</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="summary-mini-card">
+            <div class="text-muted small mb-2">อีเมล</div>
+            <div class="fw-semibold">{{ user.email|default:"-" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

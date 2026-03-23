@@ -6,6 +6,9 @@ from django.conf.urls.static import static
 urlpatterns = [
     path("admin/", admin.site.urls),
 
+    # accounts: /login /register /logout /dashboard
+    path("", include("accounts.urls")),
+
     # shop: / (home) + /cart...
     path("", include("shop.urls")),
 
