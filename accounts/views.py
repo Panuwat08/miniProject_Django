@@ -22,18 +22,33 @@ def _require_staff_access(request):
         return redirect("dashboard")
     return None
 
+import re
+from django.contrib import messages
+from django.contrib.auth.models import User
+from django.shortcuts import redirect, render
 
 def register(request):
     if request.method == "POST":
-        username = request.POST.get("username", "")
-        email = request.POST.get("email", "")
+        username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip()
         password1 = request.POST.get("password1", "")
         password2 = request.POST.get("password2", "")
 
+        # ✅ 1. เช็คค่าว่าง
         if not username or not email or not password1 or not password2:
             messages.error(request, "กรอกข้อมูลให้ครบทุกช่อง")
             return redirect("/register/")
 
+        # ✅ 2. จำกัดความยาว
+        if len(username) > 20:
+            messages.error(request, "Username ห้ามเกิน 20 ตัวอักษร")
+            return redirect("/register/")
+
+        if len(password1) > 20:
+            messages.error(request, "Password ห้ามเกิน 20 ตัวอักษร")
+            return redirect("/register/")
+
+        # ✅ 3. ห้ามมีช่องว่าง
         if " " in username:
             messages.error(request, "Username ห้ามมีช่องว่าง")
             return redirect("/register/")
@@ -42,10 +57,21 @@ def register(request):
             messages.error(request, "Password ห้ามมีช่องว่าง")
             return redirect("/register/")
 
+        # ✅ 4. รูปแบบ username
         if not re.fullmatch(r"[A-Za-z0-9_]+", username):
             messages.error(request, "Username ใช้ได้เฉพาะภาษาอังกฤษ ตัวเลข และ _ เท่านั้น")
             return redirect("/register/")
 
+        # ✅ 5. กัน email ภาษาไทย + format email
+        if not re.fullmatch(r"[A-Za-z0-9@._\-]+", email):
+            messages.error(request, "Email ต้องเป็นภาษาอังกฤษเท่านั้น")
+            return redirect("/register/")
+
+        if not re.fullmatch(r"[^@]+@[^@]+\.[^@]+", email):
+            messages.error(request, "รูปแบบ Email ไม่ถูกต้อง")
+            return redirect("/register/")
+
+        # ✅ 6. เช็ครหัสผ่าน
         if password1 != password2:
             messages.error(request, "รหัสผ่านไม่ตรงกัน")
             return redirect("/register/")
@@ -54,6 +80,7 @@ def register(request):
             messages.error(request, "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร")
             return redirect("/register/")
 
+        # ✅ 7. เช็คซ้ำ
         if User.objects.filter(username=username).exists():
             messages.error(request, "Username นี้ถูกใช้แล้ว")
             return redirect("/register/")
@@ -62,18 +89,20 @@ def register(request):
             messages.error(request, "Email นี้ถูกใช้แล้ว")
             return redirect("/register/")
 
+        # ✅ 8. สร้าง user
         user = User.objects.create_user(
             username=username,
             email=email,
             password=password1,
         )
 
+        # ✅ 9. ตั้งค่า profile
         profile = user.profile
         profile.role = "CUSTOMER"
         profile.save()
 
         messages.success(request, "สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ")
-        return redirect("/register/")
+        return redirect("/login/")  # 🔥 เปลี่ยนให้ไป login
 
     return render(request, "register.html")
 

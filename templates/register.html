@@ -196,6 +196,50 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const usernameInput = document.querySelector("input[name='username']");
+    const emailInput = document.querySelector("input[name='email']");
+    const passwordInput = document.querySelector("input[name='password1']");
+    const password2Input = document.querySelector("input[name='password2']");
+
+    // ✅ USERNAME
+    if (usernameInput) {
+        usernameInput.addEventListener("input", function () {
+            this.value = this.value
+                .replace(/[^A-Za-z0-9_]/g, "")
+                .slice(0, 20);
+        });
+    }
+
+    // ✅ EMAIL (กันภาษาไทย)
+    if (emailInput) {
+        emailInput.addEventListener("input", function () {
+            this.value = this.value
+                .replace(/[^A-Za-z0-9@._\-]/g, "");
+        });
+    }
+
+    // ✅ PASSWORD (กันไทย + จำกัด 20)
+    if (passwordInput) {
+        passwordInput.addEventListener("input", function () {
+            this.value = this.value
+                .replace(/[^A-Za-z0-9]/g, "")
+                .slice(0, 20);
+        });
+    }
+
+    if (password2Input) {
+        password2Input.addEventListener("input", function () {
+            this.value = this.value
+                .replace(/[^A-Za-z0-9]/g, "")
+                .slice(0, 20);
+        });
+    }
+
+});
+</script>
 
 </head>
 <body>
@@ -229,6 +273,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <input id="register-username"
                        name="username"
                        placeholder="กรอกชื่อผู้ใช้"
+                       maxlength="20"
                        pattern="[A-Za-z0-9_]+"
                        required>
             </div>
@@ -256,6 +301,7 @@ document.addEventListener("DOMContentLoaded", function () {
                        name="password1"
                        type="password"
                        placeholder="ตั้งรหัสผ่าน"
+                          maxlength="20"
                        required>
             </div>
             <span class="field-note">รหัสผ่านควรมีอย่างน้อย 6 ตัวอักษร</span>
@@ -269,6 +315,7 @@ document.addEventListener("DOMContentLoaded", function () {
                        name="password2"
                        type="password"
                        placeholder="ยืนยันรหัสผ่าน"
+                          maxlength="20"
                        required>
             </div>
             <span class="field-note">กรอกรหัสผ่านเดิมซ้ำอีกครั้งให้ตรงกัน</span>

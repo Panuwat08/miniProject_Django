@@ -238,6 +238,21 @@ document.addEventListener("DOMContentLoaded", function () {
     renderCountdown();
 });
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const passwordInput = document.querySelector("input[name='password']");
+
+    if (passwordInput) {
+        passwordInput.addEventListener("input", function () {
+            this.value = this.value
+                .replace(/[^A-Za-z0-9]/g, "")  // ❌ กันภาษาไทย
+                .slice(0, 20);                // ❌ จำกัด 20 ตัว
+        });
+    }
+
+});
+</script>
 </head>
 <body>
 
@@ -284,6 +299,7 @@ document.addEventListener("DOMContentLoaded", function () {
                        name="password"
                        type="password"
                        placeholder="กรอกรหัสผ่าน"
+                        maxlength="20"
                        required>
             </div>
             <span class="field-note">กรอกรหัสผ่านของบัญชีที่ลงทะเบียนไว้</span>
