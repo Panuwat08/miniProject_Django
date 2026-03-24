@@ -1,3 +1,5 @@
+"""มุมมองของระบบคำสั่งซื้อ เช่น checkout รายละเอียดออเดอร์ สลิป และใบเสร็จ"""
+
 import os
 
 from django.conf import settings
@@ -27,6 +29,7 @@ from .models import (
 
 
 def _register_thai_pdf_fonts():
+    """ลงทะเบียนฟอนต์ภาษาไทยสำหรับการสร้าง PDF ด้วย ReportLab"""
     regular_name = "TahomaThai"
     bold_name = "TahomaThai-Bold"
 
@@ -40,6 +43,7 @@ def _register_thai_pdf_fonts():
 
 
 def _require_customer(request):
+    """บังคับให้ flow คำสั่งซื้อใช้งานได้เฉพาะลูกค้า"""
     if not request.user.is_authenticated:
         messages.error(request, "กรุณาเข้าสู่ระบบก่อนใช้งาน")
         return redirect("login")
@@ -49,13 +53,16 @@ def _require_customer(request):
 
 
 def deduct_order_stock(order):
+    """ตัดสต็อกจากรายการสินค้าในออเดอร์เมื่อออเดอร์ได้รับการอนุมัติ"""
     if order.stock_deducted:
         return
 
+    # ตรวจสอบก่อนว่าทุกสินค้ามีจำนวนเพียงพอสำหรับตัดสต็อกจริง
     for item in order.items.select_related("product"):
         if item.qty > item.product.stock:
             raise ValueError(f"สินค้า {item.product.name} สต็อกไม่พอ")
 
+    # เมื่อผ่านการตรวจสอบแล้วจึงค่อยลดสต็อกทีละรายการ
     for item in order.items.select_related("product"):
         item.product.stock -= item.qty
         item.product.save()
@@ -65,6 +72,7 @@ def deduct_order_stock(order):
 
 
 def restore_order_stock(order):
+    """คืนสต็อกกลับในกรณีที่ต้องย้อนสถานะออเดอร์ที่เคยตัดสต็อกไปแล้ว"""
     if not order.stock_deducted:
         return
 
@@ -78,6 +86,7 @@ def restore_order_stock(order):
 
 @login_required
 def checkout(request):
+    """สร้างคำสั่งซื้อจากตะกร้า พร้อมบันทึกที่อยู่จัดส่งและวิธีชำระเงิน"""
     blocked = _require_customer(request)
     if blocked:
         return blocked
@@ -91,9 +100,8 @@ def checkout(request):
     initial_phone = getattr(request.user.profile, "phone", "") or ""
     initial_address = ""
 
-    latest_shipping = (
-        ShippingAddress.objects.filter(user=request.user).order_by("-created_at").first()
-    )
+    # ดึงข้อมูลจัดส่งล่าสุดมาเติมฟอร์มให้ลูกค้าเพื่อลดการกรอกซ้ำ
+    latest_shipping = ShippingAddress.objects.filter(user=request.user).order_by("-created_at").first()
     if latest_shipping:
         if not initial_full_name or initial_full_name == request.user.username:
             initial_full_name = latest_shipping.full_name
@@ -117,6 +125,7 @@ def checkout(request):
 
         try:
             with transaction.atomic():
+                # ใช้ transaction เพื่อไม่ให้เกิดออเดอร์ค้างครึ่งทาง
                 shipping = ShippingAddress.objects.create(
                     user=request.user,
                     full_name=full_name,
@@ -133,6 +142,7 @@ def checkout(request):
                 )
 
                 for ci in cart.items.select_related("product"):
+                    # ตรวจสต็อกอีกครั้งก่อนย้ายรายการจากตะกร้ามาเป็นออเดอร์
                     if ci.qty > ci.product.stock:
                         raise ValueError(f"สินค้า {ci.product.name} สต็อกไม่พอ")
 
@@ -144,6 +154,7 @@ def checkout(request):
                         qty=ci.qty,
                     )
 
+                # ล้างตะกร้าหลังสร้างออเดอร์สำเร็จแล้วเท่านั้น
                 cart.items.all().delete()
 
             Notification.objects.create(
@@ -171,6 +182,7 @@ def checkout(request):
 
 @login_required
 def order_detail(request, order_id):
+    """แสดงรายละเอียดคำสั่งซื้อ สถานะ และ QR Code สำหรับออเดอร์ออนไลน์"""
     blocked = _require_customer(request)
     if blocked:
         return blocked
@@ -180,6 +192,7 @@ def order_detail(request, order_id):
     account_name = None
 
     if order.status == OrderStatus.PENDING and order.payment_method == PaymentMethod.ONLINE:
+        # สร้าง QR Code แบบ base64 เพื่อฝังภาพลงหน้าเว็บได้ทันที
         try:
             import base64
             from io import BytesIO
@@ -210,6 +223,7 @@ def order_detail(request, order_id):
 
 @login_required
 def order_receipt(request, order_id):
+    """แสดงหน้าใบเสร็จสำหรับออเดอร์ที่ผ่านเงื่อนไขการออกใบเสร็จแล้ว"""
     blocked = _require_customer(request)
     if blocked:
         return blocked
@@ -232,6 +246,7 @@ def order_receipt(request, order_id):
 
 @login_required
 def download_receipt(request, order_id):
+    """สร้างใบเสร็จ PDF ให้ลูกค้าดาวน์โหลดเก็บไว้"""
     blocked = _require_customer(request)
     if blocked:
         return blocked
@@ -273,6 +288,7 @@ def download_receipt(request, order_id):
     value_style.fontName = regular_font
     value_style.fontSize = 10
 
+    # วางโครงเอกสารใบเสร็จเป็นส่วนหัว ข้อมูลลูกค้า ตารางรายการ และสรุปยอด
     elements = []
 
     if logo_path.exists():
@@ -430,6 +446,7 @@ def download_receipt(request, order_id):
 
 @login_required
 def orders_list(request):
+    """แสดงรายการคำสั่งซื้อทั้งหมดของลูกค้าปัจจุบัน"""
     blocked = _require_customer(request)
     if blocked:
         return blocked
@@ -440,6 +457,7 @@ def orders_list(request):
 
 @login_required
 def upload_slip(request, order_id):
+    """อัปโหลดหรือเปลี่ยนสลิปสำหรับคำสั่งซื้อแบบ QR Code"""
     blocked = _require_customer(request)
     if blocked:
         return blocked
@@ -456,6 +474,7 @@ def upload_slip(request, order_id):
             messages.error(request, "กรุณาเลือกไฟล์รูปสลิป")
             return redirect("upload_slip", order_id=order.id)
 
+        # รองรับทั้งการอัปโหลดครั้งแรกและการอัปเดตสลิปเดิม
         slip, _ = PaymentSlip.objects.get_or_create(order=order)
         slip.image = img
         slip.approved = None
@@ -481,6 +500,7 @@ def upload_slip(request, order_id):
 
 @login_required
 def remove_slip(request, order_id):
+    """ลบสลิปการชำระเงินออกจากออเดอร์ของลูกค้า"""
     blocked = _require_customer(request)
     if blocked:
         return blocked

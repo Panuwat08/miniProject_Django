@@ -1,3 +1,5 @@
+"""โมเดลของระบบคำสั่งซื้อ การชำระเงิน และข้อมูลจัดส่ง"""
+
 from django.contrib.auth.models import User
 from django.db import models
 

@@ -1,3 +1,5 @@
+"""มุมมองหลักของร้านค้า เช่น แสดงสินค้า ตะกร้า และหน้าจัดการสินค้าฝั่งผู้ดูแล"""
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -8,6 +10,7 @@ from .models import Cart, CartItem, Category, Product
 
 
 def _require_customer(request):
+    """บังคับให้เฉพาะลูกค้าเข้าใช้งาน flow การซื้อสินค้า"""
     if not request.user.is_authenticated:
         messages.error(request, "กรุณาเข้าสู่ระบบก่อนใช้งาน")
         return redirect("login")
@@ -17,16 +20,18 @@ def _require_customer(request):
 
 
 def _get_cart(user):
+    """คืนค่าตะกร้าของผู้ใช้ ถ้ายังไม่มีจะสร้างให้โดยอัตโนมัติ"""
     cart, _ = Cart.objects.get_or_create(user=user)
     return cart
 
 
 def home(request):
+    """หน้าแสดงสินค้าฝั่งลูกค้า รองรับค้นหา กรองหมวดหมู่ และแบ่งหน้า"""
     blocked = _require_customer(request)
     if blocked:
         return blocked
 
-    products = Product.objects.filter(is_active=True).select_related("category").order_by("-id")
+    products = Product.objects.filter(is_active=True).select_related("category")
     categories = Category.objects.filter(is_active=True)
 
     category_slug = request.GET.get("category", "").strip()
@@ -37,6 +42,9 @@ def home(request):
 
     if query:
         products = products.filter(name__icontains=query)
+
+    # สุ่มลำดับสินค้าเพื่อให้หน้าร้านมีความหลากหลายมากขึ้น
+    products = products.order_by("?")
 
     paginator = Paginator(products, 8)
     page_obj = paginator.get_page(request.GET.get("page"))
@@ -55,6 +63,7 @@ def home(request):
 
 
 def product_detail(request, product_id):
+    """แสดงรายละเอียดสินค้าที่ลูกค้าเลือกดู"""
     blocked = _require_customer(request)
     if blocked:
         return blocked
@@ -65,6 +74,7 @@ def product_detail(request, product_id):
 
 @login_required
 def cart_detail(request):
+    """แสดงรายการสินค้าในตะกร้าของผู้ใช้ปัจจุบัน"""
     blocked = _require_customer(request)
     if blocked:
         return blocked
@@ -75,6 +85,7 @@ def cart_detail(request):
 
 @login_required
 def cart_add(request, product_id):
+    """เพิ่มสินค้าลงตะกร้าและกันจำนวนไม่ให้เกินสต็อกจริง"""
     blocked = _require_customer(request)
     if blocked:
         return blocked
@@ -84,6 +95,7 @@ def cart_add(request, product_id):
     item, created = CartItem.objects.get_or_create(cart=cart, product=product)
 
     if not created:
+        # ถ้ามีรายการเดิมอยู่แล้วให้เพิ่มจำนวนแทนการสร้างบรรทัดใหม่
         item.qty += 1
 
     if item.qty > product.stock:
@@ -96,6 +108,7 @@ def cart_add(request, product_id):
 
 @login_required
 def cart_update_qty(request, item_id):
+    """อัปเดตจำนวนสินค้าในตะกร้าตามค่าที่ผู้ใช้กรอก"""
     blocked = _require_customer(request)
     if blocked:
         return blocked
@@ -119,6 +132,7 @@ def cart_update_qty(request, item_id):
 
 @login_required
 def cart_remove(request, item_id):
+    """ลบสินค้า 1 รายการออกจากตะกร้าของผู้ใช้"""
     blocked = _require_customer(request)
     if blocked:
         return blocked
@@ -130,6 +144,7 @@ def cart_remove(request, item_id):
 
 @login_required
 def admin_product_list(request):
+    """หน้ารายการสินค้าฝั่งผู้ดูแล รองรับค้นหา กรอง และแบ่งหน้า"""
     if not (request.user.profile.is_staff_member() or request.user.profile.is_admin()):
         messages.error(request, "ไม่มีสิทธิ์เข้าถึง")
         return redirect("home")
@@ -164,6 +179,7 @@ def admin_product_list(request):
 
 @login_required
 def product_create(request):
+    """สร้างสินค้าใหม่จากฟอร์มฝั่งผู้ดูแลระบบ"""
     if not (request.user.profile.is_staff_member() or request.user.profile.is_admin()):
         messages.error(request, "ไม่มีสิทธิ์เข้าถึง")
         return redirect("home")
@@ -182,6 +198,7 @@ def product_create(request):
 
 @login_required
 def product_update(request, pk):
+    """แก้ไขข้อมูลสินค้าเดิม"""
     if not (request.user.profile.is_staff_member() or request.user.profile.is_admin()):
         messages.error(request, "ไม่มีสิทธิ์เข้าถึง")
         return redirect("home")
@@ -201,6 +218,7 @@ def product_update(request, pk):
 
 @login_required
 def product_delete(request, pk):
+    """ปิดการขายสินค้าโดยเปลี่ยนสถานะเป็นไม่ active แทนการลบถาวร"""
     if not (request.user.profile.is_staff_member() or request.user.profile.is_admin()):
         messages.error(request, "ไม่มีสิทธิ์เข้าถึง")
         return redirect("home")
@@ -217,6 +235,7 @@ def product_delete(request, pk):
 
 @login_required
 def admin_category_list(request):
+    """หน้าจัดการหมวดหมู่สินค้า พร้อมค้นหาและแบ่งหน้า"""
     if not (request.user.profile.is_staff_member() or request.user.profile.is_admin()):
         messages.error(request, "ไม่มีสิทธิ์เข้าถึง")
         return redirect("home")
@@ -245,6 +264,7 @@ def admin_category_list(request):
 
 @login_required
 def category_create(request):
+    """เพิ่มหมวดหมู่สินค้าใหม่"""
     if not (request.user.profile.is_staff_member() or request.user.profile.is_admin()):
         messages.error(request, "ไม่มีสิทธิ์เข้าถึง")
         return redirect("home")
@@ -262,6 +282,7 @@ def category_create(request):
 
 @login_required
 def category_remove(request, pk):
+    """ลบหมวดหมู่ถาวรได้เฉพาะกรณีที่ไม่มีสินค้าใช้งานอยู่แล้ว"""
     if not (request.user.profile.is_staff_member() or request.user.profile.is_admin()):
         messages.error(request, "ไม่มีสิทธิ์เข้าถึง")
         return redirect("home")
@@ -280,6 +301,7 @@ def category_remove(request, pk):
 
 @login_required
 def category_update(request, pk):
+    """แก้ไขข้อมูลหมวดหมู่สินค้า"""
     if not (request.user.profile.is_staff_member() or request.user.profile.is_admin()):
         messages.error(request, "ไม่มีสิทธิ์เข้าถึง")
         return redirect("home")
@@ -298,6 +320,7 @@ def category_update(request, pk):
 
 @login_required
 def category_delete(request, pk):
+    """ปิดใช้งานหมวดหมู่โดยยังคงเก็บข้อมูลไว้ในระบบ"""
     if not (request.user.profile.is_staff_member() or request.user.profile.is_admin()):
         messages.error(request, "ไม่มีสิทธิ์เข้าถึง")
         return redirect("home")
@@ -313,6 +336,7 @@ def category_delete(request, pk):
 
 @login_required
 def category_enable(request, pk):
+    """เปิดใช้งานหมวดหมู่ที่เคยถูกปิดไว้"""
     if not (request.user.profile.is_staff_member() or request.user.profile.is_admin()):
         messages.error(request, "ไม่มีสิทธิ์เข้าถึง")
         return redirect("home")

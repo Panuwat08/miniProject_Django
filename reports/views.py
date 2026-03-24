@@ -1,3 +1,5 @@
+"""มุมมองรายงานยอดขาย สินค้าขายดี กำไร และการส่งออก Excel/PDF"""
+
 import openpyxl
 import os
 from django.contrib.auth.decorators import login_required
@@ -20,6 +22,7 @@ PAID_STATUSES = [OrderStatus.PAID, OrderStatus.SHIPPED, OrderStatus.COMPLETED]
 
 
 def _register_thai_pdf_fonts():
+    """ลงทะเบียนฟอนต์ไทยก่อนสร้างเอกสาร PDF รายงาน"""
     regular_name = "TahomaThai"
     bold_name = "TahomaThai-Bold"
 
@@ -33,6 +36,7 @@ def _register_thai_pdf_fonts():
 
 
 def _filtered_orders(request):
+    """รวมการกรองออเดอร์ตามช่วงเวลาและประเภทรายงานไว้ที่จุดเดียว"""
     start_date = request.GET.get("start_date")
     end_date = request.GET.get("end_date")
     report_type = request.GET.get("type", "monthly")
@@ -43,6 +47,7 @@ def _filtered_orders(request):
     if end_date in invalid_date_values:
         end_date = None
 
+    # นำเฉพาะออเดอร์ที่ถือว่าเป็นยอดขายจริงมาใช้ในรายงาน
     orders = Order.objects.filter(status__in=PAID_STATUSES)
     if start_date and end_date:
         orders = orders.filter(created_at__date__range=[start_date, end_date])
@@ -51,6 +56,7 @@ def _filtered_orders(request):
 
 
 def _sales_summary(orders, report_type):
+    """สรุปยอดขายแบบรายวันหรือรายเดือนเพื่อใช้ทั้งหน้าเว็บและกราฟ"""
     trunc = TruncDate("created_at") if report_type == "daily" else TruncMonth("created_at")
     sales = (
         orders.annotate(period=trunc)
@@ -64,6 +70,7 @@ def _sales_summary(orders, report_type):
 
 
 def _sales_export_rows(orders):
+    """เตรียมข้อมูลรายละเอียดสินค้าเพื่อใช้ในไฟล์ Excel และ PDF"""
     return (
         OrderItem.objects.filter(order__in=orders)
         .values("order__created_at__date", "product__name", "price")
@@ -79,6 +86,7 @@ def _sales_export_rows(orders):
 
 @login_required
 def sales_report(request):
+    """แสดงรายงานยอดขายพร้อมข้อมูลกราฟและสินค้าขายดี"""
     orders, start_date, end_date, report_type = _filtered_orders(request)
     sales, labels, data = _sales_summary(orders, report_type)
 
@@ -106,6 +114,7 @@ def sales_report(request):
 
 @login_required
 def product_report(request):
+    """แสดงรายงานสินค้าขายดีแยกตามจำนวนและยอดขาย"""
     orders, start_date, end_date, report_type = _filtered_orders(request)
     items = OrderItem.objects.filter(order__in=orders)
 
@@ -132,6 +141,7 @@ def product_report(request):
 
 @login_required
 def profit_report(request):
+    """แสดงรายงานกำไรจากส่วนต่างราคาขายและต้นทุน"""
     orders, start_date, end_date, report_type = _filtered_orders(request)
     items = OrderItem.objects.filter(order__in=orders)
 
@@ -163,10 +173,12 @@ def profit_report(request):
 
 @login_required
 def export_excel(request):
+    """ส่งออกข้อมูลยอดขายและรายละเอียดสินค้าเป็นไฟล์ Excel"""
     orders, _, _, report_type = _filtered_orders(request)
     sales, _, _ = _sales_summary(orders, report_type)
     export_rows = _sales_export_rows(orders)
 
+    # ใช้หลาย sheet เพื่อแยกข้อมูลสรุปและรายละเอียดสินค้าให้อ่านง่าย
     workbook = openpyxl.Workbook()
     detail_sheet = workbook.active
     detail_sheet.title = "รายละเอียดสินค้า"
@@ -197,6 +209,7 @@ def export_excel(request):
 
 @login_required
 def export_pdf(request):
+    """ส่งออกรายงานยอดขายแบบ PDF พร้อมตารางรายละเอียดสินค้า"""
     orders, _, _, report_type = _filtered_orders(request)
     export_rows = _sales_export_rows(orders)
     regular_font, bold_font = _register_thai_pdf_fonts()

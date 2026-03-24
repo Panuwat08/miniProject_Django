@@ -1,3 +1,5 @@
+"""มุมมองฝั่งผู้ดูแลสำหรับตรวจสอบ อนุมัติ หรือปฏิเสธคำสั่งซื้อ"""
+
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.mail import send_mail
@@ -10,6 +12,7 @@ from .views import deduct_order_stock, restore_order_stock
 
 
 def _build_result_message(is_qr_order, approved):
+    """สร้างข้อความผลลัพธ์ให้เหมาะกับประเภทการชำระเงินและผลตรวจสอบ"""
     if approved:
         if is_qr_order:
             return "สลิปผ่านการตรวจสอบแล้ว และระบบตัดสต๊อกสินค้าเรียบร้อย"
@@ -21,12 +24,14 @@ def _build_result_message(is_qr_order, approved):
 
 
 def _build_notification_title(approved):
+    """กำหนดหัวข้อแจ้งเตือนตามผลการตรวจสอบคำสั่งซื้อ"""
     if approved:
         return "คำสั่งซื้อได้รับการอนุมัติแล้ว"
     return "คำสั่งซื้อถูกปฏิเสธ"
 
 
 def _build_notification_message(order, result_message, note):
+    """ประกอบข้อความแจ้งเตือนในระบบที่ส่งกลับไปยังลูกค้า"""
     message = f"คำสั่งซื้อ {order.order_code}: {result_message}"
     if note:
         message += f" หมายเหตุ: {note}"
@@ -34,6 +39,7 @@ def _build_notification_message(order, result_message, note):
 
 
 def _send_order_status_email(order, approved, result_message, note):
+    """ส่งอีเมลแจ้งลูกค้าเมื่อออเดอร์ถูกอนุมัติหรือปฏิเสธ"""
     if not order.user.email:
         return
 
@@ -67,11 +73,13 @@ def _send_order_status_email(order, approved, result_message, note):
 
 @staff_member_required
 def admin_orders(request):
+    """หน้ารวมคำสั่งซื้อฝั่งผู้ดูแล พร้อมตัวเลขสรุปสถานะหลัก"""
     orders = (
         Order.objects.select_related("user", "shipping")
         .prefetch_related("items__product")
         .order_by("-created_at")
     )
+    # รวมตัวเลขสำหรับแสดงบนการ์ดสรุปด้านบนของหน้า
     summary = orders.aggregate(
         total_orders=Count("id"),
         pending_orders=Count("id", filter=Q(status=OrderStatus.PENDING)),
@@ -111,6 +119,7 @@ def admin_orders(request):
 
 @staff_member_required
 def admin_check_slip(request, order_id):
+    """หน้าตรวจสลิปหรืออนุมัติออเดอร์ COD แล้วแจ้งผลกลับหาลูกค้า"""
     order = get_object_or_404(
         Order.objects.select_related("user", "shipping").prefetch_related("items__product"),
         id=order_id,
@@ -134,6 +143,7 @@ def admin_check_slip(request, order_id):
 
         if action == "approve":
             try:
+                # ตัดสต็อกทันทีเมื่อผู้ดูแลอนุมัติคำสั่งซื้อ
                 deduct_order_stock(order)
             except ValueError as exc:
                 messages.error(request, str(exc))
@@ -161,6 +171,7 @@ def admin_check_slip(request, order_id):
             return redirect("admin_orders")
 
         if action == "reject":
+            # ฝั่ง QR จะปฏิเสธสลิป ส่วน COD จะปฏิเสธข้อมูลคำสั่งซื้อแทน
             if is_qr_order and slip:
                 slip.approved = False
                 slip.note = note
@@ -214,6 +225,7 @@ def admin_check_slip(request, order_id):
 
 @staff_member_required
 def admin_delete_order(request, order_id):
+    """ลบคำสั่งซื้อและคืนสต็อกถ้าออเดอร์นั้นเคยตัดสต็อกไปแล้ว"""
     order = get_object_or_404(Order, id=order_id)
 
     if request.method == "POST":

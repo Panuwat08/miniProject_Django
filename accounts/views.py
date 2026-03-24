@@ -1,3 +1,5 @@
+"""มุมมองหลักของระบบบัญชีผู้ใช้ เช่น สมัครสมาชิก เข้าสู่ระบบ และหน้าจัดการผู้ใช้"""
+
 import re
 import time
 
@@ -16,6 +18,7 @@ from .models import UserProfile
 
 
 def _require_staff_access(request):
+    """กันสิทธิ์ไม่ให้ผู้ใช้ทั่วไปเข้าถึงหน้าฝั่งผู้ดูแลระบบ"""
     profile = request.user.profile
     if not (profile.is_staff_member() or profile.is_admin()):
         messages.error(request, "หน้านี้สำหรับผู้ดูแลระบบ")
@@ -28,6 +31,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import redirect, render
 
 def register(request):
+    """สมัครสมาชิกใหม่ โดยกำหนดบทบาทเริ่มต้นเป็นลูกค้า"""
     if request.method == "POST":
         username = request.POST.get("username", "").strip()
         email = request.POST.get("email", "").strip()
@@ -108,6 +112,7 @@ def register(request):
 
 
 def login_view(request):
+    """เข้าสู่ระบบพร้อมจำกัดการลองผิดเกิน 3 ครั้งและล็อกชั่วคราว 60 วินาที"""
     lock_until = request.session.get("login_locked_until", 0)
     remaining_seconds = max(0, int(lock_until - time.time()))
 
@@ -127,9 +132,11 @@ def login_view(request):
             messages.error(request, "Username ไม่ถูกต้อง")
             return redirect("/login/")
 
+        # ตรวจสอบข้อมูลเข้าสู่ระบบด้วยระบบ auth ของ Django
         user = authenticate(request, username=username, password=password)
 
         if user is None:
+            # เก็บจำนวนครั้งที่กรอกผิดไว้ใน session ของเบราว์เซอร์ปัจจุบัน
             failed_attempts = int(request.session.get("login_failed_attempts", 0) or 0) + 1
             if failed_attempts >= 3:
                 request.session["login_locked_until"] = time.time() + 60
@@ -144,6 +151,7 @@ def login_view(request):
                 )
             return redirect("/login/")
 
+        # หากเข้าสู่ระบบสำเร็จให้ล้างตัวนับและเวลาล็อกอินที่เคยค้างไว้
         request.session.pop("login_locked_until", None)
         request.session.pop("login_failed_attempts", None)
         login(request, user)
@@ -155,6 +163,7 @@ def login_view(request):
 
 
 def logout_view(request):
+    """ออกจากระบบและพาผู้ใช้กลับไปหน้าเข้าสู่ระบบ"""
     logout(request)
     messages.success(request, "ออกจากระบบสำเร็จ")
     return redirect("/login/")
@@ -162,6 +171,7 @@ def logout_view(request):
 
 @login_required
 def dashboard(request):
+    """แสดงข้อมูล dashboard ที่แตกต่างกันตามบทบาทของผู้ใช้"""
     profile = request.user.profile
     context = {
         "user": request.user,
@@ -169,6 +179,7 @@ def dashboard(request):
     }
 
     if profile.is_staff_member() or profile.is_admin():
+        # สรุปตัวเลขหลักสำหรับการ์ดและรายการออเดอร์ล่าสุดบนหน้า dashboard
         orders = Order.objects.all()
         context.update(
             {
@@ -190,10 +201,12 @@ def dashboard(request):
 
 @login_required
 def profile_view(request):
+    """แสดงและบันทึกการแก้ไขข้อมูลส่วนตัวของผู้ใช้"""
     profile = request.user.profile
     if request.method == "POST":
         form = ProfileUpdateForm(request.POST, user=request.user)
         if form.is_valid():
+            # บันทึกเฉพาะฟิลด์ที่เปิดให้ผู้ใช้แก้ไขจากหน้าโปรไฟล์
             form.save()
             messages.success(request, "บันทึกข้อมูลส่วนตัวเรียบร้อยแล้ว")
             return redirect("profile")
@@ -214,6 +227,7 @@ def profile_view(request):
 
 @login_required
 def user_management(request):
+    """หน้าจัดการผู้ใช้สำหรับ staff/admin พร้อมค้นหา กรอง และสรุปจำนวนผู้ใช้"""
     blocked = _require_staff_access(request)
     if blocked:
         return blocked
@@ -221,6 +235,7 @@ def user_management(request):
     query = request.GET.get("q", "").strip()
     role = request.GET.get("role", "").strip()
 
+    # ดึง profile มาพร้อมกันเพื่อลดจำนวน query ตอนแสดงผลในตาราง
     users = User.objects.select_related("profile").order_by("-date_joined")
 
     if query:
@@ -257,6 +272,7 @@ def user_management(request):
 
 @login_required
 def create_user_account(request):
+    """สร้างผู้ใช้ใหม่จากฝั่งผู้ดูแลระบบ โดย staff จะถูกจำกัดบทบาทที่สร้างได้"""
     blocked = _require_staff_access(request)
     if blocked:
         return blocked
@@ -312,6 +328,7 @@ def create_user_account(request):
 
 @login_required
 def update_user_role(request, user_id):
+    """เปลี่ยนบทบาทผู้ใช้ โดยตรวจสิทธิ์ของผู้ที่กำลังแก้ไขก่อนเสมอ"""
     blocked = _require_staff_access(request)
     if blocked:
         return blocked
@@ -344,6 +361,7 @@ def update_user_role(request, user_id):
 
 @login_required
 def toggle_user_active(request, user_id):
+    """เปิดหรือปิดการใช้งานบัญชีจากหน้าจัดการผู้ใช้"""
     blocked = _require_staff_access(request)
     if blocked:
         return blocked

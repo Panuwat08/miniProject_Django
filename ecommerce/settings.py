@@ -1,7 +1,10 @@
+"""ไฟล์ตั้งค่าหลักของโปรเจค Django เช่น app ฐานข้อมูล session และอีเมล"""
+
 from pathlib import Path
 import os
 from dotenv import load_dotenv
 
+# โหลดค่าตัวแปรแวดล้อมจากไฟล์ .env เพื่อแยกข้อมูลสำคัญออกจากโค้ด
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -18,6 +21,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
+    # app ภายในโปรเจค
     "products",
     "accounts",
     "shop",
@@ -40,8 +44,8 @@ ROOT_URLCONF = "ecommerce.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],  # templates กลาง
-        "APP_DIRS": True,                  # templates ในแต่ละ app
+        "DIRS": [BASE_DIR / "templates"],  # templates กลางของทั้งโปรเจค
+        "APP_DIRS": True,                  # เปิดใช้ templates ภายในแต่ละ app
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
@@ -55,6 +59,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "ecommerce.wsgi.application"
 
+# ตั้งค่าฐานข้อมูลหลักของระบบ
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
@@ -89,16 +94,16 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "/admin/login/"
 
-# Session timeout after 30 minutes of inactivity for all users.
+# หมดเวลา session หลังไม่มีการใช้งาน 30 นาที
 SESSION_COOKIE_AGE = 30 * 60
 SESSION_SAVE_EVERY_REQUEST = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
-# PromptPay Configuration
+# ข้อมูลพร้อมเพย์สำหรับสร้าง QR Code ชำระเงิน
 PROMPTPAY_ID = os.getenv("PROMPTPAY_ID", "0647810688")
 PROMPTPAY_NAME = os.getenv("PROMPTPAY_NAME", "Hotel Shop")
 
-# Email Configuration
+# ตั้งค่าอีเมลสำหรับส่งแจ้งเตือนลูกค้า
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
     "django.core.mail.backends.console.EmailBackend",

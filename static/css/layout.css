@@ -72,15 +72,34 @@ body {
 }
 
 .premium-footer {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  color: rgba(255, 255, 255, 0.7);
-  padding: 2rem 0;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #5f6fe0 0%, #764ba2 55%, #5b3f97 100%);
+  color: rgba(255, 255, 255, 0.82);
+  padding: 2.25rem 0;
   width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 -10px 30px rgba(102, 126, 234, 0.14);
+}
+
+.premium-footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.16), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.12), transparent 24%);
+  pointer-events: none;
 }
 
 .premium-footer a {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.92);
   text-decoration: none;
+}
+
+.premium-footer .container-fluid {
+  position: relative;
+  z-index: 1;
 }
 
 .stat-card {

@@ -1,3 +1,4 @@
+{# ???? dashboard ???????????????????????????????? #}
 ﻿{% extends "base.html" %}
 {% load static %}
 
@@ -108,7 +109,6 @@
           <div class="col-lg-8">
             <div class="small text-white-50 text-uppercase fw-semibold mb-2">Admin Dashboard</div>
             <h1 class="display-6 fw-bold mb-2">สำหรับผู้ดูแลระบบ</h1>
-            <h1 class="display-6 fw-bold mb-2">สำหรับผู้ดูแลระบบ</h1>
             <p class="mb-0 text-white-50">
               ยินดีต้อนรับ {{ user.username }} | {{ profile.get_role_display }}
             </p>
@@ -121,7 +121,6 @@
         </div>
       </div>
     </div>
-
     {% if profile.is_staff_member or profile.is_admin %}
     <div class="row g-4 mb-4">
       <div class="col-md-6 col-xl-3">
