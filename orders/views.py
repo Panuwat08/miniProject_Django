@@ -1,4 +1,4 @@
-"""มุมมองของระบบคำสั่งซื้อ เช่น checkout รายละเอียดออเดอร์ สลิป และใบเสร็จ"""
+"""มุมมองของระบบคำสั่งซื้อ เช่น checkout รายละเอียดออเดอร์ สลิป และเอกสารคำสั่งซื้อ"""
 
 import os
 
@@ -9,6 +9,7 @@ from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from reportlab.lib import colors
+from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.pdfbase import pdfmetrics
@@ -223,14 +224,14 @@ def order_detail(request, order_id):
 
 @login_required
 def order_receipt(request, order_id):
-    """แสดงหน้าใบเสร็จสำหรับออเดอร์ที่ผ่านเงื่อนไขการออกใบเสร็จแล้ว"""
+    """แสดงหน้าใบสั่งซื้อสินค้าสำหรับออเดอร์ที่ผ่านเงื่อนไขการออกเอกสารแล้ว"""
     blocked = _require_customer(request)
     if blocked:
         return blocked
 
     order = get_object_or_404(Order.objects.select_related("shipping"), id=order_id, user=request.user)
-    if not order.can_issue_receipt():
-        messages.error(request, "ใบเสร็จจะออกได้หลังตรวจสอบการชำระเงินผ่านแล้ว")
+    if not order.can_download_purchase_order():
+        messages.error(request, "ไม่พบเอกสารคำสั่งซื้อ")
         return redirect("order_detail", order_id=order.id)
 
     return render(
@@ -246,7 +247,7 @@ def order_receipt(request, order_id):
 
 @login_required
 def download_receipt(request, order_id):
-    """สร้างใบเสร็จ PDF ให้ลูกค้าดาวน์โหลดเก็บไว้"""
+    """สร้างใบสั่งซื้อสินค้า PDF ให้ลูกค้าดาวน์โหลดเก็บไว้"""
     blocked = _require_customer(request)
     if blocked:
         return blocked
@@ -256,14 +257,15 @@ def download_receipt(request, order_id):
         id=order_id,
         user=request.user,
     )
-    if not order.can_issue_receipt():
-        messages.error(request, "ใบเสร็จจะดาวน์โหลดได้หลังตรวจสอบการชำระเงินผ่านแล้ว")
+    if not order.can_download_purchase_order():
+        messages.error(request, "ไม่พบเอกสารคำสั่งซื้อ")
         return redirect("order_detail", order_id=order.id)
 
     regular_font, bold_font = _register_thai_pdf_fonts()
     logo_path = settings.BASE_DIR / "static" / "img" / "logo.png"
     response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="{order.receipt_code}.pdf"'
+    purchase_order_code = order.order_code.replace("ORD", "PO", 1)
+    response["Content-Disposition"] = f'attachment; filename="{purchase_order_code}.pdf"'
 
     document = SimpleDocTemplate(
         response,
@@ -280,15 +282,20 @@ def download_receipt(request, order_id):
     styles["Normal"].fontName = regular_font
     styles["Normal"].fontSize = 10
 
-    label_style = styles["Normal"].clone("ReceiptLabel")
+    label_style = styles["Normal"].clone("OrderDocumentLabel")
     label_style.fontName = bold_font
     label_style.fontSize = 10
 
-    value_style = styles["Normal"].clone("ReceiptValue")
+    value_style = styles["Normal"].clone("OrderDocumentValue")
     value_style.fontName = regular_font
     value_style.fontSize = 10
 
-    # วางโครงเอกสารใบเสร็จเป็นส่วนหัว ข้อมูลลูกค้า ตารางรายการ และสรุปยอด
+    price_style = styles["Normal"].clone("OrderDocumentPrice")
+    price_style.fontName = regular_font
+    price_style.fontSize = 10
+    price_style.alignment = TA_RIGHT
+
+    # วางโครงเอกสารคำสั่งซื้อเป็นส่วนหัว ข้อมูลลูกค้า ตารางรายการ และสรุปยอด
     elements = []
 
     if logo_path.exists():
@@ -299,14 +306,14 @@ def download_receipt(request, order_id):
     title_table = Table(
         [
             [
-                Paragraph("บิลเต็มรูปแบบ (Receipt)", styles["Title"]),
+                Paragraph("ใบสั่งซื้อสินค้า", styles["Title"]),
                 Paragraph(
-                    f'<para align="right"><font name="{bold_font}" size="11" color="white">{order.receipt_code}</font></para>',
+                    f'<para align="right"><font name="{bold_font}" size="9" color="white"><nobr>{purchase_order_code}</nobr></font></para>',
                     styles["Normal"],
                 ),
             ]
         ],
-        colWidths=[390, 110],
+        colWidths=[360, 140],
     )
     title_table.setStyle(
         TableStyle(
@@ -326,7 +333,7 @@ def download_receipt(request, order_id):
         Paragraph("ร้านค้าที่ให้บริการ", label_style),
         Paragraph(getattr(settings, "PROMPTPAY_NAME", "Hotel Shop"), value_style),
         Paragraph("ระบบขายสินค้าโรงแรม", value_style),
-        Paragraph("อีเมลติดต่อ: " + (getattr(settings, "DEFAULT_FROM_EMAIL", "Hotel Shop")), value_style),
+        Paragraph("อีเมลติดต่อ: hotelshop@gmail.com", value_style),
     ]
     customer_info = [
         Paragraph("รายละเอียดลูกค้าคนสำคัญ", label_style),
@@ -346,18 +353,18 @@ def download_receipt(request, order_id):
     )
     elements.extend([info_table, Spacer(1, 18)])
 
-    table_data = [["จำนวน", "รายการสินค้า", "ราคา"]]
-    for index, item in enumerate(order.items.all(), start=1):
+    table_data = [[Paragraph("จำนวน", label_style), Paragraph("รายการสินค้า", label_style), Paragraph("ราคา", price_style)]]
+    for index, item in enumerate(order.items.select_related("product"), start=1):
         table_data.append(
             [
-                str(item.qty),
-                item.product.name,
-                f"{float(item.subtotal()):,.2f}",
+                Paragraph(str(item.qty), value_style),
+                Paragraph(item.product.name, value_style),
+                Paragraph(f"{float(item.subtotal()):,.2f}", price_style),
             ]
         )
 
-    receipt_table = Table(table_data, colWidths=[65, 310, 125])
-    receipt_table.setStyle(
+    order_table = Table(table_data, colWidths=[80, 335, 120])
+    order_table.setStyle(
         TableStyle(
             [
                 ("LINEABOVE", (0, 0), (-1, 0), 1.1, colors.black),
@@ -365,16 +372,19 @@ def download_receipt(request, order_id):
                 ("LINEBELOW", (0, -1), (-1, -1), 1.1, colors.black),
                 ("FONTNAME", (0, 0), (-1, 0), bold_font),
                 ("FONTNAME", (0, 1), (-1, -1), regular_font),
-                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-                ("ALIGN", (1, 1), (1, -1), "LEFT"),
+                ("ALIGN", (0, 0), (0, -1), "LEFT"),
+                ("ALIGN", (1, 0), (1, -1), "LEFT"),
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("ALIGN", (2, 1), (2, -1), "RIGHT"),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-                ("TOPPADDING", (0, 0), (-1, -1), 10),
+                ("ALIGN", (2, 0), (2, -1), "RIGHT"),
+                ("LEFTPADDING", (0, 0), (0, -1), 6),
+                ("LEFTPADDING", (1, 0), (1, -1), 8),
+                ("RIGHTPADDING", (2, 0), (2, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 8),
             ]
         )
     )
-    elements.extend([receipt_table, Spacer(1, 16)])
+    elements.extend([order_table, Spacer(1, 16)])
 
     note_box = Table(
         [[Paragraph("หมายเหตุ", label_style)], [Paragraph(order.review_note or "-", value_style)]],
@@ -451,7 +461,12 @@ def orders_list(request):
     if blocked:
         return blocked
 
-    orders = Order.objects.filter(user=request.user).select_related("shipping").order_by("-created_at")
+    orders = (
+        Order.objects.filter(user=request.user)
+        .select_related("shipping")
+        .prefetch_related("items__product")
+        .order_by("-created_at")
+    )
     return render(request, "orders/orders_list.html", {"orders": orders})
 
 

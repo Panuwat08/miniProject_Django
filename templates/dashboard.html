@@ -5,15 +5,35 @@
 {% block extra_head %}
 <style>
 .dashboard-hero {
-    background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
+    background: var(--primary-gradient);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-soft);
     color: white;
     overflow: hidden;
+    position: relative;
+  }
+
+  .dashboard-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 28%),
+      radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.1), transparent 24%);
+    pointer-events: none;
+  }
+
+  .dashboard-hero > .p-4,
+  .dashboard-hero > .p-md-5 {
+    position: relative;
+    z-index: 1;
   }
 
   .dashboard-panel {
-    background: white;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-soft);
     padding: 1.5rem;
@@ -21,7 +41,8 @@
   }
 
   .summary-mini-card {
-    background: white;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(102, 126, 234, 0.08);
     border-radius: 18px;
     box-shadow: var(--shadow-soft);
     padding: 1.25rem;
@@ -29,7 +50,10 @@
   }
 
   .overview-link-card {
-    background: white;
+    position: relative;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(102, 126, 234, 0.08);
+    border-left: 5px solid transparent;
     border-radius: 18px;
     box-shadow: var(--shadow-soft);
     padding: 1.25rem;
@@ -61,6 +85,22 @@
 
   .overview-link-reports {
     color: #be123c;
+  }
+
+  .overview-link-card.overview-link-product {
+    border-left-color: #4f46e5;
+  }
+
+  .overview-link-card.overview-link-orders {
+    border-left-color: #0f766e;
+  }
+
+  .overview-link-card.overview-link-users {
+    border-left-color: #b45309;
+  }
+
+  .overview-link-card.overview-link-reports {
+    border-left-color: #be123c;
   }
 
   .recent-order-badge {
@@ -96,6 +136,18 @@
     background: #eef2f7;
     color: #475569;
     border-color: #d8e0ea;
+  }
+
+  .recent-order-card {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(102, 126, 234, 0.08);
+    border-radius: 18px;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .recent-order-total {
+    color: #0f766e;
+    font-weight: 700;
   }
 </style>
 {% endblock %}
@@ -209,7 +261,7 @@
           <div class="row g-3">
             <div class="col-md-6">
               <a href="{% url 'admin_product_list' %}" class="text-decoration-none">
-                <div class="overview-link-card">
+                <div class="overview-link-card overview-link-product">
                   <div class="overview-link-title overview-link-product">
                     <i class="bi bi-gear me-2"></i>จัดการสินค้า
                   </div>
@@ -219,7 +271,7 @@
             </div>
             <div class="col-md-6">
               <a href="{% url 'admin_orders' %}" class="text-decoration-none">
-                <div class="overview-link-card">
+                <div class="overview-link-card overview-link-orders">
                   <div class="overview-link-title overview-link-orders">
                     <i class="bi bi-receipt me-2"></i>จัดการคำสั่งซื้อ
                   </div>
@@ -229,7 +281,7 @@
             </div>
             <div class="col-md-6">
               <a href="{% url 'user_management' %}" class="text-decoration-none">
-                <div class="overview-link-card">
+                <div class="overview-link-card overview-link-users">
                   <div class="overview-link-title overview-link-users">
                     <i class="bi bi-people me-2"></i>จัดการผู้ใช้งาน
                   </div>
@@ -239,7 +291,7 @@
             </div>
             <div class="col-md-6">
               <a href="{% url 'sales_report' %}" class="text-decoration-none">
-                <div class="overview-link-card">
+                <div class="overview-link-card overview-link-reports">
                   <div class="overview-link-title overview-link-reports">
                     <i class="bi bi-bar-chart-line me-2"></i>รายงานระบบ
                   </div>
@@ -256,17 +308,18 @@
           <h2 class="h5 fw-bold mb-4">ออเดอร์ล่าสุด</h2>
           <div class="d-flex flex-column gap-3">
             {% for order in recent_orders %}
-            <div class="bg-white rounded-4 shadow-sm p-3">
+            <div class="recent-order-card p-3">
               <div class="d-flex justify-content-between align-items-start gap-2">
                 <div>
-                  <div class="fw-bold">#{{ order.id }} โดย {{ order.user.username }}</div>
+                  <div class="fw-bold">คำสั่งซื้อ #{{ order.id }}</div>
+                  <div class="text-muted small">โดยคุณ {{ order.user.username }}</div>
                   <div class="text-muted small">{{ order.created_at|date:"d/m/Y H:i" }}</div>
                 </div>
                 <span class="recent-order-badge {% if order.status == 'PENDING' %}recent-order-pending{% elif order.status == 'PAID' or order.status == 'SHIPPED' or order.status == 'COMPLETED' %}recent-order-paid{% elif order.status == 'REJECTED' or order.status == 'CANCELLED' %}recent-order-danger{% else %}recent-order-neutral{% endif %}">
                   {{ order.get_status_display }}
                 </span>
               </div>
-              <div class="mt-2 fw-semibold">{{ order.total }}</div>
+              <div class="mt-2 recent-order-total">{{ order.total }}</div>
             </div>
             {% empty %}
             <div class="text-muted">ยังไม่มีออเดอร์ในระบบ</div>

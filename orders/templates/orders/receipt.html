@@ -1,7 +1,7 @@
 {# ????????????????????????????????????????????? #}
 ﻿{% extends "base.html" %}
 {% load static %}
-{% block title %}ใบเสร็จรับเงิน {{ order.receipt_code }}{% endblock %}
+{% block title %}ใบสั่งซื้อสินค้า {{ order.order_code }}{% endblock %}
 
 {% block extra_head %}
 <style>
@@ -107,11 +107,20 @@
     <div class="receipt-header">
       <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
         <div>
-          <h2 class="fw-bold mb-1">ใบเสร็จรับเงิน</h2>
-          <div class="subtle">เลขที่เอกสาร {{ order.receipt_code }}</div>
+          <h2 class="fw-bold mb-1">ใบสั่งซื้อสินค้า</h2>
+          <div class="subtle">เลขที่เอกสาร {{ order.order_code }}</div>
         </div>
         <div class="text-end subtle">
-          <div>วันที่ชำระ: {{ order.paid_at|date:"d/m/Y H:i" }}</div>
+          <div>
+            วันที่ชำระ:
+            {% if order.paid_at %}
+              {{ order.paid_at|date:"d/m/Y H:i" }}
+            {% elif order.status == "PAID" or order.status == "SHIPPED" or order.status == "COMPLETED" %}
+              {{ order.created_at|date:"d/m/Y H:i" }}
+            {% else %}
+              รอการยืนยันการชำระ
+            {% endif %}
+          </div>
           <div>ลูกค้า: {{ order.shipping.full_name }}</div>
         </div>
       </div>
@@ -130,7 +139,7 @@
               <i class="bi bi-arrow-left me-1"></i> กลับ
             </a>
             <a href="{% url 'download_receipt' order.id %}" class="btn receipt-btn-download">
-              <i class="bi bi-download me-1"></i> ดาวน์โหลดใบเสร็จ
+              <i class="bi bi-download me-1"></i> ดาวน์โหลดใบสั่งซื้อสินค้า
             </a>
           </div>
         </div>

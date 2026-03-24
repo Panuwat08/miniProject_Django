@@ -39,11 +39,11 @@ class Order(models.Model):
     stock_deducted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def can_download_purchase_order(self):
+        return self.pk is not None
+
     def can_issue_receipt(self):
-        return (
-            self.payment_method == PaymentMethod.ONLINE
-            and self.status in {OrderStatus.PAID, OrderStatus.SHIPPED, OrderStatus.COMPLETED}
-        )
+        return self.can_download_purchase_order()
 
     @property
     def order_code(self):

@@ -121,9 +121,9 @@
       <div class="subtitle">สั่งซื้อเมื่อ {{ order.created_at|date:"d/m/Y H:i" }} น. ตรวจสอบรายการสินค้า สถานะ และข้อมูลการชำระเงินได้จากหน้านี้</div>
     </div>
     <div class="d-flex flex-wrap gap-2">
-      {% if order.can_issue_receipt %}
+      {% if order.can_download_purchase_order %}
       <a href="{% url 'order_receipt' order.id %}" class="btn btn-light rounded-3 px-4 py-2 fw-semibold">
-        <i class="bi bi-receipt me-1"></i> ใบเสร็จรับเงิน
+        <i class="bi bi-file-earmark-text me-1"></i> ใบสั่งซื้อสินค้า
       </a>
       {% endif %}
       <a href="{% url 'orders_list' %}" class="btn btn-outline-light rounded-3 px-4 py-2 fw-semibold">
