@@ -149,7 +149,7 @@ def admin_product_list(request):
         messages.error(request, "ไม่มีสิทธิ์เข้าถึง")
         return redirect("home")
 
-    products = Product.objects.select_related("category").all().order_by("-id")
+    products = Product.objects.select_related("category").filter(is_active=True).order_by("-id")
     categories = Category.objects.filter(is_active=True).order_by("name")
     query = request.GET.get("q", "").strip()
     category_slug = request.GET.get("category", "").strip()
