@@ -68,6 +68,19 @@
     margin-bottom: 0.3rem;
   }
 
+  .deadline-note {
+    margin-top: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.48rem 0.8rem;
+    border-radius: 999px;
+    background: #fff7e6;
+    color: #b7791f;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
   .items-box {
     background: #fbfdff;
     border: 1px solid #edf2f7;
@@ -136,10 +149,24 @@
       <div>
         <div class="h5 mb-1">คำสั่งซื้อ {{ order.order_code }}</div>
         <div class="order-meta">สร้างเมื่อ {{ order.created_at|date:"d/m/Y H:i" }} น.</div>
+        {% if order.payment_method == "ONLINE" and order.status == "PENDING" and not order.has_uploaded_slip %}
+        <div class="deadline-note">
+          <i class="bi bi-clock-history"></i>
+          เหลือเวลาชำระเงิน {{ order.payment_time_left_label }}
+        </div>
+        {% elif order.payment_method == "ONLINE" and order.status == "PENDING" and order.has_uploaded_slip %}
+        <div class="deadline-note">
+          <i class="bi bi-hourglass-split"></i>
+          รอตรวจสอบภายใน {{ order.review_time_left_label }}
+        </div>
+        {% endif %}
       </div>
       <div>
         {% if order.status == "PENDING" %}
-        <span class="status-pill status-pending"><i class="bi bi-hourglass-split"></i> {{ order.status_label }}</span>
+        <span class="status-pill status-pending">
+          <i class="bi {% if order.payment_method == 'ONLINE' and not order.has_uploaded_slip %}bi-wallet2{% else %}bi-hourglass-split{% endif %}"></i>
+          {{ order.status_label }}
+        </span>
         {% elif order.status == "PAID" %}
         <span class="status-pill status-paid"><i class="bi bi-patch-check"></i> {{ order.status_label }}</span>
         {% elif order.status == "SHIPPED" %}
@@ -164,6 +191,11 @@
         <div class="label">วิธีชำระเงิน</div>
         <div class="fw-semibold">{{ order.get_payment_method_display }}</div>
         <div class="text-muted small">ยอดรวม {{ order.total|floatformat:2 }} บาท</div>
+        {% if order.payment_method == "ONLINE" and order.status == "PENDING" %}
+        <div class="text-muted small mt-1">
+          {% if order.has_uploaded_slip %}อัปโหลดหลักฐานแล้ว กำลังรอตรวจสอบ{% else %}ยังไม่อัปโหลดหลักฐานการชำระเงิน{% endif %}
+        </div>
+        {% endif %}
       </div>
     </div>
 

@@ -1,11 +1,16 @@
-﻿{# ???? layout ??????????????? ????? navbar sidebar ??? footer #}
-﻿{% load static %}
+﻿{# layout navbar sidebar ??? footer #}
+{% load static %}
 <!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบจัดการสินค้า - โรงแรม</title>
+  <title>ระบบจัดการสินค้า - ของโรงแรม</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/logo.png' %}">
+  <link rel="icon" type="image/png" sizes="48x48" href="{% static 'img/logo.png' %}">
+  <link rel="icon" type="image/png" sizes="180x180" href="{% static 'img/logo.png' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/logo.png' %}">
+  <link rel="shortcut icon" type="image/png" href="{% static 'img/logo.png' %}">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +18,13 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
   <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+  <style>
+    .required-star {
+      color: #dc3545;
+      font-weight: 700;
+      margin-left: 0.2rem;
+    }
+  </style>
   {% block extra_head %}{% endblock %}
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -108,6 +120,20 @@
   {% if messages %}
   <script>
     document.addEventListener("DOMContentLoaded", function () {
+      document
+        .querySelectorAll("input[required], select[required], textarea[required]")
+        .forEach(function (field) {
+          if (!field.id) return;
+
+          const label = document.querySelector(`label[for="${field.id}"]`);
+          if (!label || label.querySelector(".required-star")) return;
+
+          const star = document.createElement("span");
+          star.className = "required-star";
+          star.textContent = "*";
+          label.appendChild(star);
+        });
+
       const toast = Swal.mixin({
         toast: true,
         position: "top-end",
@@ -218,6 +244,8 @@
       });
     });
   </script>
+
+  {% block extra_script %}{% endblock %}
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

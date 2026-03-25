@@ -98,6 +98,12 @@ body {
     font-weight: 600;
 }
 
+.required-star {
+    color: #dc3545;
+    font-weight: 700;
+    margin-left: 0.2rem;
+}
+
 .field-note {
     display: block;
     margin-top: 5px;
@@ -209,6 +215,20 @@ document.addEventListener("DOMContentLoaded", function () {
     const lockNote = document.getElementById("login-lock-note");
     let remaining = Number(lockNote?.dataset.remaining || 0);
 
+    document
+        .querySelectorAll("input[required], select[required], textarea[required]")
+        .forEach(function (field) {
+            if (!field.id) return;
+
+            const label = document.querySelector(`label[for="${field.id}"]`);
+            if (!label || label.querySelector(".required-star")) return;
+
+            const star = document.createElement("span");
+            star.className = "required-star";
+            star.textContent = "*";
+            label.appendChild(star);
+        });
+
     if (usernameInput) {
         usernameInput.addEventListener("input", function () {
             this.value = this.value.replace(/[^A-Za-z0-9_]/g, "");
@@ -237,21 +257,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     renderCountdown();
-});
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const passwordInput = document.querySelector("input[name='password']");
-
-    if (passwordInput) {
-        passwordInput.addEventListener("input", function () {
-            this.value = this.value
-                .replace(/[^A-Za-z0-9]/g, "")  // ❌ กันภาษาไทย
-                .slice(0, 20);                // ❌ จำกัด 20 ตัว
-        });
-    }
-
 });
 </script>
 </head>

@@ -18,6 +18,33 @@ class CategoryForm(forms.ModelForm):
 
 
 class ProductForm(forms.ModelForm):
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.filter(is_active=True).order_by("name"),
+        required=True,
+        label="หมวดหมู่สินค้า",
+        widget=forms.Select(attrs={"class": "form-select"}),
+        empty_label="เลือกหมวดหมู่สินค้า",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # บังคับให้มีรูปสินค้าตอนสร้างสินค้าใหม่ แต่ถ้าแก้ไขและมีรูปเดิมอยู่แล้วไม่ต้องอัปโหลดซ้ำ
+        self.fields["image"].required = not bool(getattr(self.instance, "pk", None))
+
+    def clean_name(self):
+        """ตรวจสอบไม่ให้มีชื่อสินค้าซ้ำกันในระบบ โดยไม่สนตัวพิมพ์เล็ก/ใหญ่"""
+        name = (self.cleaned_data.get("name") or "").strip()
+        queryset = Product.objects.filter(name__iexact=name)
+
+        if self.instance and self.instance.pk:
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
+            raise forms.ValidationError("มีชื่อสินค้านี้อยู่ในระบบแล้ว กรุณาใช้ชื่ออื่น")
+
+        return name
+
     class Meta:
         model = Product
         fields = ["category", "name", "description", "price", "cost", "stock", "image"]

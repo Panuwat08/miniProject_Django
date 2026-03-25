@@ -96,7 +96,9 @@
           {% for field in form %}
           <div class="{% if field.name == 'description' or field.name == 'image' %}col-12{% else %}col-md-6{% endif %}">
             <div class="field-card">
-              <label class="form-label fw-bold mb-2">{{ field.label }}</label>
+              <label class="form-label fw-bold mb-2" for="{{ field.id_for_label }}">
+                {{ field.label }}{% if field.field.required %}<span class="required-star">*</span>{% endif %}
+              </label>
 
               {% if field.name == "image" and form.instance.pk and form.instance.image %}
               <div class="current-image-box mb-3">

@@ -129,10 +129,49 @@
   }
 
   .action-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-  }
+     display: flex;
+     justify-content: flex-end;
+     gap: 0.5rem;
+   }
+
+   .action-btn {
+     border: none;
+     border-radius: 12px;
+     padding: 0.55rem 0.95rem;
+     font-size: 0.82rem;
+     font-weight: 700;
+     display: inline-flex;
+     align-items: center;
+     gap: 0.35rem;
+     text-decoration: none;
+     transition: var(--transition-smooth);
+     box-shadow: 0 10px 22px rgba(37, 99, 235, 0.16);
+   }
+
+   .action-btn:hover {
+     transform: translateY(-2px);
+   }
+
+   .action-btn-primary {
+     background: var(--primary-gradient);
+     color: white;
+   }
+
+   .action-btn-primary:hover {
+     color: white;
+     box-shadow: 0 14px 28px rgba(102, 126, 234, 0.28);
+   }
+
+   .action-btn-danger {
+     background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+     color: #be123c;
+     box-shadow: 0 10px 22px rgba(190, 24, 93, 0.12);
+   }
+
+   .action-btn-danger:hover {
+     color: #9f1239;
+     box-shadow: 0 14px 28px rgba(190, 24, 93, 0.18);
+   }
 
   .empty-state {
     padding: 3rem 1.5rem;
@@ -325,7 +364,7 @@
             </td>
             <td class="text-end">
               <div class="action-buttons">
-                <a class="btn btn-outline-primary btn-sm rounded-3" href="{% url 'admin_check_slip' o.id %}">
+                <a class="action-btn action-btn-primary" href="{% url 'admin_check_slip' o.id %}">
                   <i class="bi bi-search me-1"></i>
                   {% if o.status == OrderStatus.PENDING %}
                     {% if o.payment_method == PaymentMethod.COD %}ตรวจข้อมูล{% else %}ตรวจสลิป{% endif %}
@@ -342,7 +381,7 @@
                   data-swal-icon="warning"
                   data-swal-confirm-color="#dc3545">
                   {% csrf_token %}
-                  <button type="submit" class="btn btn-outline-danger btn-sm rounded-3">
+                  <button type="submit" class="action-btn action-btn-danger">
                     <i class="bi bi-trash me-1"></i> ลบ
                   </button>
                 </form>

@@ -190,6 +190,10 @@ def product_create(request):
             product = form.save()
             messages.success(request, f'เพิ่มสินค้า "{product.name}" เรียบร้อยแล้ว')
             return redirect("admin_product_list")
+        if form.errors.get("name"):
+            messages.error(request, form.errors["name"][0])
+        else:
+            messages.error(request, "ไม่สามารถเพิ่มสินค้าได้ กรุณาตรวจสอบข้อมูลอีกครั้ง")
     else:
         form = ProductForm()
 
@@ -210,6 +214,10 @@ def product_update(request, pk):
             form.save()
             messages.success(request, f'อัปเดตข้อมูล "{product.name}" เรียบร้อยแล้ว')
             return redirect("admin_product_list")
+        if form.errors.get("name"):
+            messages.error(request, form.errors["name"][0])
+        else:
+            messages.error(request, "ไม่สามารถอัปเดตสินค้าได้ กรุณาตรวจสอบข้อมูลอีกครั้ง")
     else:
         form = ProductForm(instance=product)
 

@@ -92,6 +92,12 @@ body {
     font-weight: 600;
 }
 
+.required-star {
+    color: #dc3545;
+    font-weight: 700;
+    margin-left: 0.2rem;
+}
+
 .field-note {
     display: block;
     margin-top: 5px;
@@ -204,6 +210,20 @@ document.addEventListener("DOMContentLoaded", function () {
     const emailInput = document.querySelector("input[name='email']");
     const passwordInput = document.querySelector("input[name='password1']");
     const password2Input = document.querySelector("input[name='password2']");
+
+    document
+        .querySelectorAll("input[required], select[required], textarea[required]")
+        .forEach(function (field) {
+            if (!field.id) return;
+
+            const label = document.querySelector(`label[for="${field.id}"]`);
+            if (!label || label.querySelector(".required-star")) return;
+
+            const star = document.createElement("span");
+            star.className = "required-star";
+            star.textContent = "*";
+            label.appendChild(star);
+        });
 
     // ✅ USERNAME
     if (usernameInput) {

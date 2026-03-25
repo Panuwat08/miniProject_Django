@@ -7,6 +7,7 @@ from . import admin_views
 urlpatterns = [
     path("checkout/", views.checkout, name="checkout"),
     path("order/<int:order_id>/", views.order_detail, name="order_detail"),
+    path("order/<int:order_id>/cancel/", views.cancel_order, name="cancel_order"),
     path("order/<int:order_id>/receipt/", views.order_receipt, name="order_receipt"),
     path("order/<int:order_id>/receipt/download/", views.download_receipt, name="download_receipt"),
     path("order/<int:order_id>/slip/", views.upload_slip, name="upload_slip"),

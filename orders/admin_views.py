@@ -7,7 +7,7 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from .models import Notification, Order, OrderStatus, PaymentMethod
+from .models import Notification, Order, OrderStatus, PaymentMethod, cancel_expired_online_orders
 from .views import deduct_order_stock, restore_order_stock
 
 
@@ -15,8 +15,8 @@ def _build_result_message(is_qr_order, approved):
     """สร้างข้อความผลลัพธ์ให้เหมาะกับประเภทการชำระเงินและผลตรวจสอบ"""
     if approved:
         if is_qr_order:
-            return "สลิปผ่านการตรวจสอบแล้ว และระบบตัดสต๊อกสินค้าเรียบร้อย"
-        return "ข้อมูลคำสั่งซื้อผ่านการตรวจสอบแล้ว และระบบตัดสต๊อกสินค้าเรียบร้อย"
+            return "สลิปผ่านการตรวจสอบแล้ว"
+        return "ข้อมูลคำสั่งซื้อผ่านการตรวจสอบแล้ว"
 
     if is_qr_order:
         return "สลิปไม่ถูกต้อง กรุณาอัปโหลดใหม่"
@@ -74,6 +74,8 @@ def _send_order_status_email(order, approved, result_message, note):
 @staff_member_required
 def admin_orders(request):
     """หน้ารวมคำสั่งซื้อฝั่งผู้ดูแล พร้อมตัวเลขสรุปสถานะหลัก"""
+    cancel_expired_online_orders()
+
     orders = (
         Order.objects.select_related("user", "shipping")
         .prefetch_related("items__product")
@@ -120,6 +122,8 @@ def admin_orders(request):
 @staff_member_required
 def admin_check_slip(request, order_id):
     """หน้าตรวจสลิปหรืออนุมัติออเดอร์ COD แล้วแจ้งผลกลับหาลูกค้า"""
+    cancel_expired_online_orders()
+
     order = get_object_or_404(
         Order.objects.select_related("user", "shipping").prefetch_related("items__product"),
         id=order_id,

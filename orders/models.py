@@ -1,7 +1,10 @@
 """โมเดลของระบบคำสั่งซื้อ การชำระเงิน และข้อมูลจัดส่ง"""
 
+from datetime import timedelta
+
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 from shop.models import Product
 
@@ -45,6 +48,9 @@ class Order(models.Model):
     def can_issue_receipt(self):
         return self.can_download_purchase_order()
 
+    def can_customer_cancel(self):
+        return self.status == OrderStatus.PENDING
+
     @property
     def order_code(self):
         if not self.pk or not self.created_at:
@@ -57,6 +63,10 @@ class Order(models.Model):
             return "RC-PENDING"
         return f"RC{self.created_at:%Y%m%d}-{self.pk:04d}"
 
+    def has_uploaded_slip(self):
+        """ตรวจสอบว่าออเดอร์นี้มีการอัปโหลดสลิปแล้วหรือยัง"""
+        return hasattr(self, "slip") and bool(getattr(self.slip, "image", None))
+
     def status_label(self):
         if self.payment_method == PaymentMethod.COD:
             if self.status == OrderStatus.PENDING:
@@ -64,8 +74,58 @@ class Order(models.Model):
             if self.status == OrderStatus.PAID:
                 return "รอเก็บเงิน"
         if self.payment_method == PaymentMethod.ONLINE and self.status == OrderStatus.PENDING:
-            return "รอตรวจสลิป"
+            if self.has_uploaded_slip():
+                return "รอตรวจสอบ"
+            return "รอชำระเงิน"
+        if self.status == OrderStatus.CANCELLED:
+            return "ยกเลิกสินค้า"
         return self.get_status_display()
+
+    def payment_deadline(self):
+        """คืนค่าวันเวลาสิ้นสุดการชำระสำหรับออเดอร์ QR Code"""
+        if self.payment_method != PaymentMethod.ONLINE:
+            return None
+        return self.created_at + timedelta(days=3)
+
+    def remaining_payment_seconds(self):
+        """คืนค่าจำนวนวินาทีที่เหลือก่อนหมดเวลาชำระเงิน"""
+        deadline = self.payment_deadline()
+        if not deadline or self.status != OrderStatus.PENDING:
+            return None
+        return max(0, int((deadline - timezone.now()).total_seconds()))
+
+    def payment_time_left_label(self):
+        """แปลงเวลาที่เหลือเป็นข้อความ วัน และ ชั่วโมง สำหรับแสดงบนหน้าเว็บ"""
+        remaining = self.remaining_payment_seconds()
+        if remaining is None:
+            return ""
+
+        days = remaining // 86400
+        hours = (remaining % 86400) // 3600
+        return f"{days} วัน {hours} ชม."
+
+    def review_deadline(self):
+        """คืนค่าวันเวลาสิ้นสุดกรอบตรวจสอบ 24 ชั่วโมงหลังอัปโหลดสลิป"""
+        if not self.has_uploaded_slip() or self.status != OrderStatus.PENDING:
+            return None
+        return self.slip.created_at + timedelta(hours=24)
+
+    def remaining_review_seconds(self):
+        """คืนค่าจำนวนวินาทีที่เหลือในกรอบรอตรวจสอบ 24 ชั่วโมง"""
+        deadline = self.review_deadline()
+        if not deadline:
+            return None
+        return max(0, int((deadline - timezone.now()).total_seconds()))
+
+    def review_time_left_label(self):
+        """แปลงเวลาที่เหลือของการรอตรวจสอบเป็นข้อความ วัน และ ชั่วโมง"""
+        remaining = self.remaining_review_seconds()
+        if remaining is None:
+            return ""
+
+        days = remaining // 86400
+        hours = (remaining % 86400) // 3600
+        return f"{days} วัน {hours} ชม."
 
 
 class OrderItem(models.Model):
@@ -88,6 +148,7 @@ class PaymentSlip(models.Model):
     approved = models.BooleanField(null=True, blank=True)
     note = models.TextField(blank=True, default="")
     checked_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
 
 
 class Notification(models.Model):
@@ -96,3 +157,34 @@ class Notification(models.Model):
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+
+
+def cancel_expired_online_orders():
+    """ยกเลิกออเดอร์ QR Code ที่ยังไม่ชำระและค้างเกิน 3 วัน"""
+    expired_orders = (
+        Order.objects.filter(
+            payment_method=PaymentMethod.ONLINE,
+            status=OrderStatus.PENDING,
+            created_at__lte=timezone.now() - timedelta(days=3),
+        )
+        .select_related("user")
+    )
+
+    cancelled_count = 0
+    for order in expired_orders:
+        order.status = OrderStatus.CANCELLED
+        if not order.review_note:
+            order.review_note = "ระบบยกเลิกอัตโนมัติ เนื่องจากไม่ชำระเงินภายใน 3 วัน"
+        order.save(update_fields=["status", "review_note"])
+
+        Notification.objects.get_or_create(
+            user=order.user,
+            title="คำสั่งซื้อถูกยกเลิกอัตโนมัติ",
+            message=(
+                f"คำสั่งซื้อ {order.order_code} ถูกยกเลิกอัตโนมัติ "
+                f"เนื่องจากยังไม่ชำระเงินภายใน 3 วัน"
+            ),
+        )
+        cancelled_count += 1
+
+    return cancelled_count

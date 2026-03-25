@@ -189,20 +189,20 @@
     <form method="post" action="{% url 'create_user_account' %}" class="row g-3">
       {% csrf_token %}
       <div class="col-md-6">
-        <label class="form-label fw-semibold">Username</label>
-        <input type="text" name="username" class="form-control search-input" placeholder="username" required>
+        <label class="form-label fw-semibold" for="create-user-username">Username <span class="required-star">*</span></label>
+        <input id="create-user-username" type="text" name="username" class="form-control search-input" placeholder="username" required>
       </div>
       <div class="col-md-6">
-        <label class="form-label fw-semibold">Email</label>
-        <input type="email" name="email" class="form-control search-input" placeholder="email@example.com" required>
+        <label class="form-label fw-semibold" for="create-user-email">Email <span class="required-star">*</span></label>
+        <input id="create-user-email" type="email" name="email" class="form-control search-input" placeholder="email@example.com" required>
       </div>
       <div class="col-md-4">
-        <label class="form-label fw-semibold">Password</label>
-        <input type="text" name="password" class="form-control search-input" placeholder="อย่างน้อย 6 ตัว" required>
+        <label class="form-label fw-semibold" for="create-user-password">Password <span class="required-star">*</span></label>
+        <input id="create-user-password" type="text" name="password" class="form-control search-input" placeholder="อย่างน้อย 6 ตัว" required>
       </div>
       <div class="col-md-4">
-        <label class="form-label fw-semibold">บทบาท</label>
-        <select name="role" class="form-select role-select">
+        <label class="form-label fw-semibold" for="create-user-role">บทบาท <span class="required-star">*</span></label>
+        <select id="create-user-role" name="role" class="form-select role-select" required>
           {% for value, label in role_choices %}
           {% if not user.profile.is_staff_member or value != 'ADMIN' %}
           <option value="{{ value }}">{{ label }}</option>
@@ -211,8 +211,8 @@
         </select>
       </div>
       <div class="col-md-4">
-        <label class="form-label fw-semibold">เบอร์โทร</label>
-        <input type="text" name="phone" class="form-control search-input" placeholder="08x-xxx-xxxx">
+        <label class="form-label fw-semibold" for="create-user-phone">เบอร์โทร</label>
+        <input id="create-user-phone" type="text" name="phone" class="form-control search-input" placeholder="08x-xxx-xxxx">
       </div>
       <div class="col-md-4 ms-md-auto d-flex align-items-end">
         <button type="submit" class="btn btn-gradient w-100 py-3">เพิ่มผู้ใช้</button>

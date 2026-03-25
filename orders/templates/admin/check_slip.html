@@ -162,18 +162,6 @@
             <button name="action" value="reject" type="submit" class="btn btn-warning flex-grow-1 fw-bold">
               <i class="bi bi-x-circle-fill me-2"></i>{% if is_qr_order %}ปฏิเสธสลิป{% else %}ไม่อนุมัติคำสั่งซื้อ{% endif %}
             </button>
-            {% if is_qr_order and slip %}
-            <button name="action" value="delete" type="submit" class="btn btn-outline-danger flex-grow-1 fw-bold"
-              data-swal-confirm="true"
-              data-swal-title="ลบสลิปนี้?"
-              data-swal-text="สถานะจะกลับเป็นรอตรวจสอบ"
-              data-swal-confirm-text="ลบสลิป"
-              data-swal-cancel-text="ยกเลิก"
-              data-swal-icon="warning"
-              data-swal-confirm-color="#dc3545">
-              <i class="bi bi-trash-fill me-2"></i>ลบสลิป
-            </button>
-            {% endif %}
           </div>
         </form>
         {% else %}

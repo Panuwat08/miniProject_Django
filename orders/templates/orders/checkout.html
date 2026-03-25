@@ -96,6 +96,17 @@
     box-shadow: 0 10px 24px rgba(102, 126, 234, 0.14);
   }
 
+  .payment-check-icon {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: var(--transition-smooth);
+  }
+
+  .btn-check:checked + .payment-option .payment-check-icon {
+    opacity: 1;
+    transform: scale(1);
+  }
+
   .payment-icon {
     width: 52px;
     height: 52px;
@@ -189,7 +200,7 @@
 
 <div class="row g-4">
   <div class="col-xl-8">
-    <form method="post">
+    <form method="post" id="checkout-form">
       {% csrf_token %}
 
       <section class="checkout-panel">
@@ -199,14 +210,14 @@
         <div class="checkout-body">
           <div class="row g-3">
             <div class="col-md-6 field-group">
-              <label class="field-label">ชื่อ-นามสกุล</label>
+              <label class="field-label" for="checkout-full-name">ชื่อ-นามสกุล <span class="required-star">*</span></label>
               <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input type="text" class="form-control" name="full_name" value="{{ initial_full_name }}" placeholder="ระบุชื่อผู้รับสินค้า" required>
+                <input id="checkout-full-name" type="text" class="form-control" name="full_name" value="{{ initial_full_name }}" placeholder="ระบุชื่อผู้รับสินค้า" required>
               </div>
             </div>
             <div class="col-md-6 field-group">
-              <label class="field-label">เบอร์โทรศัพท์</label>
+              <label class="field-label" for="phoneInput">เบอร์โทรศัพท์ <span class="required-star">*</span></label>
               <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-telephone"></i></span>
                 <input 
@@ -223,8 +234,8 @@
               </div>
             </div>
             <div class="col-12 field-group">
-              <label class="field-label">ที่อยู่จัดส่ง</label>
-              <textarea class="form-control" name="address_line" rows="4"
+              <label class="field-label" for="checkout-address-line">ที่อยู่จัดส่ง <span class="required-star">*</span></label>
+              <textarea id="checkout-address-line" class="form-control" name="address_line" rows="4"
                 placeholder="บ้านเลขที่, ซอย, ถนน, แขวง/ตำบล, เขต/อำเภอ, จังหวัด, รหัสไปรษณีย์" required>{{ initial_address }}</textarea>
             </div>
           </div>
@@ -238,8 +249,7 @@
         <div class="checkout-body">
           <div class="d-flex flex-column gap-3">
             {% for value, label in methods %}
-            <input type="radio" class="btn-check" name="payment_method" id="payment_{{ value }}" value="{{ value }}"
-              {% if forloop.first %}checked{% endif %} required>
+            <input type="radio" class="btn-check" name="payment_method" id="payment_{{ value }}" value="{{ value }}" required>
             <label class="payment-option" for="payment_{{ value }}">
               <div class="payment-card d-flex align-items-center justify-content-between gap-3">
                 <div class="d-flex align-items-center gap-3">
@@ -269,7 +279,7 @@
                     </div>
                   </div>
                 </div>
-                <i class="bi bi-check-circle-fill text-primary fs-4"></i>
+                <i class="bi bi-check-circle-fill text-primary fs-4 payment-check-icon"></i>
               </div>
             </label>
             {% endfor %}
@@ -342,6 +352,25 @@
       }
 
       this.value = formatted;
+    });
+  })();
+
+  (function () {
+    const checkoutForm = document.getElementById("checkout-form");
+    if (!checkoutForm) return;
+
+    checkoutForm.addEventListener("submit", function (event) {
+      const selectedPayment = checkoutForm.querySelector('input[name="payment_method"]:checked');
+      if (selectedPayment) return;
+
+      event.preventDefault();
+      Swal.fire({
+        icon: "warning",
+        title: "กรุณาเลือกวิธีการชำระเงิน",
+        text: "โปรดเลือกวิธีการชำระเงินก่อนยืนยันการสั่งซื้อ",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#667eea"
+      });
     });
   })();
 </script>

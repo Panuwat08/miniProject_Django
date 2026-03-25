@@ -19,6 +19,7 @@ from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Tabl
 from shop.models import Cart
 
 from .models import (
+    cancel_expired_online_orders,
     Notification,
     Order,
     OrderItem,
@@ -27,6 +28,15 @@ from .models import (
     PaymentSlip,
     ShippingAddress,
 )
+
+
+CUSTOMER_CANCEL_REASONS = [
+    "สั่งซื้อผิดรายการ",
+    "ต้องการเปลี่ยนสินค้า",
+    "เปลี่ยนใจยังไม่ต้องการสินค้า",
+    "ต้องการแก้ไขข้อมูลจัดส่ง",
+    "พบราคาหรือรายละเอียดไม่ตรงตามต้องการ",
+]
 
 
 def _register_thai_pdf_fonts():
@@ -188,6 +198,8 @@ def order_detail(request, order_id):
     if blocked:
         return blocked
 
+    cancel_expired_online_orders()
+
     order = get_object_or_404(Order.objects.select_related("shipping"), id=order_id, user=request.user)
     qr_code_img = None
     account_name = None
@@ -218,8 +230,51 @@ def order_detail(request, order_id):
             "order": order,
             "qr_code_img": qr_code_img,
             "account_name": account_name,
+            "customer_cancel_reasons": CUSTOMER_CANCEL_REASONS,
         },
     )
+
+
+@login_required
+def cancel_order(request, order_id):
+    """เปิดให้ลูกค้ายกเลิกคำสั่งซื้อที่ยังรอดำเนินการ พร้อมบันทึกเหตุผล"""
+    blocked = _require_customer(request)
+    if blocked:
+        return blocked
+
+    cancel_expired_online_orders()
+
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    if request.method != "POST":
+        return redirect("order_detail", order_id=order.id)
+
+    if not order.can_customer_cancel():
+        messages.error(request, "คำสั่งซื้อนี้ไม่สามารถยกเลิกได้แล้ว")
+        return redirect("order_detail", order_id=order.id)
+
+    selected_reasons = request.POST.getlist("cancel_reasons")
+    other_reason = request.POST.get("cancel_reason_other", "").strip()
+
+    if not selected_reasons and not other_reason:
+        messages.error(request, "กรุณาเลือกหรือระบุเหตุผลในการยกเลิกคำสั่งซื้อ")
+        return redirect("order_detail", order_id=order.id)
+
+    reason_parts = selected_reasons[:]
+    if other_reason:
+        reason_parts.append(f"อื่น ๆ: {other_reason}")
+
+    order.status = OrderStatus.CANCELLED
+    order.review_note = "ลูกค้ายกเลิกคำสั่งซื้อ เนื่องจาก " + ", ".join(reason_parts)
+    order.save(update_fields=["status", "review_note"])
+
+    Notification.objects.create(
+        user=request.user,
+        title="ยกเลิกคำสั่งซื้อสำเร็จ",
+        message=f"คำสั่งซื้อ {order.order_code} ถูกยกเลิกเรียบร้อยแล้ว",
+    )
+
+    messages.success(request, "ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว")
+    return redirect("order_detail", order_id=order.id)
 
 
 @login_required
@@ -228,6 +283,8 @@ def order_receipt(request, order_id):
     blocked = _require_customer(request)
     if blocked:
         return blocked
+
+    cancel_expired_online_orders()
 
     order = get_object_or_404(Order.objects.select_related("shipping"), id=order_id, user=request.user)
     if not order.can_download_purchase_order():
@@ -251,6 +308,8 @@ def download_receipt(request, order_id):
     blocked = _require_customer(request)
     if blocked:
         return blocked
+
+    cancel_expired_online_orders()
 
     order = get_object_or_404(
         Order.objects.select_related("shipping").prefetch_related("items__product"),
@@ -461,6 +520,8 @@ def orders_list(request):
     if blocked:
         return blocked
 
+    cancel_expired_online_orders()
+
     orders = (
         Order.objects.filter(user=request.user)
         .select_related("shipping")
@@ -476,6 +537,8 @@ def upload_slip(request, order_id):
     blocked = _require_customer(request)
     if blocked:
         return blocked
+
+    cancel_expired_online_orders()
 
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
@@ -519,6 +582,8 @@ def remove_slip(request, order_id):
     blocked = _require_customer(request)
     if blocked:
         return blocked
+
+    cancel_expired_online_orders()
 
     order = get_object_or_404(Order, id=order_id, user=request.user)
 

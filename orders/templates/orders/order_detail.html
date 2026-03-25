@@ -1,11 +1,11 @@
-{# ????????????????????????????????? #}
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% load static %}
+
 {% block title %}คำสั่งซื้อ {{ order.order_code }}{% endblock %}
 
 {% block extra_head %}
 <style>
-.order-hero {
+  .order-hero {
     background: var(--primary-gradient);
     border-radius: var(--radius-xl);
     padding: 2rem;
@@ -46,10 +46,25 @@
     font-weight: 700;
   }
 
-  .status-pending { background: #fff7e6; color: #b7791f; }
-  .status-paid { background: #ecfdf3; color: #157347; }
-  .status-rejected { background: #fff1f2; color: #be123c; }
-  .status-other { background: #eef2f7; color: #475569; }
+  .status-pending {
+    background: #fff7e6;
+    color: #b7791f;
+  }
+
+  .status-paid {
+    background: #ecfdf3;
+    color: #157347;
+  }
+
+  .status-rejected {
+    background: #fff1f2;
+    color: #be123c;
+  }
+
+  .status-other {
+    background: #eef2f7;
+    color: #475569;
+  }
 
   .item-row {
     display: flex;
@@ -109,16 +124,56 @@
     box-shadow: var(--shadow-soft);
   }
 
+  .cancel-box {
+    background: #fff8f8;
+    border: 1px solid #ffd6d6;
+    border-radius: 20px;
+    padding: 1.1rem;
+  }
 
+  .cancel-option {
+    background: white;
+    border: 1px solid #f1d0d0;
+    border-radius: 14px;
+    padding: 0.75rem 0.9rem;
+  }
+
+  .payment-panel-body {
+    min-height: 650px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .cancel-panel-body {
+    min-height: 640px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (max-width: 1199.98px) {
+    .payment-panel-body {
+      min-height: auto;
+      display: block;
+    }
+
+    .cancel-panel-body {
+      min-height: auto;
+      display: block;
+    }
+  }
 </style>
 {% endblock %}
 
-{% block content %}<section class="order-hero">
+{% block content %}
+<section class="order-hero">
   <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
     <div>
       <div class="small text-uppercase fw-semibold opacity-75 mb-2">Order Detail</div>
       <h1 class="h3 mb-2">คำสั่งซื้อ {{ order.order_code }}</h1>
-      <div class="subtitle">สั่งซื้อเมื่อ {{ order.created_at|date:"d/m/Y H:i" }} น. ตรวจสอบรายการสินค้า สถานะ และข้อมูลการชำระเงินได้จากหน้านี้</div>
+      <div class="subtitle">
+        สั่งซื้อเมื่อ {{ order.created_at|date:"d/m/Y H:i" }} น. ตรวจสอบรายการสินค้า สถานะ และข้อมูลการชำระเงินได้จากหน้านี้
+      </div>
     </div>
     <div class="d-flex flex-wrap gap-2">
       {% if order.can_download_purchase_order %}
@@ -163,51 +218,6 @@
         </div>
       </div>
     </section>
-  </div>
-
-  <div class="col-xl-5">
-    <section class="order-panel">
-      <div class="order-head">
-        <div class="fw-bold fs-5">สถานะคำสั่งซื้อ</div>
-      </div>
-      <div class="order-body">
-        <div class="info-card">
-          <div class="d-flex justify-content-between align-items-center gap-2">
-            <span class="text-muted">สถานะ</span>
-            {% if order.status == "PENDING" %}
-            <span class="status-pill status-pending"><i class="bi bi-hourglass-split"></i> {{ order.status_label }}</span>
-            {% elif order.status == "PAID" %}
-            <span class="status-pill status-paid"><i class="bi bi-patch-check"></i> {{ order.status_label }}</span>
-            {% elif order.status == "REJECTED" %}
-            <span class="status-pill status-rejected"><i class="bi bi-x-circle"></i> {{ order.status_label }}</span>
-            {% else %}
-            <span class="status-pill status-other"><i class="bi bi-dot"></i> {{ order.status_label }}</span>
-            {% endif %}
-          </div>
-        </div>
-
-        <div class="info-card">
-          <div class="d-flex justify-content-between align-items-center gap-2">
-            <span class="text-muted"><i class="bi bi-credit-card me-1"></i> วิธีชำระเงิน</span>
-            <span class="fw-bold">{{ order.get_payment_method_display }}</span>
-          </div>
-        </div>
-
-        {% if order.review_note and order.status == "REJECTED" or order.review_note and order.status == "CANCELLED" %}
-        <div class="info-card">
-          <div class="fw-semibold text-danger mb-2"><i class="bi bi-exclamation-circle me-2"></i>หมายเหตุจากการปฏิเสธ</div>
-          <div class="text-secondary small">{{ order.review_note }}</div>
-        </div>
-        {% endif %}
-
-        <div class="info-card mb-0">
-          <div class="fw-semibold text-secondary mb-2"><i class="bi bi-geo-alt me-2"></i>ที่อยู่จัดส่ง</div>
-          <div class="fw-bold">{{ order.shipping.full_name }}</div>
-          <div class="text-muted small mb-1">{{ order.shipping.phone }}</div>
-          <div class="text-secondary small">{{ order.shipping.address_line }}</div>
-        </div>
-      </div>
-    </section>
 
     <section class="order-panel">
       <div class="order-head">
@@ -219,11 +229,11 @@
           {% endif %}
         </div>
       </div>
-      <div class="order-body">
+      <div class="order-body payment-panel-body">
         {% if order.payment_method == "COD" %}
         <div class="info-card mb-0">
           {% if order.status == "PAID" %}
-          ออเดอร์นี้ผ่านการอนุมัติแล้ว และกำลังอยู่ในสถานะรอเก็บเงินปลายทาง
+          ออเดอร์นี้ผ่านการอนุมัติแล้ว และอยู่ในสถานะรอเก็บเงินปลายทาง
           {% else %}
           ออเดอร์นี้เป็นแบบเก็บเงินปลายทาง ขณะนี้กำลังรอผู้ดูแลระบบตรวจสอบข้อมูลก่อนอนุมัติ
           {% endif %}
@@ -255,16 +265,139 @@
             <div class="fs-1 text-muted mb-2"><i class="bi bi-receipt"></i></div>
             <p class="text-muted small mb-0">ยังไม่มีหลักฐานการชำระเงิน</p>
           </div>
+          {% if order.status == "CANCELLED" %}
+          <button class="btn primary-btn w-100 py-3 fw-bold" type="button" disabled style="opacity: 0.65; cursor: not-allowed;">
+            <i class="bi bi-ban me-1"></i> ไม่สามารถอัปโหลดสลิปได้
+          </button>
+          {% else %}
           <a class="btn primary-btn w-100 py-3 fw-bold" href="{% url 'upload_slip' order.id %}">
             <i class="bi bi-upload me-1"></i> อัปโหลดสลิป
           </a>
+          {% endif %}
           {% endif %}
         {% endif %}
       </div>
     </section>
   </div>
+
+  <div class="col-xl-5">
+    <section class="order-panel">
+      <div class="order-head">
+        <div class="fw-bold fs-5">สถานะคำสั่งซื้อ</div>
+      </div>
+      <div class="order-body">
+        <div class="info-card">
+          <div class="d-flex justify-content-between align-items-center gap-2">
+            <span class="text-muted">สถานะ</span>
+            {% if order.status == "PENDING" %}
+            <span class="status-pill status-pending">
+              <i class="bi {% if order.payment_method == 'ONLINE' and not order.has_uploaded_slip %}bi-wallet2{% else %}bi-hourglass-split{% endif %}"></i>
+              {{ order.status_label }}
+            </span>
+            {% elif order.status == "PAID" %}
+            <span class="status-pill status-paid"><i class="bi bi-patch-check"></i> {{ order.status_label }}</span>
+            {% elif order.status == "REJECTED" %}
+            <span class="status-pill status-rejected"><i class="bi bi-x-circle"></i> {{ order.status_label }}</span>
+            {% else %}
+            <span class="status-pill status-other"><i class="bi bi-dot"></i> {{ order.status_label }}</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="d-flex justify-content-between align-items-center gap-2">
+            <span class="text-muted"><i class="bi bi-credit-card me-1"></i> วิธีชำระเงิน</span>
+            <span class="fw-bold">{{ order.get_payment_method_display }}</span>
+          </div>
+        </div>
+
+        {% if order.review_note and order.status == "REJECTED" or order.review_note and order.status == "CANCELLED" %}
+        <div class="info-card">
+          <div class="fw-semibold text-danger mb-2">
+            <i class="bi bi-exclamation-circle me-2"></i>
+            {% if order.status == "CANCELLED" %}หมายเหตุการยกเลิก{% else %}หมายเหตุจากการปฏิเสธ{% endif %}
+          </div>
+          <div class="text-secondary small">{{ order.review_note }}</div>
+        </div>
+        {% endif %}
+
+        <div class="info-card mb-0">
+          <div class="fw-semibold text-secondary mb-2"><i class="bi bi-geo-alt me-2"></i>ที่อยู่จัดส่ง</div>
+          <div class="fw-bold">{{ order.shipping.full_name }}</div>
+          <div class="text-muted small mb-1">{{ order.shipping.phone }}</div>
+          <div class="text-secondary small">{{ order.shipping.address_line }}</div>
+        </div>
+      </div>
+    </section>
+
+    {% if order.can_customer_cancel %}
+    <section class="order-panel">
+      <div class="order-head">
+        <div class="fw-bold fs-5"><i class="bi bi-x-circle me-2 text-danger"></i>ยกเลิกคำสั่งซื้อ</div>
+      </div>
+      <div class="order-body cancel-panel-body">
+        <form id="cancel-order-form"
+              method="post"
+              action="{% url 'cancel_order' order.id %}"
+              class="cancel-box"
+              data-swal-confirm
+              data-swal-title="ยืนยันการยกเลิกคำสั่งซื้อ?"
+              data-swal-text="เมื่อยกเลิกแล้ว ระบบจะเปลี่ยนสถานะคำสั่งซื้อทันที"
+              data-swal-confirm-text="ยืนยันการยกเลิก"
+              data-swal-confirm-color="#dc3545">
+          {% csrf_token %}
+          <div class="fw-semibold mb-3">เลือกเหตุผลในการยกเลิก</div>
+          <div class="d-grid gap-2 mb-3">
+            {% for reason in customer_cancel_reasons %}
+            <label class="cancel-option d-flex align-items-center gap-2">
+              <input class="form-check-input mt-0" type="checkbox" name="cancel_reasons" value="{{ reason }}">
+              <span>{{ reason }}</span>
+            </label>
+            {% endfor %}
+          </div>
+
+          <div class="mb-3">
+            <label for="cancel_reason_other" class="form-label fw-semibold">เหตุผลเพิ่มเติม</label>
+            <textarea id="cancel_reason_other"
+                      name="cancel_reason_other"
+                      class="form-control"
+                      rows="3"
+                      placeholder="ระบุเพิ่มเติมได้ถ้าต้องการ"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-outline-danger rounded-3 px-4 py-2 fw-semibold">
+            <i class="bi bi-x-octagon me-1"></i> ยกเลิกคำสั่งซื้อ
+          </button>
+        </form>
+      </div>
+    </section>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}
 
+{% block extra_script %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const cancelForm = document.getElementById("cancel-order-form");
+    if (!cancelForm) return;
 
+    cancelForm.addEventListener("submit", function (event) {
+      const checkedReasons = cancelForm.querySelectorAll('input[name="cancel_reasons"]:checked');
+      const otherReason = cancelForm.querySelector('textarea[name="cancel_reason_other"]');
+      const otherText = otherReason ? otherReason.value.trim() : "";
 
+      if (checkedReasons.length === 0 && !otherText) {
+        event.preventDefault();
+        Swal.fire({
+          icon: "warning",
+          title: "กรุณาเลือกเหตุผล",
+          text: "กรุณาติ๊กเหตุผลหรือระบุรายละเอียดเพิ่มเติมก่อนยกเลิกคำสั่งซื้อ",
+          confirmButtonText: "ตกลง",
+          confirmButtonColor: "#dc3545"
+        });
+      }
+    });
+  });
+</script>
+{% endblock %}
